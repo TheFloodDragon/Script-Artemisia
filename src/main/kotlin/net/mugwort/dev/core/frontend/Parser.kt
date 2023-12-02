@@ -18,7 +18,7 @@ class Parser(private val tokens: List<Token>) {
 
         while(!isEnd){
             nextToken()
-            statements()
+            statements()?.let { statementList.add(it) }
         }
         return Statement.Program(statementList)
     }
@@ -27,33 +27,129 @@ class Parser(private val tokens: List<Token>) {
         return JsonUtils.toJson(parser().toMap())
     }
 
+    /**
+     * Statement Parser:
+     *   ExpressionStatement{
+     *   -> BlockStatement
+     *   -> EmptyStatement
+     *   -> VariableStatement
+     *   -> IfStatement
+     *   -> IterationStatement
+     *   -> FunctionDeclaration
+     *   -> ClassDeclaration
+     *   -> ReturnStatement
+     *   }
+     */
 
-    private fun statements() {
+
+
+    private fun statements(): Statement? {
         when (currentToken.type) {
+            /**
+             * Parser Block Statement
+             * @see blockStatement
+             * */
+            TokenType.LEFT_BRACE -> {
+                return blockStatement()
+            }
+            /**
+             * Parser Const Var Statement
+             * @see varStatement
+             * */
+            TokenType.CONST -> {
+                return varStatement(true)
+            }
+            /**
+             * Parser Var Statement
+             * @see varStatement
+             * */
             TokenType.VAR -> {
-                statementList.add(varStatement())
-                if (!isEnd) {
-                    statements()
-                }
+                return varStatement()
+            }
+
+            TokenType.SEMICOLON -> {
+                return Statement.EmptyStatement()
             }
             else -> {
-                Statement.EmptyStatement()
+                if (currentToken.type != TokenType.EOF) {
+                    return Statement.ExpressionStatement(expression())
+                }else{
+                    return null
+                }
             }
         }
     }
 
-    private fun varStatement(): Statement.VariableStatement {
+//    /**
+//     * DefStatement
+//     *
+//     * | def a(var a : Number, var b : Number): Number { body } |
+//     *
+//     * @return Block Statement
+//     * */
+//    private fun defStatement(): Statement.FunctionDeclaration {
+//        del(TokenType.DEF)
+//        val id = expression() as Expression.Identifier
+//
+//        val params = ArrayList<Expression.Identifier>()
+//        return Statement.FunctionDeclaration(id,params)
+//    }
+
+    /**
+     * BlockStatement
+     *
+     * | { body } |
+     *
+     * @return Block Statement
+     * */
+    private fun blockStatement(): Statement.BlockStatement {
+
+        del(TokenType.LEFT_BRACE)
+        val statements = ArrayList<Statement>()
+        while (currentToken.type != TokenType.RIGHT_BRACE) {
+            statements()?.let { statements.add(it) }
+        }
+        return Statement.BlockStatement(statements)
+    }
+    /**
+     * VarStatement
+     *
+     * | var {Identifier} = {Number | String | Boolean |... }; |
+     * | const var {Identifier} = {Number | String | Boolean |... }; |
+     *
+     * @return Var Statement
+     * */
+    private fun varStatement(isConst : Boolean = false): Statement.VariableStatement {
         fun declaration(): Statement.VariableDeclaration {
             val id = expression() as Expression.Identifier
+            if (currentToken.type == TokenType.COLON){
+                if (isConst && !check(TokenType.EQUAL)){
+                    thrower.SyntaxError("the Const Var Must be init!")
+                }else{
+                    del(TokenType.COLON)
+                    val init = COLONExpression()
+                    if (check(TokenType.EQUAL)){
+                        del(TokenType.EQUAL)
+                        val inits = expression()
+                        return Statement.VariableDeclaration(id, inits)
+                    }
+                    return Statement.VariableDeclaration(id, init)
+                }
+            }
             del(TokenType.EQUAL)
             val init = expression()
             return Statement.VariableDeclaration(id, init)
         }
-        del(TokenType.VAR)
+        if (isConst) {
+            del(TokenType.CONST)
+            del(TokenType.VAR)
+        } else {
+            del(TokenType.VAR)
+        }
         val declarations = mutableListOf<Statement.VariableDeclaration>()
         declarations.add(declaration())
         del(TokenType.SEMICOLON, Translation.InvalidEND.get())
-        return Statement.VariableStatement(declarations)
+        return Statement.VariableStatement(declarations, isConst)
     }
 
     private fun expression(): Expression {
@@ -89,14 +185,49 @@ class Parser(private val tokens: List<Token>) {
             }
         }
     }
+    private fun COLONExpression(): Expression {
+        return when (currentToken.type) {
+            TokenType.IDENTIFIER -> {
+                val identifier = Expression.Identifier(currentToken.value)
+                nextToken()
+                identifier
+            }
+            TokenType.NUMBER -> {
+                val number = Expression.NumericLiteral(null)
+                nextToken()
+                number
+            }
+            TokenType.STRING ->{
+                val string = Expression.StringLiteral(null)
+                nextToken()
+                string
+            }
+            TokenType.FALSE,TokenType.TRUE -> {
+                val boolean = Expression.BooleanLiteral(null)
+                nextToken()
+                boolean
+            }
 
+            else -> {
+                thrower.SyntaxError(Translation.InvalidExpression.get())
+                Expression.NullLiteral
+            }
+        }
+    }
 
-
-
+    private fun back(){
+        if (!isEnd) {
+            statements()
+        }
+    }
     private fun peek() : Token?{
         val nextIndex = currentTokenIndex + 1
         return if (nextIndex < tokens.size) tokens[nextIndex] else null
     }
+    private fun lastToken(index:Int = 2) : Token{
+        return tokens[currentTokenIndex - index]
+    }
+
 
     private fun check(token: TokenType): Boolean {
         return peek()?.type == token
@@ -111,17 +242,19 @@ class Parser(private val tokens: List<Token>) {
         return currentToken
     }
 
-    fun del(token: TokenType,error:String){
+    private fun del(token: TokenType, error:String){
         if (currentToken.type != token){
+            println(currentToken.type)
             thrower.SyntaxError(error)
         }
         nextToken()
     }
 
-    fun del(token: TokenType){
-        if (currentToken.type != token){
+    private fun del(token: TokenType){
+        if (!isEnd && currentToken.type != token) {
             thrower.SyntaxError("Not Found -> [\"${token.id}\"]")
         }
+
         nextToken()
     }
 }
