@@ -49,11 +49,12 @@
                 )
             }
         }
-        data class VariableStatement(val declarations: List<VariableDeclaration>) : Statement(){
+        data class VariableStatement(val declarations: List<VariableDeclaration>,val const : Boolean) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "VariableStatement" to mutableMapOf(
                             "type" to "VariableStatement",
+                            "const" to const,
                             "declarations" to declarations.map { it.toMap() }
                         )
 

@@ -17,10 +17,10 @@ class Lexer(private var source: String, private var file : File? = null) {
         "super" to TokenType.SUPER,
         "do" to TokenType.DO,
         "return" to TokenType.RETURN,
-        "number" to TokenType.NUMBER,
-        "string" to TokenType.STRING,
-        "boolean" to TokenType.BOOLEAN,
-        "object" to TokenType.OBJECT,
+        "Number" to TokenType.NUMBER,
+        "String" to TokenType.STRING,
+        "Boolean" to TokenType.BOOLEAN,
+        "Object" to TokenType.OBJECT,
         "def" to TokenType.DEF,
         "class" to TokenType.CLASS,
         "or" to TokenType.OR,
@@ -30,6 +30,7 @@ class Lexer(private var source: String, private var file : File? = null) {
         "false" to TokenType.FALSE,
         "for" to TokenType.FOR,
         "if" to TokenType.IF,
+        "const" to TokenType.CONST,
         "include" to TokenType.INCLUDE,
         "null" to TokenType.NULL,
         "while" to TokenType.WHILE,
@@ -185,7 +186,7 @@ class Lexer(private var source: String, private var file : File? = null) {
     }
     private fun typeFinder(index : Int = 0) : TokenType {
         val id: String = source.substring(start, current + index)
-        return TokenType.fromId(id)!!
+        return TokenType.fromId(id.lowercase())!!
     }
     private fun addToken(type: TokenType) {
         addToken(type,typeFinder().id)

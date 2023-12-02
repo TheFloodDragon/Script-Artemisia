@@ -6,6 +6,7 @@ package net.mugwort.dev.ast.token
 enum class TokenType(val id: String) {
     // Keywords
     CLASS("class"),
+    CONST("const"),
     DEF("def"),
     OR("||"),
     BREAK("break"),

@@ -15,7 +15,7 @@ open class MScript {
     companion object{
         @JvmStatic
         fun main(args:Array<String>){
-            val i = "var a = 10 ; var b = \"awa\";"
+            val i = "{ const var a : Number = 10;} "
             //Lexer(i).printf()
             println(Parser(Lexer(i).tokens).parserJson())
         }

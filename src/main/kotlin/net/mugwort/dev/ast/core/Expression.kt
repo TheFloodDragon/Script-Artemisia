@@ -9,21 +9,21 @@ sealed class Expression {
             )
         }
     }
-    data class NumericLiteral(val value: Double) : Expression(){
+    data class NumericLiteral(val value: Double?) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "NumericLiteral" to mutableMapOf("type" to "NumericLiteral", "value" to value)
             )
         }
     }
-    data class StringLiteral(val value: String) : Expression(){
+    data class StringLiteral(val value: String?) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "StringLiteral" to mutableMapOf("type" to "StringLiteral", "value" to value)
             )
         }
     }
-    data class BooleanLiteral(val value: Boolean) : Expression(){
+    data class BooleanLiteral(val value: Boolean?) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "BooleanLiteral" to mutableMapOf("type" to "BooleanLiteral", "value" to value)
