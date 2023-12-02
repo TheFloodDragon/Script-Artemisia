@@ -37,7 +37,7 @@ class Parser(private val tokens: List<Token>) {
                 }
             }
             else -> {
-                statementList.add(Statement.EmptyStatement())
+                Statement.EmptyStatement()
             }
         }
     }
