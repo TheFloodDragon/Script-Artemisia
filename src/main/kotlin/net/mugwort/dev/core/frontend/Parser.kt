@@ -87,7 +87,7 @@ class Parser(private val tokens: List<Token>) {
      *
      * | def a(var a : Number,var b : Number): Number { body } |
      *
-     * @return Block Statement
+     * @return Function Statement
      * */
     private fun defStatement(): Statement.FunctionDeclaration {
         del(TokenType.DEF)
@@ -102,6 +102,9 @@ class Parser(private val tokens: List<Token>) {
                 TokenType.CONST ->  params.add(varStatement(true, isParams = true))
                 TokenType.VAR -> params.add(varStatement(false,isParams = true))
                 else -> {
+                    if (currentToken.type == TokenType.IDENTIFIER){
+                        params.add(varStatement(false, isParams = true))
+                    }
                 }
             }
         }
@@ -140,7 +143,7 @@ class Parser(private val tokens: List<Token>) {
      * | var {Identifier} = {Number | String | Boolean |... }; |
      * | const var {Identifier} = {Number | String | Boolean |... }; |
      *
-     * @return Var Statement
+     * @return Var
      * */
     private fun varStatement(isConst : Boolean = false,isParams : Boolean = false): Statement.VariableStatement {
         fun declaration(): Statement.VariableDeclaration {
@@ -165,11 +168,13 @@ class Parser(private val tokens: List<Token>) {
             val init = expression()
             return Statement.VariableDeclaration(id, init)
         }
-        if (isConst) {
-            del(TokenType.CONST)
-            del(TokenType.VAR)
-        } else {
-            del(TokenType.VAR)
+        if (!isParams){
+            if (isConst) {
+                del(TokenType.CONST)
+                del(TokenType.VAR)
+            } else {
+                del(TokenType.VAR)
+            }
         }
         val declarations = mutableListOf<Statement.VariableDeclaration>()
         declarations.add(declaration())
