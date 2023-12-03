@@ -16,6 +16,7 @@ class Lexer(private var source: String, private var file : File? = null) {
         "this" to TokenType.THIS,
         "super" to TokenType.SUPER,
         "do" to TokenType.DO,
+        "fun" to TokenType.FUN,
         "return" to TokenType.RETURN,
         "Number" to TokenType.NUMBER,
         "String" to TokenType.STRING,
