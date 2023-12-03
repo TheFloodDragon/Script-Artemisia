@@ -13,20 +13,17 @@ class Parser(private val tokens: List<Token>) {
     private var currentToken : Token = tokens[currentTokenIndex]
     private var isEnd : Boolean = false
     private val statementList : ArrayList<Statement> = arrayListOf()
-
+    private var functions = ArrayList<Statement.FunctionDeclaration>()
     fun parser(): Statement.Program {
-
         while(!isEnd){
             nextToken()
             statements()?.let { statementList.add(it) }
         }
         return Statement.Program(statementList)
     }
-
     fun parserJson(): String? {
         return JsonUtils.toJson(parser().toMap())
     }
-
     /**
      * Statement Parser:
      *   ExpressionStatement{
@@ -40,9 +37,6 @@ class Parser(private val tokens: List<Token>) {
      *   -> ReturnStatement
      *   }
      */
-
-
-
     private fun statements(): Statement? {
         when (currentToken.type) {
             /**
@@ -67,21 +61,58 @@ class Parser(private val tokens: List<Token>) {
                 return varStatement()
             }
             TokenType.LET ->{
-                return functionStatement()
+                val ret = functionStatement()
+                functions.add(ret)
+                return ret
             }
             TokenType.SEMICOLON -> {
                 return Statement.EmptyStatement()
             }
+            TokenType.IDENTIFIER -> {
+                return if (tokens[currentTokenIndex].type == TokenType.LEFT_PAREN){
+                    Statement.ExpressionStatement(callFunction())
+                }else {
+                    Statement.ExpressionStatement(assignmentExpression())
+                }
+            }
             else -> {
-                if (currentToken.type != TokenType.EOF) {
-                    return Statement.ExpressionStatement(expression())
+                return if (currentToken.type != TokenType.EOF) {
+                    Statement.ExpressionStatement(expression())
                 }else{
-                    return null
+                    null
                 }
             }
         }
     }
 
+    private fun assignmentExpression(): Expression.AssignmentExpression {
+        val left = expression()
+        val operator = currentToken.value
+        nextToken()
+        val right = expression()
+        return Expression.AssignmentExpression(left,operator,right)
+    }
+
+    private fun callFunction(): Expression.CallExpression {
+        var id : Expression = Expression.NullLiteral
+        val value : ArrayList<Expression> = arrayListOf()
+        for (i in functions){
+            if (currentToken.value == i.identifier.name){
+                id = expression()
+                del(TokenType.LEFT_PAREN)
+                while (currentToken.type != TokenType.RIGHT_PAREN){
+                    if (currentToken.type == TokenType.COMMA){
+                        del(currentToken.type)
+                    }
+                    value.add(expression())
+                }
+                del(TokenType.RIGHT_PAREN)
+            }else{
+                thrower.SyntaxError("Not Found Function ${currentToken.value}")
+            }
+        }
+        return Expression.CallExpression(id,value)
+    }
     /**
      * LetStatement
      *
@@ -118,9 +149,6 @@ class Parser(private val tokens: List<Token>) {
         val body : Statement.BlockStatement = blockStatement()
         return Statement.FunctionDeclaration(id,params,ret,body)
     }
-
-
-
     /**
      * BlockStatement
      *
@@ -187,11 +215,9 @@ class Parser(private val tokens: List<Token>) {
         }
         return Statement.VariableStatement(declarations, isConst)
     }
-
     private fun expression(): Expression {
         return primaryExpression()
     }
-
     private fun primaryExpression(locktype : TokenType? = null): Expression {
         return when (currentToken.type) {
             TokenType.IDENTIFIER -> {
@@ -275,12 +301,6 @@ class Parser(private val tokens: List<Token>) {
             }
         }
     }
-
-    private fun back(){
-        if (!isEnd) {
-            statements()
-        }
-    }
     private fun peek() : Token?{
         val nextIndex = currentTokenIndex + 1
         return if (nextIndex < tokens.size) tokens[nextIndex] else null
@@ -288,12 +308,9 @@ class Parser(private val tokens: List<Token>) {
     private fun lastToken(index:Int = 2) : Token{
         return tokens[currentTokenIndex - index]
     }
-
-
     private fun check(token: TokenType): Boolean {
         return peek()?.type == token
     }
-
     private fun nextToken(): Token {
         currentToken = if (currentTokenIndex < tokens.size || currentToken.type != TokenType.EOF) tokens[currentTokenIndex ++] else {
             isEnd = true
@@ -302,19 +319,17 @@ class Parser(private val tokens: List<Token>) {
         }
         return currentToken
     }
-
     private fun del(token: TokenType, error:String){
         if (currentToken.type != token){
             thrower.SyntaxError(error)
         }
         nextToken()
     }
-
     private fun del(token: TokenType){
         if (!isEnd && currentToken.type != token) {
+            println(currentToken)
             thrower.SyntaxError("Not Found -> [\"${token.id}\"]")
         }
-
         nextToken()
     }
 }

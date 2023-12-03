@@ -37,11 +37,13 @@ sealed class Expression {
             )
         }
     }
-    object NullLiteral : Expression(){
+    data object NullLiteral : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf("NullLiteral" to mutableMapOf("type" to "NullLiteral"))
         }
     }
+
+
     data class BinaryExpression(val operator: Any?, val left: Expression, val right: Expression) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
