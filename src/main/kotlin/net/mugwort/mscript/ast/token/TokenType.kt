@@ -35,7 +35,6 @@ enum class TokenType(val id: String) {
 
     // Symbols
     ARROW(">"),
-    LINE_TERMINATOR("NewLine"),
     COLON(":"),
     AND("&&"),
     MINUS_EQUAL("-="),

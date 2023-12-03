@@ -12,11 +12,6 @@ let main(#* 参数定义 *# a : Number,#* 另外一种定义方法 *#var b : Num
 {
     #变量定义
     var i = 10;
-    #常量定义
-    const val a = 1;
-    #当然也可以这样写
-    val a = 1;
-    #也可以这样写
-    const a = 1;
+
 }
 

@@ -199,7 +199,6 @@ class Parser(private val tokens: List<Token>) {
                     return Statement.VariableDeclaration(id, init.keys.first())
                 }
             }
-
             del(TokenType.EQUAL)
             val init = expression()
             return Statement.VariableDeclaration(id, init)
@@ -216,6 +215,20 @@ class Parser(private val tokens: List<Token>) {
                 }
             } else {
                 del(TokenType.VAR)
+            }
+        }else{
+            if (isConst) {
+                if (currentToken.type == TokenType.CONST){
+                    del(TokenType.CONST)
+                    if (currentToken.type == TokenType.VAL){
+                        del(TokenType.VAL)
+                    }
+                }
+
+            } else {
+                if (currentToken.type == TokenType.VAR) {
+                    del(TokenType.VAR)
+                }
             }
         }
         val declarations = mutableListOf<Statement.VariableDeclaration>()
