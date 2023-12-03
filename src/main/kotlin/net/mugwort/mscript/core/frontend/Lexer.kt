@@ -13,6 +13,7 @@ class Lexer(private var source: String, private var file : File? = null) {
     private var line = 1
     private var column = 1
     private val keyWords: MutableMap<String, TokenType> = mutableMapOf(
+        "val" to TokenType.VAL,
         "this" to TokenType.THIS,
         "super" to TokenType.SUPER,
         "do" to TokenType.DO,
@@ -63,13 +64,27 @@ class Lexer(private var source: String, private var file : File? = null) {
                 '/' -> {
                     if (match('=')){
                         addToken(typeFinder())
-                    }
-                    else if (match('/')){
+                    } else typeFinder()
+                }
+                '#' -> {
+                    if (match('*')) {
+                        while (!isEnd()) {
+                            if (look() == '*' && lookNext() == '#') {
+                                advance()
+                                advance()
+                                break
+                            }
+                            if (look() == '\n') {
+                                line++
+                                column = 0
+                            }
+                            advance()
+                        }
+                    }else{
                         while (look() != '\n' && !isEnd()) {
                             advance()
                         }
                     }
-                    else typeFinder()
                 }
                 '%' -> addToken(if (match('=')) typeFinder() else typeFinder())
                 '!' -> addToken(if (match('=')) typeFinder() else typeFinder())

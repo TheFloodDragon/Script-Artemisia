@@ -7,6 +7,7 @@ enum class TokenType(val id: String) {
     // Keywords
     CLASS("class"),
     CONST("const"),
+    VAL("val"),
     LET("let"),
     OR("||"),
     BREAK("break"),
@@ -95,16 +96,10 @@ enum class TokenType(val id: String) {
         val relationalOperators = listOf(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)
 
         /**
-         * List of additive operators.
+         * List of binary operators.
          * @see TokenType
          */
-        val additiveOperators = listOf(PLUS, MINUS)
-
-        /**
-         * List of multiplicative operators.
-         * @see TokenType
-         */
-        val multiplicativeOperators = listOf(STAR, SLASH, MODULUS)
+        val binaryOperators = listOf(PLUS, MINUS,STAR, SLASH, MODULUS)
 
         /**
          * 根据id获取对应的TokenType

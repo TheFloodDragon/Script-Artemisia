@@ -17,7 +17,7 @@ open class MScript {
         @JvmStatic
         fun main(args:Array<String>){
             val i = File(System.getProperty("user.dir") + "/scripts/main.ms").readText()
-            println()
+            // println(1 +1)
             //Lexer(i).printf()
             println(Parser(Lexer("",File(System.getProperty("user.dir") + "/scripts/main.ms")).tokens).parserJson())
         }

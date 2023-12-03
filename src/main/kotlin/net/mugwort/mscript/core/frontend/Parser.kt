@@ -50,7 +50,7 @@ class Parser(private val tokens: List<Token>) {
              * Parser Const Var Statement
              * @see varStatement
              * */
-            TokenType.CONST -> {
+            TokenType.CONST,TokenType.VAL -> {
                 return varStatement(true)
             }
             /**
@@ -85,11 +85,17 @@ class Parser(private val tokens: List<Token>) {
         }
     }
 
+    private fun isBinaryOperator(): Boolean {
+        val binaryOperators = listOf(TokenType.LESS_EQUAL,TokenType.BANG_EQUAL, TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS,TokenType.EQUAL_EQUAL,TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.MODULUS,TokenType.SLASH)
+        return binaryOperators.contains(currentToken.type)
+    }
+
     private fun assignmentExpression(): Expression.AssignmentExpression {
         val left = expression()
         val operator = currentToken.value
         nextToken()
         val right = expression()
+        del(TokenType.SEMICOLON)
         return Expression.AssignmentExpression(left,operator,right)
     }
 
@@ -111,12 +117,14 @@ class Parser(private val tokens: List<Token>) {
                 thrower.SyntaxError("Not Found Function ${currentToken.value}")
             }
         }
+        del(TokenType.SEMICOLON)
         return Expression.CallExpression(id,value)
     }
+
     /**
      * LetStatement
      *
-     * | def a(var a : Number,var b : Number): Number { body } |
+     * | def a( <const> <var> <id> : <type>,const var b : Number): Number { body } |
      *
      * @return Function Statement
      * */
@@ -130,7 +138,7 @@ class Parser(private val tokens: List<Token>) {
                 del(TokenType.COMMA)
             }
             when(currentToken.type){
-                TokenType.CONST ->  params.add(varStatement(true, isParams = true))
+                TokenType.CONST,TokenType.VAL ->  params.add(varStatement(true, isParams = true))
                 TokenType.VAR -> params.add(varStatement(false,isParams = true))
                 else -> {
                     if (currentToken.type == TokenType.IDENTIFIER){
@@ -142,7 +150,7 @@ class Parser(private val tokens: List<Token>) {
         del(TokenType.RIGHT_PAREN)
         val ret : TokenType = if (currentToken.type == TokenType.COLON){
             del(TokenType.COLON)
-            COLONExpression().values.first()
+            typeExpression().values.first()
         }else{
             TokenType.VOID
         }
@@ -169,7 +177,7 @@ class Parser(private val tokens: List<Token>) {
      * VarStatement
      *
      * | var {Identifier} = {Number | String | Boolean |... }; |
-     * | const var {Identifier} = {Number | String | Boolean |... }; |
+     * | <const> val {Identifier} = {Number | String | Boolean |... }; |
      *
      * @return Var
      * */
@@ -181,7 +189,7 @@ class Parser(private val tokens: List<Token>) {
                     thrower.SyntaxError("the Const Var Must be init!")
                 }else{
                     del(TokenType.COLON)
-                    val init = COLONExpression()
+                    val init = typeExpression()
 
                     if (currentToken.type == TokenType.EQUAL){
                         del(TokenType.EQUAL)
@@ -198,8 +206,14 @@ class Parser(private val tokens: List<Token>) {
         }
         if (!isParams){
             if (isConst) {
-                del(TokenType.CONST)
-                del(TokenType.VAR)
+                if (currentToken.type == TokenType.CONST){
+                    del(TokenType.CONST)
+                    if (currentToken.type == TokenType.VAL){
+                        del(TokenType.VAL)
+                    }
+                }else{
+                    del(TokenType.VAL)
+                }
             } else {
                 del(TokenType.VAR)
             }
@@ -215,9 +229,18 @@ class Parser(private val tokens: List<Token>) {
         }
         return Statement.VariableStatement(declarations, isConst)
     }
+
     private fun expression(): Expression {
-        return primaryExpression()
+        var left = primaryExpression()
+        while (isBinaryOperator()) {
+            val operator = currentToken.value
+            nextToken()
+            val right = primaryExpression()
+            left = Expression.BinaryExpression(operator, left, right)
+        }
+        return left
     }
+
     private fun primaryExpression(locktype : TokenType? = null): Expression {
         return when (currentToken.type) {
             TokenType.IDENTIFIER -> {
@@ -239,7 +262,6 @@ class Parser(private val tokens: List<Token>) {
                     nextToken()
                     number
                 }
-
             }
             TokenType.STRING ->{
                 if (locktype != null && locktype != TokenType.STRING && locktype != TokenType.OBJECT){
@@ -261,14 +283,19 @@ class Parser(private val tokens: List<Token>) {
                     boolean
                 }
             }
-
+            TokenType.LEFT_PAREN -> {
+                del(TokenType.LEFT_PAREN)
+                val expression = Expression.BinaryParentExpression(expression())
+                del(TokenType.RIGHT_PAREN)
+                return expression
+            }
             else -> {
                 thrower.SyntaxError(Translation.InvalidExpression.get())
                 Expression.NullLiteral
             }
         }
     }
-    private fun COLONExpression(): MutableMap<Expression,TokenType> {
+    private fun typeExpression(): MutableMap<Expression,TokenType> {
         return when (currentToken.type) {
             TokenType.IDENTIFIER -> {
                 val identifier = Expression.Identifier(currentToken.value)

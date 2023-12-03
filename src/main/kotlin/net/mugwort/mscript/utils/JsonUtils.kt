@@ -15,7 +15,7 @@ object JsonUtils {
 
         private fun Int.toHexString(): String = Integer.toHexString(this)
 
-        fun encode(char: Char) = "\\u${char.code.toHexString()}"
+        private fun encode(char: Char) = "\\u${char.code.toHexString()}"
 
         fun encode(text: String) = text
             .toCharArray().joinToString(separator = "", truncated = "") { encode(it) }

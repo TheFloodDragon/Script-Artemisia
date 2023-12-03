@@ -56,6 +56,18 @@ sealed class Expression {
             )
         }
     }
+
+    data class BinaryParentExpression(val binary: Expression) : Expression(){
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "BinaryParentExpression" to mutableMapOf(
+                    "type" to "BinaryParentExpression",
+                    "binary" to binary,
+                )
+            )
+        }
+    }
+
     data class UnaryExpression(val operator: String, val argument: Expression) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
