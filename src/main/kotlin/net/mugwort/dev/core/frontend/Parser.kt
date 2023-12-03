@@ -99,10 +99,9 @@ class Parser(private val tokens: List<Token>) {
                 del(TokenType.COMMA)
             }
             when(currentToken.type){
-                TokenType.CONST ->  varStatement(true)
-                TokenType.VAR -> varStatement()
+                TokenType.CONST ->  params.add(varStatement(true, isParams = true))
+                TokenType.VAR -> params.add(varStatement(false,isParams = true))
                 else -> {
-
                 }
             }
         }
@@ -143,7 +142,7 @@ class Parser(private val tokens: List<Token>) {
      *
      * @return Var Statement
      * */
-    private fun varStatement(isConst : Boolean = false): Statement.VariableStatement {
+    private fun varStatement(isConst : Boolean = false,isParams : Boolean = false): Statement.VariableStatement {
         fun declaration(): Statement.VariableDeclaration {
             val id = expression() as Expression.Identifier
             if (currentToken.type == TokenType.COLON){
@@ -155,7 +154,6 @@ class Parser(private val tokens: List<Token>) {
 
                     if (currentToken.type == TokenType.EQUAL){
                         del(TokenType.EQUAL)
-                        println(init.values.first())
                         val inits = primaryExpression(init.values.first())
                         return Statement.VariableDeclaration(id, inits)
                     }
@@ -175,7 +173,13 @@ class Parser(private val tokens: List<Token>) {
         }
         val declarations = mutableListOf<Statement.VariableDeclaration>()
         declarations.add(declaration())
-        del(TokenType.SEMICOLON, Translation.InvalidEND.get())
+        if (currentToken.type == TokenType.COMMA && isParams){
+            del(TokenType.COMMA)
+        }else if (currentToken.type == TokenType.RIGHT_PAREN){
+            return Statement.VariableStatement(declarations, isConst)
+        } else{
+            del(TokenType.SEMICOLON, Translation.InvalidEND.get())
+        }
         return Statement.VariableStatement(declarations, isConst)
     }
 
@@ -296,7 +300,6 @@ class Parser(private val tokens: List<Token>) {
 
     private fun del(token: TokenType, error:String){
         if (currentToken.type != token){
-            println(currentToken.type)
             thrower.SyntaxError(error)
         }
         nextToken()
