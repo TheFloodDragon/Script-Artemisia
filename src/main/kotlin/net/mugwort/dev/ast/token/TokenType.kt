@@ -29,6 +29,7 @@ enum class TokenType(val id: String) {
     NUMBER("number"),
     STRING("string"),
     BOOLEAN("boolean"),
+    VOID("Void"),
     OBJECT("object"),
 
     // Symbols

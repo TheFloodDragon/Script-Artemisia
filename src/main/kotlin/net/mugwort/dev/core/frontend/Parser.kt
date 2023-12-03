@@ -113,7 +113,7 @@ class Parser(private val tokens: List<Token>) {
             del(TokenType.COLON)
             COLONExpression().values.first()
         }else{
-            TokenType.OBJECT
+            TokenType.VOID
         }
         val body : Statement.BlockStatement = blockStatement()
         return Statement.FunctionDeclaration(id,params,ret,body)

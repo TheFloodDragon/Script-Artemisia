@@ -20,6 +20,7 @@ class Lexer(private var source: String, private var file : File? = null) {
         "return" to TokenType.RETURN,
         "Number" to TokenType.NUMBER,
         "String" to TokenType.STRING,
+        "Void" to TokenType.VOID,
         "Boolean" to TokenType.BOOLEAN,
         "Object" to TokenType.OBJECT,
         "class" to TokenType.CLASS,
@@ -98,7 +99,7 @@ class Lexer(private var source: String, private var file : File? = null) {
                     }
                 }
                 '\n' -> {
-                    addToken(TokenType.LINE_TERMINATOR)
+
                 }
                 ' ', '\t', '\r' -> Unit
                 '"', '\'', '`' -> setString(c)
