@@ -1,9 +1,6 @@
-package net.mugwort.dev.utils
+package net.mugwort.mscript.utils
 
 import java.time.LocalDate
-import java.time.LocalTime
-import java.util.Date
-import java.util.Timer
 
 
 object Logger {

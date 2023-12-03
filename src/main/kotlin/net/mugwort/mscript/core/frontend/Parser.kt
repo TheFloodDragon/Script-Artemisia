@@ -1,12 +1,12 @@
-package net.mugwort.dev.core.frontend
+package net.mugwort.mscript.core.frontend
 
-import net.mugwort.dev.ast.core.Expression
-import net.mugwort.dev.ast.core.Statement
-import net.mugwort.dev.ast.token.Token
-import net.mugwort.dev.ast.token.TokenType
-import net.mugwort.dev.runtime.Translation
-import net.mugwort.dev.runtime.expection.thrower
-import net.mugwort.dev.utils.JsonUtils
+import net.mugwort.mscript.ast.core.Expression
+import net.mugwort.mscript.ast.core.Statement
+import net.mugwort.mscript.ast.token.Token
+import net.mugwort.mscript.ast.token.TokenType
+import net.mugwort.mscript.runtime.Translation
+import net.mugwort.mscript.runtime.expection.thrower
+import net.mugwort.mscript.utils.JsonUtils
 
 class Parser(private val tokens: List<Token>) {
     private var currentTokenIndex = 0

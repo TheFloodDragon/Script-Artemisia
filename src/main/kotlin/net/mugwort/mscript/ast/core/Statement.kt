@@ -1,6 +1,6 @@
-    package net.mugwort.dev.ast.core
+    package net.mugwort.mscript.ast.core
 
-    import net.mugwort.dev.ast.token.TokenType
+    import net.mugwort.mscript.ast.token.TokenType
 
     sealed class Statement {
         data class Program(val body: List<Statement>) : Statement(){

@@ -1,4 +1,4 @@
-package net.mugwort.dev.ast.core
+package net.mugwort.mscript.ast.core
 
 
 sealed class Expression {

@@ -1,4 +1,4 @@
-package net.mugwort.dev.utils
+package net.mugwort.mscript.utils
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser

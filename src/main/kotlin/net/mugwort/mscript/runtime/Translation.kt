@@ -1,4 +1,4 @@
-package net.mugwort.dev.runtime
+package net.mugwort.mscript.runtime
 
 import java.util.*
 

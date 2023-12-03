@@ -1,4 +1,4 @@
-package net.mugwort.dev.ast.token
+package net.mugwort.mscript.ast.token
 
 /**
  * TokenType枚举类定义了所有可能的Token类型。

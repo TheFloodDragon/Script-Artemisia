@@ -1,4 +1,4 @@
-package net.mugwort.dev.utils
+package net.mugwort.mscript.utils
 
 import java.io.File
 

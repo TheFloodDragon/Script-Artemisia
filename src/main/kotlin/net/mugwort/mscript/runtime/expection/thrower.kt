@@ -1,6 +1,6 @@
-package net.mugwort.dev.runtime.expection
+package net.mugwort.mscript.runtime.expection
 
-import net.mugwort.dev.runtime.Translation
+import net.mugwort.mscript.runtime.Translation
 
 object thrower {
 

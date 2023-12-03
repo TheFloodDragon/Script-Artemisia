@@ -1,8 +1,8 @@
-package net.mugwort.dev.core.frontend
+package net.mugwort.mscript.core.frontend
 
-import net.mugwort.dev.ast.token.Token
-import net.mugwort.dev.ast.token.TokenType
-import net.mugwort.dev.runtime.expection.thrower
+import net.mugwort.mscript.ast.token.Token
+import net.mugwort.mscript.ast.token.TokenType
+import net.mugwort.mscript.runtime.expection.thrower
 import java.io.File
 
 

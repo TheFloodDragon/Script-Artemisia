@@ -1,4 +1,4 @@
-package net.mugwort.dev.objects
+package net.mugwort.mscript.objects
 
 class Object {
     enum class ObjectType(private val type : kotlin.String){
