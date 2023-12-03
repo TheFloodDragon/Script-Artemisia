@@ -2,52 +2,58 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.0"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    java
+    `maven-publish`
+    id("org.jetbrains.kotlin.jvm") version "1.9.21"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     application
 }
 
-group = "net.mugwort.dev"
-version = "1.0-SNAPSHOT"
-
 repositories {
-    maven {
-        name = "Huawei Maven"
-        setUrl("https://repo.huaweicloud.com/repository/maven/")
-    }
-    maven {
-        name = "spigotmc-repo"
-        setUrl("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    }
-    maven {
-        setUrl("https://maven.google.com")
-    }
-    google()
-    maven { setUrl("https://jitpack.io") }
+    mavenLocal()
     mavenCentral()
+    maven("https://repo.huaweicloud.com/repository/maven/")
+    maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.8.7")
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
-}
-
-tasks.named("build") {
-    dependsOn("shadowJar")
-}
-
-tasks.withType<ShadowJar>{
-    archiveFileName.set(tasks.named<Jar>("jar").get().archiveFileName.get())
-    relocate("kotlin","kotlin190")
+    implementation("com.google.code.gson:gson:2.8.9")
 }
 
 application {
     mainClass.set("${group}.MScript")
+}
+
+tasks {
+    test {
+        useJUnitPlatform()
+    }
+    build { dependsOn(shadowJar) }
+    withType<ShadowJar> {
+        relocate("kotlin.", "kotlin1921.")
+    }
+    // 编码设置
+    withType<JavaCompile> { options.encoding = "UTF-8" }
+    // Kotlin Jvm 设置
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = listOf("-Xjvm-default=all")
+        }
+    }
+}
+
+// Java 版本设置
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// 发布
+publishing {
+    publications {
+        register<MavenPublication>("publishToMavenLocal") {
+            from(components["java"])
+        }
+    }
 }
