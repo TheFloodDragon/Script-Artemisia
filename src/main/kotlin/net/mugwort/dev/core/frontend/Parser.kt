@@ -66,7 +66,9 @@ class Parser(private val tokens: List<Token>) {
             TokenType.VAR -> {
                 return varStatement()
             }
-
+            TokenType.DEF ->{
+                return defStatement()
+            }
             TokenType.SEMICOLON -> {
                 return Statement.EmptyStatement()
             }
@@ -80,20 +82,42 @@ class Parser(private val tokens: List<Token>) {
         }
     }
 
-//    /**
-//     * DefStatement
-//     *
-//     * | def a(var a : Number, var b : Number): Number { body } |
-//     *
-//     * @return Block Statement
-//     * */
-//    private fun defStatement(): Statement.FunctionDeclaration {
-//        del(TokenType.DEF)
-//        val id = expression() as Expression.Identifier
-//
-//        val params = ArrayList<Expression.Identifier>()
-//        return Statement.FunctionDeclaration(id,params)
-//    }
+    /**
+     * DefStatement
+     *
+     * | def a(var a : Number,var b : Number): Number { body } |
+     *
+     * @return Block Statement
+     * */
+    private fun defStatement(): Statement.FunctionDeclaration {
+        del(TokenType.DEF)
+        val id = expression() as Expression.Identifier
+        val params = ArrayList<Statement.VariableStatement>()
+        del(TokenType.LEFT_PAREN)
+        while (currentToken.type != TokenType.RIGHT_PAREN){
+            if (currentToken.type == TokenType.COMMA){
+                del(TokenType.COMMA)
+            }
+            when(currentToken.type){
+                TokenType.CONST ->  varStatement(true)
+                TokenType.VAR -> varStatement()
+                else -> {
+
+                }
+            }
+        }
+        del(TokenType.RIGHT_PAREN)
+        val ret : TokenType = if (currentToken.type == TokenType.COLON){
+            del(TokenType.COLON)
+            COLONExpression().values.first()
+        }else{
+            TokenType.OBJECT
+        }
+        val body : Statement.BlockStatement = blockStatement()
+        return Statement.FunctionDeclaration(id,params,ret,body)
+    }
+
+
 
     /**
      * BlockStatement
@@ -128,14 +152,17 @@ class Parser(private val tokens: List<Token>) {
                 }else{
                     del(TokenType.COLON)
                     val init = COLONExpression()
-                    if (check(TokenType.EQUAL)){
+
+                    if (currentToken.type == TokenType.EQUAL){
                         del(TokenType.EQUAL)
-                        val inits = expression()
+                        println(init.values.first())
+                        val inits = primaryExpression(init.values.first())
                         return Statement.VariableDeclaration(id, inits)
                     }
-                    return Statement.VariableDeclaration(id, init)
+                    return Statement.VariableDeclaration(id, init.keys.first())
                 }
             }
+
             del(TokenType.EQUAL)
             val init = expression()
             return Statement.VariableDeclaration(id, init)
@@ -156,27 +183,48 @@ class Parser(private val tokens: List<Token>) {
         return primaryExpression()
     }
 
-    private fun primaryExpression(): Expression {
+    private fun primaryExpression(locktype : TokenType? = null): Expression {
         return when (currentToken.type) {
             TokenType.IDENTIFIER -> {
-                val identifier = Expression.Identifier(currentToken.value)
-                nextToken()
-                identifier
+                if (locktype != null && locktype != TokenType.IDENTIFIER && locktype != TokenType.OBJECT){
+                    thrower.SyntaxError("the variable is locked of $locktype")
+                    Expression.NullLiteral
+                }else{
+                    val identifier = Expression.Identifier(currentToken.value)
+                    nextToken()
+                    identifier
+                }
             }
             TokenType.NUMBER -> {
-                val number = Expression.NumericLiteral(currentToken.value.toDouble())
-                nextToken()
-                number
+                if (locktype != null && locktype != TokenType.NUMBER && locktype != TokenType.OBJECT){
+                    thrower.SyntaxError("the variable is locked of $locktype")
+                    Expression.NullLiteral
+                }else{
+                    val number = Expression.NumericLiteral(currentToken.value.toDouble())
+                    nextToken()
+                    number
+                }
+
             }
             TokenType.STRING ->{
-                val string = Expression.StringLiteral(currentToken.value)
-                nextToken()
-                string
+                if (locktype != null && locktype != TokenType.STRING && locktype != TokenType.OBJECT){
+                    thrower.SyntaxError("the variable is locked of $locktype")
+                    Expression.NullLiteral
+                }else{
+                    val string = Expression.StringLiteral(currentToken.value)
+                    nextToken()
+                    string
+                }
             }
             TokenType.FALSE,TokenType.TRUE -> {
-                val boolean = Expression.BooleanLiteral(currentToken.value.toBoolean())
-                nextToken()
-                boolean
+                if (locktype != null && locktype != TokenType.BOOLEAN && locktype != TokenType.OBJECT){
+                    thrower.SyntaxError("the variable is locked of $locktype")
+                    Expression.NullLiteral
+                }else{
+                    val boolean = Expression.BooleanLiteral(currentToken.value.toBoolean())
+                    nextToken()
+                    boolean
+                }
             }
 
             else -> {
@@ -185,32 +233,36 @@ class Parser(private val tokens: List<Token>) {
             }
         }
     }
-    private fun COLONExpression(): Expression {
+    private fun COLONExpression(): MutableMap<Expression,TokenType> {
         return when (currentToken.type) {
             TokenType.IDENTIFIER -> {
                 val identifier = Expression.Identifier(currentToken.value)
                 nextToken()
-                identifier
+                mutableMapOf(identifier to TokenType.IDENTIFIER)
             }
             TokenType.NUMBER -> {
                 val number = Expression.NumericLiteral(null)
                 nextToken()
-                number
+                mutableMapOf(number to TokenType.NUMBER)
             }
             TokenType.STRING ->{
                 val string = Expression.StringLiteral(null)
                 nextToken()
-                string
+                mutableMapOf(string to TokenType.STRING)
             }
             TokenType.FALSE,TokenType.TRUE -> {
                 val boolean = Expression.BooleanLiteral(null)
                 nextToken()
-                boolean
+                mutableMapOf(boolean to TokenType.BOOLEAN)
             }
-
+            TokenType.OBJECT -> {
+                val obj = Expression.ObjectLiteral(null)
+                nextToken()
+                mutableMapOf(obj to TokenType.OBJECT)
+            }
             else -> {
                 thrower.SyntaxError(Translation.InvalidExpression.get())
-                Expression.NullLiteral
+                mutableMapOf(Expression.NullLiteral to TokenType.NULL)
             }
         }
     }

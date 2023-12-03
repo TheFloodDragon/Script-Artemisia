@@ -1,5 +1,7 @@
     package net.mugwort.dev.ast.core
 
+    import net.mugwort.dev.ast.token.TokenType
+
     sealed class Statement {
         data class Program(val body: List<Statement>) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
@@ -119,13 +121,14 @@
                 )
             }
         }
-        data class FunctionDeclaration(val identifier: Expression.Identifier, val params: List<Expression.Identifier?>, val body: BlockStatement) : Statement() {
+        data class FunctionDeclaration(val identifier: Expression.Identifier, val params: List<VariableStatement>,val returns : TokenType, val body: BlockStatement) : Statement() {
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "FunctionDeclaration" to mutableMapOf(
                         "type" to "FunctionDeclaration",
                         "identifier" to identifier.toMap(),
-                        "params" to params.map { it?.toMap() },
+                        "params" to params.map { it.toMap() },
+                        "return" to returns,
                         "body" to body.toMap()
                     )
                 )

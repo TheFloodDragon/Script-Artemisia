@@ -23,6 +23,13 @@ sealed class Expression {
             )
         }
     }
+    data class ObjectLiteral(val value: Any?) : Expression(){
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "ObjectLiteral" to mutableMapOf("type" to "ObjectLiteral", "value" to value)
+            )
+        }
+    }
     data class BooleanLiteral(val value: Boolean?) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
