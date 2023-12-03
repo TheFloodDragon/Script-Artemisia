@@ -7,8 +7,7 @@ enum class TokenType(val id: String) {
     // Keywords
     CLASS("class"),
     CONST("const"),
-    DEF("def"),
-    FUN("fun"),
+    LET("let"),
     OR("||"),
     BREAK("break"),
     CONTINUE("continue"),

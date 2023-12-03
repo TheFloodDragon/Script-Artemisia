@@ -15,7 +15,7 @@ open class MScript {
     companion object{
         @JvmStatic
         fun main(args:Array<String>){
-            val i = "fun b(a : Number,b : Number){  } "
+            val i = "let b(a : Number,b : Number){  } "
             //Lexer(i).printf()
             println(Parser(Lexer(i).tokens).parserJson())
         }

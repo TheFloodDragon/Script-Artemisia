@@ -66,7 +66,7 @@ class Parser(private val tokens: List<Token>) {
             TokenType.VAR -> {
                 return varStatement()
             }
-            TokenType.DEF ->{
+            TokenType.LET ->{
                 return functionStatement()
             }
             TokenType.SEMICOLON -> {
@@ -83,14 +83,14 @@ class Parser(private val tokens: List<Token>) {
     }
 
     /**
-     * DefStatement
+     * LetStatement
      *
      * | def a(var a : Number,var b : Number): Number { body } |
      *
      * @return Function Statement
      * */
     private fun functionStatement(): Statement.FunctionDeclaration {
-        del(TokenType.DEF)
+        del(TokenType.LET)
         val id = expression() as Expression.Identifier
         val params = ArrayList<Statement.VariableStatement>()
         del(TokenType.LEFT_PAREN)
