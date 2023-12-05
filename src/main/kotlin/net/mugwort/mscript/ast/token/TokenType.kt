@@ -39,6 +39,8 @@ enum class TokenType(val id: String) {
     AND("&&"),
     MINUS_EQUAL("-="),
     PLUS_EQUAL("+="),
+    Incrementing("++"),
+    Subtraction("--"),
     STAR_EQUAL("*="),
     SLASH_EQUAL("/="),
     MODULUS_EQUAL("%="),

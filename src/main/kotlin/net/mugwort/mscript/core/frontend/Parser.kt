@@ -71,9 +71,14 @@ class Parser(private val tokens: List<Token>) {
             TokenType.IDENTIFIER -> {
                 return if (tokens[currentTokenIndex].type == TokenType.LEFT_PAREN){
                     Statement.ExpressionStatement(callFunction())
+                } else if (tokens[currentTokenIndex].type == TokenType.Incrementing || tokens[currentTokenIndex].type == TokenType.Subtraction){
+                    Statement.ExpressionStatement(UnaryExpression().rightUnaryExpression())
                 }else {
                     Statement.ExpressionStatement(assignmentExpression())
                 }
+            }
+            TokenType.BANG,TokenType.MINUS ->{
+               return Statement.ExpressionStatement(UnaryExpression().leftUnaryExpression())
             }
             else -> {
                 return if (currentToken.type != TokenType.EOF) {
@@ -86,7 +91,28 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun isBinaryOperator(): Boolean {
-        val binaryOperators = listOf(TokenType.LESS_EQUAL,TokenType.BANG_EQUAL, TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS,TokenType.EQUAL_EQUAL,TokenType.PLUS, TokenType.MINUS, TokenType.STAR, TokenType.MODULUS,TokenType.SLASH)
+        val binaryOperators = listOf(
+            TokenType.PLUS_EQUAL,
+            TokenType.MINUS_EQUAL,
+            TokenType.STAR_EQUAL,
+            TokenType.SLASH_EQUAL,
+            TokenType.MODULUS_EQUAL,
+
+            TokenType.OR,
+            TokenType.AND,
+            TokenType.LESS_EQUAL,
+            TokenType.BANG_EQUAL,
+            TokenType.GREATER,
+            TokenType.GREATER_EQUAL,
+            TokenType.LESS,
+            TokenType.EQUAL_EQUAL,
+
+            TokenType.PLUS,
+            TokenType.MINUS,
+            TokenType.STAR,
+            TokenType.MODULUS,
+            TokenType.SLASH
+        )
         return binaryOperators.contains(currentToken.type)
     }
 
@@ -100,27 +126,21 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun callFunction(): Expression.CallExpression {
-        var id : Expression = Expression.NullLiteral
+
         val value : ArrayList<Expression> = arrayListOf()
-        for (i in functions){
-            if (currentToken.value == i.identifier.name){
-                id = expression()
-                del(TokenType.LEFT_PAREN)
-                while (currentToken.type != TokenType.RIGHT_PAREN){
-                    if (currentToken.type == TokenType.COMMA){
-                        del(currentToken.type)
-                    }
-                    value.add(expression())
-                }
-                del(TokenType.RIGHT_PAREN)
-            }else{
-                thrower.SyntaxError("Not Found Function ${currentToken.value}")
+        val id = expression()
+        del(TokenType.LEFT_PAREN)
+        while (currentToken.type != TokenType.RIGHT_PAREN){
+            if (currentToken.type == TokenType.COMMA){
+                del(currentToken.type)
             }
+            value.add(expression())
         }
+        del(TokenType.RIGHT_PAREN)
         del(TokenType.SEMICOLON)
+
         return Expression.CallExpression(id,value)
     }
-
     /**
      * LetStatement
      *
@@ -243,15 +263,46 @@ class Parser(private val tokens: List<Token>) {
         return Statement.VariableStatement(declarations, isConst)
     }
 
-    private fun expression(): Expression {
-        var left = primaryExpression()
-        while (isBinaryOperator()) {
+    private inner class UnaryExpression{
+        fun leftUnaryExpression() : Expression.UnaryExpression{
             val operator = currentToken.value
             nextToken()
             val right = primaryExpression()
-            left = Expression.BinaryExpression(operator, left, right)
+            del(TokenType.SEMICOLON)
+            return Expression.UnaryExpression(operator, right)
         }
-        return left
+        fun rightUnaryExpression() : Expression.UnaryExpression{
+            val operator = tokens[currentTokenIndex].value
+            val left = primaryExpression()
+            nextToken()
+            del(TokenType.SEMICOLON)
+            return Expression.UnaryExpression(operator, left)
+        }
+    }
+
+
+    private fun expression(): Expression {
+        if (currentToken.type == TokenType.MINUS || currentToken.type == TokenType.BANG) {
+            val operator = currentToken.value
+            nextToken()
+            val right = primaryExpression()
+            return Expression.UnaryExpression(operator, right)
+        }else if (tokens[currentTokenIndex].type == TokenType.Incrementing || tokens[currentTokenIndex].type == TokenType.Subtraction){
+            val operator = tokens[currentTokenIndex].value
+            val left = primaryExpression()
+            nextToken()
+            return Expression.UnaryExpression(operator, left)
+        } else {
+            var left = primaryExpression()
+            while (isBinaryOperator()) {
+                val operator = currentToken.value
+                nextToken()
+                val right = primaryExpression()
+                left = Expression.BinaryExpression(operator, left, right)
+            }
+            return left
+        }
+
     }
 
     private fun primaryExpression(locktype : TokenType? = null): Expression {
@@ -325,7 +376,7 @@ class Parser(private val tokens: List<Token>) {
                 nextToken()
                 mutableMapOf(string to TokenType.STRING)
             }
-            TokenType.FALSE,TokenType.TRUE -> {
+            TokenType.BOOLEAN -> {
                 val boolean = Expression.BooleanLiteral(null)
                 nextToken()
                 mutableMapOf(boolean to TokenType.BOOLEAN)
@@ -345,9 +396,7 @@ class Parser(private val tokens: List<Token>) {
         val nextIndex = currentTokenIndex + 1
         return if (nextIndex < tokens.size) tokens[nextIndex] else null
     }
-    private fun lastToken(index:Int = 2) : Token{
-        return tokens[currentTokenIndex - index]
-    }
+
     private fun check(token: TokenType): Boolean {
         return peek()?.type == token
     }
@@ -367,8 +416,7 @@ class Parser(private val tokens: List<Token>) {
     }
     private fun del(token: TokenType){
         if (!isEnd && currentToken.type != token) {
-            println(currentToken)
-            thrower.SyntaxError("Not Found -> [\"${token.id}\"]")
+            thrower.SyntaxError("Expect Token -> [\"${token.id}\"] but not Found? Just Found [\"${currentToken.value}\"]")
         }
         nextToken()
     }

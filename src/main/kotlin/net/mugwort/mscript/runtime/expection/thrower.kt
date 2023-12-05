@@ -9,6 +9,7 @@ object thrower {
     @JvmStatic
     fun RuntimeException(message:String){
         RuntimeException().send(message)
+
     }
     @JvmStatic
     fun SyntaxError(message:String){

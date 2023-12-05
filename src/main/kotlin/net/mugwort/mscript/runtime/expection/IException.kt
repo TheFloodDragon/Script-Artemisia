@@ -9,6 +9,7 @@ open class IException(val id : String) {
     companion object{
         fun send(id : String,message : String){
             Logger.fatal("${Translation.ExceptionOf.get()} $id : $message")
+            //throw RuntimeException()
             exitProcess(0)
         }
     }
