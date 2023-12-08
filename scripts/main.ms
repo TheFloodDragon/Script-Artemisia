@@ -1,3 +1,3 @@
 let main(a : Number){
-    return 0;
+    return 1;
 }

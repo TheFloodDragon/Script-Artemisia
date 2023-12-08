@@ -57,12 +57,12 @@ sealed class Expression {
         }
     }
 
-    data class BinaryParentExpression(val binary: Expression) : Expression(){
+    data class GroupExpression(val expr: Expression) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
-                "BinaryParentExpression" to mutableMapOf(
+                "GroupExpression" to mutableMapOf(
                     "type" to "BinaryParentExpression",
-                    "binary" to binary,
+                    "group" to expr.toMap(),
                 )
             )
         }
@@ -91,12 +91,12 @@ sealed class Expression {
             )
         }
     }
-    data class CallExpression(val callee: Expression, val arguments: List<Expression>) : Expression(){
+    data class CallExpression(val caller: Expression, val arguments: List<Expression>) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "CallExpression" to mutableMapOf(
                     "type" to "CallExpression",
-                    "callee" to callee.toMap(),
+                    "caller" to caller.toMap(),
                     "arguments" to arguments.map { it.toMap() }
                 )
             )

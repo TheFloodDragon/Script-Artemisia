@@ -35,12 +35,16 @@ class Parser(private val tokens: List<Token>) {
                 TokenType.LET -> return functionStatement()
                 TokenType.SEMICOLON -> return Statement.EmptyStatement()
                 TokenType.IDENTIFIER -> {
-                    return if (tokens[currentTokenIndex].type == TokenType.LEFT_PAREN){
-                        Statement.ExpressionStatement(expr.CallExpression())
-                    } else if (tokens[currentTokenIndex].type == TokenType.Incrementing || tokens[currentTokenIndex].type == TokenType.Subtraction){
-                        Statement.ExpressionStatement(expr.rightUnaryExpression())
-                    }else {
-                        Statement.ExpressionStatement(expr.AssignmentExpression())
+                    return when (tokens[currentTokenIndex].type) {
+                        TokenType.LEFT_PAREN -> {
+                            Statement.ExpressionStatement(expr.CallExpression())
+                        }
+                        TokenType.Incrementing, TokenType.Subtraction -> {
+                            Statement.ExpressionStatement(expr.rightUnaryExpression())
+                        }
+                        else -> {
+                            Statement.ExpressionStatement(expr.AssignmentExpression())
+                        }
                     }
                 }
                 TokenType.BANG,TokenType.MINUS ->{
@@ -155,8 +159,20 @@ class Parser(private val tokens: List<Token>) {
         }
         fun returnStatement(): Statement.ReturnStatement {
             consume(TokenType.RETURN)
-            val argument = expr.expression()
-            consume(TokenType.SEMICOLON)
+            val argument : Expression =
+                when(currentToken.type){
+                    TokenType.IDENTIFIER -> {
+                        if (tokens[currentTokenIndex].type == TokenType.LEFT_PAREN) {
+                            expr.CallExpression()
+                        }else{
+                            expr.Identifier()
+                        }
+                    }
+                    else -> {
+                        expr.primaryExpression()
+                    }
+                }
+            if (argument !is Expression.CallExpression) consume(TokenType.SEMICOLON)
             return Statement.ReturnStatement(argument)
         }
     }
@@ -213,7 +229,7 @@ class Parser(private val tokens: List<Token>) {
         }
         fun CallExpression(): Expression.CallExpression {
             val value : ArrayList<Expression> = arrayListOf()
-            val id = expression()
+            val id = Identifier()
             consume(TokenType.LEFT_PAREN)
             while (currentToken.type != TokenType.RIGHT_PAREN){
                 if (currentToken.type == TokenType.COMMA){
@@ -306,10 +322,17 @@ class Parser(private val tokens: List<Token>) {
         }
         fun primaryExpression(): Expression {
             return when(currentToken.type){
-                TokenType.IDENTIFIER -> expr.Identifier()
+                TokenType.IDENTIFIER -> Identifier()
+                TokenType.LEFT_PAREN -> {
+                    consume(TokenType.LEFT_PAREN)
+                    val ret = Expression.GroupExpression(expression())
+                    consume(TokenType.RIGHT_PAREN)
+                    ret
+                }
                 else -> Literal().literal
             }
         }
+
     }
     private inner class Literal{
         val literal: Expression = when(currentToken.type){
@@ -319,10 +342,18 @@ class Parser(private val tokens: List<Token>) {
             TokenType.NULL -> NullLiteral()
             TokenType.OBJECT -> ObjectLiteral()
             else -> {
+                println(currentToken)
                 thrower.SyntaxError("Literal: unexpected literal production")
                 Expression.NullLiteral
             }
         }
+        val isLiteral : Boolean =
+            currentToken.type == TokenType.NUMBER ||
+            currentToken.type == TokenType.STRING ||
+            currentToken.type == TokenType.FALSE ||
+            currentToken.type == TokenType.TRUE ||
+            currentToken.type == TokenType.OBJECT
+
 
         fun BooleanLiteral(): Expression.BooleanLiteral {
             return Expression.BooleanLiteral(consume(if (currentToken.type == TokenType.TRUE) TokenType.TRUE else TokenType.FALSE).value.toBoolean())
