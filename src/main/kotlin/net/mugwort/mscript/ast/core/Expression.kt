@@ -102,17 +102,7 @@ sealed class Expression {
             )
         }
     }
-    data class NewExpression(val callee: Expression, val arguments: List<Expression>) : Expression(){
-        override fun toMap(): MutableMap<Any?, Any?> {
-            return mutableMapOf(
-                "NewExpression" to mutableMapOf(
-                    "type" to "NewExpression",
-                    "callee" to callee.toMap(),
-                    "arguments" to arguments.map { it.toMap() }
-                )
-            )
-        }
-    }
+
     data class AssignmentExpression(val left: Expression, val operator: String, val right: Expression) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
@@ -135,16 +125,6 @@ sealed class Expression {
                     "right" to right.toMap()
                 )
             )
-        }
-    }
-    data object ThisExpression : Expression(){
-        override fun toMap(): MutableMap<Any?, Any?> {
-            return mutableMapOf("ThisExpression" to mutableMapOf("type" to "ThisExpression"))
-        }
-    }
-    data object Super : Expression(){
-        override fun toMap(): MutableMap<Any?, Any?> {
-            return mutableMapOf("Super" to mutableMapOf("type" to "Super"))
         }
     }
     abstract fun toMap(): MutableMap<Any?, Any?>

@@ -78,37 +78,6 @@ enum class TokenType(val id: String) {
 
     companion object {
         /**
-         * 定义复合赋值运算符列表
-         * += ; -= ; *= ; /= ; %=
-         * @see TokenType
-         */
-        val complex = listOf(MINUS_EQUAL, PLUS_EQUAL, STAR_EQUAL, SLASH_EQUAL, MODULUS_EQUAL)
-
-        /**
-         * 定义等式运算符列表
-         * == ; !=
-         * @see TokenType
-         */
-        val equalityOperators = listOf(EQUAL, BANG_EQUAL)
-        /**
-         * List of relational operators.
-         * @see TokenType
-         */
-        val relationalOperators = listOf(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)
-
-        /**
-         * List of binary operators.
-         * @see TokenType
-         */
-        val binaryOperators = listOf(PLUS, MINUS,STAR, SLASH, MODULUS)
-
-        /**
-         * 根据id获取对应的TokenType
-         * @param id Token类型的标识符
-         * @return 对应的TokenType，如果不存在则返回null
-         */
-
-        /**
          * 根据id获取对应的TokenType
          * @param id Token类型的标识符
          * @return 对应的TokenType，如果不存在则返回null

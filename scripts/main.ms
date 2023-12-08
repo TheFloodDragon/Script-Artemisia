@@ -1,4 +1,3 @@
-let main(){
-    var a = !true;
-    !true;
+let main(a : Number){
+    return 0;
 }
