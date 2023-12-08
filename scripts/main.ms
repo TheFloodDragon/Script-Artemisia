@@ -1,2 +1,4 @@
-let main(a : Number){
+class a(){
+
+
 }

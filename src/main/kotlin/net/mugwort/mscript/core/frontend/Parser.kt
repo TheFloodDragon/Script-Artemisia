@@ -34,6 +34,9 @@ class Parser(private val tokens: List<Token>) {
                 TokenType.VAR -> return varStatement()
                 TokenType.LET -> return functionStatement()
                 TokenType.SEMICOLON -> return Statement.EmptyStatement()
+                TokenType.DO -> return doWhileStatement()
+                TokenType.WHILE -> return whileStatement()
+                TokenType.CLASS -> return classStatement()
                 TokenType.IDENTIFIER -> {
                     return when (tokens[currentTokenIndex].type) {
                         TokenType.LEFT_PAREN -> {
@@ -59,6 +62,26 @@ class Parser(private val tokens: List<Token>) {
                     }
                 }
             }
+        }
+        fun paramGetter(): ArrayList<Statement.VariableStatement> {
+            val params = ArrayList<Statement.VariableStatement>()
+            consume(TokenType.LEFT_PAREN)
+            while (currentToken.type != TokenType.RIGHT_PAREN){
+                if (currentToken.type == TokenType.COMMA){
+                    consume(TokenType.COMMA)
+                }
+                when(currentToken.type){
+                    TokenType.CONST,TokenType.VAL ->  params.add(varStatement(true, isParams = true))
+                    TokenType.VAR -> params.add(varStatement(false,isParams = true))
+                    else -> {
+                        if (currentToken.type == TokenType.IDENTIFIER){
+                            params.add(varStatement(false, isParams = true))
+                        }
+                    }
+                }
+            }
+            consume(TokenType.RIGHT_PAREN)
+            return params
         }
         fun varStatement(isConst : Boolean = false,isParams : Boolean = false): Statement.VariableStatement {
             fun declaration(): Statement.VariableDeclaration {
@@ -133,31 +156,10 @@ class Parser(private val tokens: List<Token>) {
         fun functionStatement(): Statement.FunctionDeclaration {
             consume(TokenType.LET)
             val id = expr.Identifier()
-            val params = ArrayList<Statement.VariableStatement>()
-            consume(TokenType.LEFT_PAREN)
-            while (currentToken.type != TokenType.RIGHT_PAREN){
-                if (currentToken.type == TokenType.COMMA){
-                    consume(TokenType.COMMA)
-                }
-                when(currentToken.type){
-                    TokenType.CONST,TokenType.VAL ->  params.add(varStatement(true, isParams = true))
-                    TokenType.VAR -> params.add(varStatement(false,isParams = true))
-                    else -> {
-                        if (currentToken.type == TokenType.IDENTIFIER){
-                            params.add(varStatement(false, isParams = true))
-                        }
-                    }
-                }
-            }
-            consume(TokenType.RIGHT_PAREN)
-            val ret : TokenType = if (currentToken.type == TokenType.COLON){
-                consume(TokenType.COLON)
-                expr.typeExpression().values.first()
-            }else{
-                TokenType.VOID
-            }
+            val params = paramGetter()
+
             val body : Statement.BlockStatement = blockStatement()
-            return Statement.FunctionDeclaration(id,params,ret,body)
+            return Statement.FunctionDeclaration(id,params,body)
         }
         fun returnStatement(): Statement.ReturnStatement {
             consume(TokenType.RETURN)
@@ -176,6 +178,35 @@ class Parser(private val tokens: List<Token>) {
                 }
             if (argument !is Expression.CallExpression) consume(TokenType.SEMICOLON)
             return Statement.ReturnStatement(argument)
+        }
+        fun whileStatement() : Statement.WhileStatement{
+            consume(TokenType.WHILE)
+            consume(TokenType.LEFT_PAREN)
+            val rule = expr.expression()
+            consume(TokenType.RIGHT_PAREN)
+            val body = blockStatement()
+            return Statement.WhileStatement(rule, body)
+        }
+        fun doWhileStatement(): Statement.DoWhileStatement {
+            consume(TokenType.DO)
+            val body = blockStatement()
+            consume(TokenType.WHILE)
+            consume(TokenType.LEFT_PAREN)
+            val rule = expr.expression()
+            consume(TokenType.RIGHT_PAREN)
+            return Statement.DoWhileStatement(body,rule)
+        }
+        fun classStatement() : Statement.ClassDeclaration{
+            consume(TokenType.CLASS)
+            val id = expr.Identifier()
+            if (currentToken.type == TokenType.LEFT_PAREN){
+                val params = paramGetter()
+                val body = blockStatement()
+                return Statement.ClassDeclaration(id,params,body)
+            }
+            val body = blockStatement()
+
+            return Statement.ClassDeclaration(id,null,body)
         }
         fun ifStatement() : Statement.IfStatement{
             consume(TokenType.IF)
