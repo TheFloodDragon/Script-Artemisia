@@ -80,7 +80,7 @@
                     "IfStatement" to mutableMapOf(
                         "type" to "IfStatement",
                         "rules" to rule.toMap(),
-                        "main" to consequent.toMap(),
+                        "body" to consequent.toMap(),
                         "else" to alternate?.toMap(),
                     )
                 )

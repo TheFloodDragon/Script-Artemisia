@@ -50,6 +50,7 @@ class Parser(private val tokens: List<Token>) {
                 TokenType.BANG,TokenType.MINUS ->{
                     return Statement.ExpressionStatement(expr.leftUnaryExpression())
                 }
+                TokenType.IF -> return ifStatement()
                 else -> {
                     return if (currentToken.type != TokenType.EOF) {
                         Statement.ExpressionStatement(expr.expression())
@@ -126,6 +127,7 @@ class Parser(private val tokens: List<Token>) {
             while (currentToken.type != TokenType.RIGHT_BRACE) {
                 statements()?.let { statements.add(it) }
             }
+            consume(TokenType.RIGHT_BRACE)
             return Statement.BlockStatement(statements)
         }
         fun functionStatement(): Statement.FunctionDeclaration {
@@ -169,13 +171,32 @@ class Parser(private val tokens: List<Token>) {
                         }
                     }
                     else -> {
-                        expr.primaryExpression()
+                        expr.expression()
                     }
                 }
             if (argument !is Expression.CallExpression) consume(TokenType.SEMICOLON)
             return Statement.ReturnStatement(argument)
         }
+        fun ifStatement() : Statement.IfStatement{
+            consume(TokenType.IF)
+            consume(TokenType.LEFT_PAREN)
+            val rules = expr.expression()
+            consume(TokenType.RIGHT_PAREN)
+            val consequent = blockStatement()
+            if (currentToken.type == TokenType.ELSE){
+                consume(TokenType.ELSE)
+                return if (currentToken.type == TokenType.IF){
+                    val alternate = ifStatement()
+                    Statement.IfStatement(rules,consequent,alternate)
+                }else{
+                    val alternate = blockStatement()
+                    Statement.IfStatement(rules,consequent,alternate)
+                }
+            }
+            return Statement.IfStatement(rules,consequent,null)
+        }
     }
+
     private inner class Expressions{
         val complex = listOf(
             TokenType.PLUS_EQUAL,
