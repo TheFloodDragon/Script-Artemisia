@@ -91,7 +91,7 @@ sealed class Expression {
             )
         }
     }
-    data class CallExpression(val caller: Expression, val arguments: List<Expression>) : Expression(){
+    data class CallExpression(val caller: Identifier, val arguments: List<Expression>) : Expression(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "CallExpression" to mutableMapOf(

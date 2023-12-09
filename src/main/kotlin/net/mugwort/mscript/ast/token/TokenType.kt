@@ -7,9 +7,18 @@ enum class TokenType(val id: String) {
     // Keywords
     CLASS("class"),
     CONST("const"),
+
+
+    PUBLIC("public"),
+    PRIVATE("private"),
+
+
     VAL("val"),
     LET("let"),
     OR("||"),
+    TRY("try"),
+    CATCH("catch"),
+    IN("in"),
     BREAK("break"),
     CONTINUE("continue"),
     ELSE("else"),
@@ -56,6 +65,7 @@ enum class TokenType(val id: String) {
     SEMICOLON(";"),
     SLASH("/"),
     STAR("*"),
+
     LEFT_SQUARE("["),
     RIGHT_SQUARE("]"),
 

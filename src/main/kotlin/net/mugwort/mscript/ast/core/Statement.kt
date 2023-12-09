@@ -72,6 +72,30 @@
                 )
             }
         }
+        data class VisitorStatement(val visitor: VisitorType,val state: Statement) : Statement() {
+            override fun toMap(): MutableMap<Any?, Any?> {
+                return mutableMapOf(
+                    "VisitorStatement" to mutableMapOf(
+                        "type" to "VisitorStatement",
+                        "visitor" to visitor,
+                        "statement" to state.toMap(),
+                    )
+                )
+            }
+        }
+        data class TryStatement(val body: BlockStatement,val exception : Expression,val catch : BlockStatement) : Statement(){
+            override fun toMap(): MutableMap<Any?, Any?> {
+                return mutableMapOf(
+                    "TryStatement" to mutableMapOf(
+                        "type" to "TryStatement",
+                        "body" to body.toMap(),
+                        "exception" to exception.toMap(),
+                        "catch" to catch.toMap(),
+                    )
+                )
+            }
+        }
+
         data class IfStatement(val rule: Expression, val consequent: Statement, val alternate: Statement?) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
@@ -96,14 +120,13 @@
                 )
             }
         }
-        data class ForStatement(val init: Expression?, val rule: Expression?, val update: Expression?, val body: Statement) : Statement(){
+        data class ForStatement(val init: Expression, val rule: Expression, val body: Statement) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "ForStatement" to mutableMapOf(
                         "type" to "ForStatement",
-                        "init" to init?.toMap(),
-                        "rule" to rule?.toMap(),
-                        "update" to update?.toMap(),
+                        "init" to init.toMap(),
+                        "range" to rule.toMap(),
                         "body" to body.toMap(),
                     )
                 )
@@ -143,6 +166,14 @@
                 )
             }
         }
+
+        enum class VisitorType{
+            PUBLIC,
+            PRIVATE
+        }
+
+
+
         abstract fun toMap():MutableMap<Any?,Any?>
 
     }
