@@ -18,6 +18,8 @@ repositories {
 
 dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
+    //api(project(":project"))
+
 }
 
 application {
