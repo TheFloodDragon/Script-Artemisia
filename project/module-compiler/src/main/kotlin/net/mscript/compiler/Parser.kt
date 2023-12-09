@@ -1,8 +1,8 @@
-package net.mugwort.mscript.core.compiler
+package net.mscript.compiler
 
-import net.mugwort.mscript.core.ast.core.Expression
+import net.mscript.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.core.ast.token.Token
+import net.mscript.ast.token.Token
 import net.mugwort.mscript.core.ast.token.TokenType
 import net.mugwort.mscript.core.runtime.Translation
 import net.mugwort.mscript.core.runtime.expection.thrower

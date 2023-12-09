@@ -1,5 +1,7 @@
     package net.mugwort.mscript.core.ast.core
 
+    import net.mscript.ast.core.Expression
+
     sealed class Statement {
         data class Program(val body: List<Statement>) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
@@ -165,7 +167,7 @@
                 )
             }
         }
-        data class CaseDeclaration(val case: Expression,val body: Statement?) : Statement(){
+        data class CaseDeclaration(val case: Expression, val body: Statement?) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "CaseDeclaration" to mutableMapOf(
@@ -176,7 +178,7 @@
                 )
             }
         }
-        data class SwitchStatement(val init : Expression,val body: List<CaseDeclaration>) : Statement(){
+        data class SwitchStatement(val init : Expression, val body: List<CaseDeclaration>) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "SwichStatement" to mutableMapOf(

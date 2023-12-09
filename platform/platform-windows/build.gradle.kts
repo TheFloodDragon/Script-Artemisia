@@ -1,16 +1,32 @@
-description = "windows"
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.21"
+    id("kotlin")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
-subprojects{
-    dependencies{
-        implementation(project(":project:module-core"))
+
+group = "net.mscript.windows"
+version = "0.0.1-DEV"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly(project(":project:module-compiler"))
+}
+
+application {
+    mainClass.set("${group}.MScript")
+}
+
+tasks{
+    test {
+        useJUnitPlatform()
     }
-
-}
-
-
-dependencies{
-
+    build { dependsOn(shadowJar) }
+    withType<ShadowJar> {
+        relocate("kotlin.", "kotlin1921.")
+    }
 }
