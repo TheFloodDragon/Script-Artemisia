@@ -1,7 +1,7 @@
 package net.mugwort.mscript
 
-import net.mugwort.mscript.core.frontend.Lexer
-import net.mugwort.mscript.core.frontend.Parser
+import net.mugwort.mscript.core.compiler.Lexer
+import net.mugwort.mscript.core.compiler.Parser
 import java.io.File
 
 

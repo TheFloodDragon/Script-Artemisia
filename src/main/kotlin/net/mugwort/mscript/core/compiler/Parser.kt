@@ -1,4 +1,4 @@
-package net.mugwort.mscript.core.frontend
+package net.mugwort.mscript.core.compiler
 
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
