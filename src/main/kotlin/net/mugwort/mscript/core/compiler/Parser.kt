@@ -33,6 +33,7 @@ class Parser(private val tokens: List<Token>) {
                 TokenType.RETURN -> return returnStatement()
                 TokenType.VAR -> return varStatement()
                 TokenType.TRY -> return tryStatement()
+                TokenType.SWITCH -> return switchStatement()
                 TokenType.LET -> return functionStatement()
                 TokenType.IMPORT -> return importStatement()
                 TokenType.SEMICOLON -> return Statement.EmptyStatement()
@@ -273,6 +274,34 @@ class Parser(private val tokens: List<Token>) {
             consume(TokenType.SEMICOLON)
             return Statement.ImportStatement(file)
         }
+        fun switchStatement(): Statement.SwitchStatement{
+            consume(TokenType.SWITCH)
+            fun case(): Statement.CaseDeclaration{
+                consume(TokenType.CASE)
+                consume(TokenType.LEFT_PAREN)
+                val rule = expr.expression()
+                consume(TokenType.RIGHT_PAREN)
+                consume(TokenType.COLON)
+                var body : Statement?
+                if (currentToken.type == TokenType.LEFT_BRACE) body = blockStatement() else {
+                    body = statements()
+                    nextToken()
+                }
+                return Statement.CaseDeclaration(rule,body)
+            }
+            consume(TokenType.LEFT_PAREN)
+            val rule = expr.expression()
+            consume(TokenType.RIGHT_PAREN)
+            consume(TokenType.LEFT_BRACE)
+            val case = ArrayList<Statement.CaseDeclaration>()
+            while (currentToken.type != TokenType.RIGHT_BRACE){
+                case.add(case())
+            }
+            consume(TokenType.RIGHT_BRACE)
+            return Statement.SwitchStatement(rule,case)
+        }
+
+
     }
 
     private inner class Expressions{

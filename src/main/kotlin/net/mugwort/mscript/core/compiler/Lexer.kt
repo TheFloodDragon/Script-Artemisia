@@ -13,6 +13,8 @@ class Lexer(private var source: String, private var file : File? = null) {
     private var line = 1
     private var column = 1
     private val keyWords: MutableMap<String, TokenType> = mutableMapOf(
+        "case" to TokenType.CASE,
+        "switch" to TokenType.SWITCH,
         "public" to TokenType.PUBLIC,
         "private" to TokenType.PRIVATE,
         "try" to TokenType.TRY,

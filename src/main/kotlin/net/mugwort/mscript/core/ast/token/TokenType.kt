@@ -12,7 +12,8 @@ enum class TokenType(val id: String) {
     PUBLIC("public"),
     PRIVATE("private"),
 
-
+    SWITCH("switch"),
+    CASE("case"),
     VAL("val"),
     LET("let"),
     OR("||"),

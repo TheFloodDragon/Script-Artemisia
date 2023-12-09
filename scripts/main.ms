@@ -1,3 +1,8 @@
-private let main(){
-    println("awa");
+switch(a){
+    case(b) : {
+
+    }
+    case(c) : {
+
+    }
 }

@@ -93,6 +93,7 @@
                 )
             }
         }
+
         data class TryStatement(val body: BlockStatement, val exception : Expression, val catch : BlockStatement) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
@@ -164,6 +165,30 @@
                 )
             }
         }
+        data class CaseDeclaration(val case: Expression,val body: Statement?) : Statement(){
+            override fun toMap(): MutableMap<Any?, Any?> {
+                return mutableMapOf(
+                    "CaseDeclaration" to mutableMapOf(
+                        "type" to "CaseDeclaration",
+                        "case" to case.toMap(),
+                        "body" to body?.toMap()
+                    )
+                )
+            }
+        }
+        data class SwitchStatement(val init : Expression,val body: List<CaseDeclaration>) : Statement(){
+            override fun toMap(): MutableMap<Any?, Any?> {
+                return mutableMapOf(
+                    "SwichStatement" to mutableMapOf(
+                        "type" to "SwichStatement",
+                        "init" to init.toMap(),
+                        "cases" to body.map { it.toMap() }
+                    )
+                )
+            }
+        }
+
+
         data class ClassDeclaration(val identifier: Expression.Identifier, val params: List<VariableStatement>?, val body: BlockStatement) : Statement() {
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
