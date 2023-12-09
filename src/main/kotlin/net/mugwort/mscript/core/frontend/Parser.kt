@@ -1,11 +1,11 @@
 package net.mugwort.mscript.core.frontend
 
-import net.mugwort.mscript.ast.core.Expression
-import net.mugwort.mscript.ast.core.Statement
-import net.mugwort.mscript.ast.token.Token
-import net.mugwort.mscript.ast.token.TokenType
-import net.mugwort.mscript.runtime.Translation
-import net.mugwort.mscript.runtime.expection.thrower
+import net.mugwort.mscript.core.ast.core.Expression
+import net.mugwort.mscript.core.ast.core.Statement
+import net.mugwort.mscript.core.ast.token.Token
+import net.mugwort.mscript.core.ast.token.TokenType
+import net.mugwort.mscript.core.runtime.Translation
+import net.mugwort.mscript.core.runtime.expection.thrower
 import net.mugwort.mscript.utils.JsonUtils
 
 class Parser(private val tokens: List<Token>) {
@@ -29,14 +29,14 @@ class Parser(private val tokens: List<Token>) {
         fun statements(): Statement? {
             when (currentToken.type) {
                 TokenType.LEFT_BRACE -> return blockStatement()
-                TokenType.CONST,TokenType.VAL -> return varStatement(true)
+                TokenType.CONST, TokenType.VAL -> return varStatement(true)
                 TokenType.RETURN -> return returnStatement()
                 TokenType.VAR -> return varStatement()
                 TokenType.TRY -> return tryStatement()
                 TokenType.LET -> return functionStatement()
                 TokenType.IMPORT -> return importStatement()
                 TokenType.SEMICOLON -> return Statement.EmptyStatement()
-                TokenType.PRIVATE,TokenType.PUBLIC -> return visitorStatement()
+                TokenType.PRIVATE, TokenType.PUBLIC -> return visitorStatement()
                 TokenType.DO -> return doWhileStatement()
                 TokenType.FOR -> return forStatement()
                 TokenType.WHILE -> return whileStatement()
@@ -48,7 +48,7 @@ class Parser(private val tokens: List<Token>) {
                             consume(TokenType.SEMICOLON)
                             ret
                         }
-                        TokenType.DOT,TokenType.LEFT_SQUARE -> expr.MemberExpression()?.let { Statement.ExpressionStatement(it) }
+                        TokenType.DOT, TokenType.LEFT_SQUARE -> expr.MemberExpression()?.let { Statement.ExpressionStatement(it) }
                         TokenType.Incrementing, TokenType.Subtraction -> {
                             Statement.ExpressionStatement(expr.rightUnaryExpression())
                         }
@@ -57,7 +57,7 @@ class Parser(private val tokens: List<Token>) {
                         }
                     }
                 }
-                TokenType.BANG,TokenType.MINUS ->{
+                TokenType.BANG, TokenType.MINUS ->{
                     return Statement.ExpressionStatement(expr.leftUnaryExpression())
                 }
                 TokenType.IF -> return ifStatement()
@@ -78,7 +78,7 @@ class Parser(private val tokens: List<Token>) {
                     consume(TokenType.COMMA)
                 }
                 when(currentToken.type){
-                    TokenType.CONST,TokenType.VAL ->  params.add(varStatement(true, isParams = true))
+                    TokenType.CONST, TokenType.VAL ->  params.add(varStatement(true, isParams = true))
                     TokenType.VAR -> params.add(varStatement(false,isParams = true))
                     else -> {
                         if (currentToken.type == TokenType.IDENTIFIER){
@@ -360,7 +360,7 @@ class Parser(private val tokens: List<Token>) {
 
         fun expression(): Expression {
             when(currentToken.type){
-                TokenType.MINUS,TokenType.BANG ->{
+                TokenType.MINUS, TokenType.BANG ->{
                     val operator = currentToken.value
                     nextToken()
                     val right = primaryExpression()
@@ -376,7 +376,7 @@ class Parser(private val tokens: List<Token>) {
                 }
                 else ->{
                     when(tokens[currentTokenIndex].type){
-                        TokenType.Incrementing,TokenType.Subtraction ->{
+                        TokenType.Incrementing, TokenType.Subtraction ->{
                             val operator = tokens[currentTokenIndex].value
                             val left = primaryExpression()
                             nextToken()
@@ -402,7 +402,7 @@ class Parser(private val tokens: List<Token>) {
                 }
             }
         }
-        fun typeExpression(): MutableMap<Expression,TokenType> {
+        fun typeExpression(): MutableMap<Expression, TokenType> {
             return when (currentToken.type) {
                 TokenType.IDENTIFIER -> {
                     val identifier = Expression.Identifier(currentToken.value)
@@ -470,7 +470,7 @@ class Parser(private val tokens: List<Token>) {
         val literal: Expression = when(currentToken.type){
             TokenType.NUMBER ->  NumericLiteral()
             TokenType.STRING ->  StringLiteral()
-            TokenType.FALSE,TokenType.TRUE ->  BooleanLiteral()
+            TokenType.FALSE, TokenType.TRUE ->  BooleanLiteral()
             TokenType.NULL -> NullLiteral()
             TokenType.OBJECT -> ObjectLiteral()
             else -> {

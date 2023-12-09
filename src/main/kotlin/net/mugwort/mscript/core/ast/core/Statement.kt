@@ -1,4 +1,4 @@
-    package net.mugwort.mscript.ast.core
+    package net.mugwort.mscript.core.ast.core
 
     sealed class Statement {
         data class Program(val body: List<Statement>) : Statement(){
@@ -49,7 +49,7 @@
                 )
             }
         }
-        data class VariableStatement(val declarations: List<VariableDeclaration>,val const : Boolean) : Statement(){
+        data class VariableStatement(val declarations: List<VariableDeclaration>, val const : Boolean) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "VariableStatement" to mutableMapOf(
@@ -82,7 +82,7 @@
                 )
             }
         }
-        data class VisitorStatement(val visitor: VisitorType,val state: Statement) : Statement() {
+        data class VisitorStatement(val visitor: VisitorType, val state: Statement) : Statement() {
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "VisitorStatement" to mutableMapOf(
@@ -93,7 +93,7 @@
                 )
             }
         }
-        data class TryStatement(val body: BlockStatement,val exception : Expression,val catch : BlockStatement) : Statement(){
+        data class TryStatement(val body: BlockStatement, val exception : Expression, val catch : BlockStatement) : Statement(){
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "TryStatement" to mutableMapOf(
@@ -152,7 +152,7 @@
                 )
             }
         }
-        data class FunctionDeclaration(val identifier: Expression.Identifier, val params: List<VariableStatement>,val body: BlockStatement) : Statement() {
+        data class FunctionDeclaration(val identifier: Expression.Identifier, val params: List<VariableStatement>, val body: BlockStatement) : Statement() {
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "FunctionDeclaration" to mutableMapOf(
@@ -164,7 +164,7 @@
                 )
             }
         }
-        data class ClassDeclaration(val identifier: Expression.Identifier,val params: List<VariableStatement>?, val body: BlockStatement) : Statement() {
+        data class ClassDeclaration(val identifier: Expression.Identifier, val params: List<VariableStatement>?, val body: BlockStatement) : Statement() {
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
                     "ClassDeclaration" to mutableMapOf(

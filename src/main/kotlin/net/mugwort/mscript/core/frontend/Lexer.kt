@@ -1,8 +1,8 @@
 package net.mugwort.mscript.core.frontend
 
-import net.mugwort.mscript.ast.token.Token
-import net.mugwort.mscript.ast.token.TokenType
-import net.mugwort.mscript.runtime.expection.thrower
+import net.mugwort.mscript.core.ast.token.Token
+import net.mugwort.mscript.core.ast.token.TokenType
+import net.mugwort.mscript.core.runtime.expection.thrower
 import java.io.File
 
 
@@ -42,9 +42,7 @@ class Lexer(private var source: String, private var file : File? = null) {
         "null" to TokenType.NULL,
         "while" to TokenType.WHILE,
         "true" to TokenType.TRUE,
-        "print" to TokenType.PRINT,
         "var" to TokenType.VAR,
-        "println" to TokenType.PRINTLN
     )
 
     init {

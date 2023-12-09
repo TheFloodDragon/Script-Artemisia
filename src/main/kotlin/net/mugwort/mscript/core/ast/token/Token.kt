@@ -1,4 +1,4 @@
-package net.mugwort.mscript.ast.token
+package net.mugwort.mscript.core.ast.token
 
 import net.mugwort.mscript.utils.JsonUtils
 

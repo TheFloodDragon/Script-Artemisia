@@ -1,4 +1,4 @@
-package net.mugwort.mscript.ast.token
+package net.mugwort.mscript.core.ast.token
 
 /**
  * TokenType枚举类定义了所有可能的Token类型。
@@ -30,8 +30,6 @@ enum class TokenType(val id: String) {
     NULL("null"),
     WHILE("while"),
     TRUE("true"),
-    PRINTLN("println"),
-    PRINT("print"),
 
     // Types
     RETURN("return"),
