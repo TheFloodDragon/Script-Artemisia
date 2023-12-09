@@ -17,5 +17,5 @@ interface ICallable {
      *  @param side 类型为List<object?>，表示调用站点的对象~
      *
      * */
-    fun bind(side : Any?)
+    fun bind(site : Any?)
 }

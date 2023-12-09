@@ -4,8 +4,8 @@ import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
 import net.mugwort.mscript.core.ast.token.Token
 import net.mugwort.mscript.core.ast.token.TokenType
-import net.mugwort.mscript.runtime.other.Translation
 import net.mugwort.mscript.runtime.expection.thrower
+import net.mugwort.mscript.runtime.other.Translation
 import net.mugwort.mscript.utils.JsonUtils
 
 class Parser(private val tokens: List<Token>) {
@@ -65,7 +65,7 @@ class Parser(private val tokens: List<Token>) {
                     }
                 }
 
-                TokenType.BANG, TokenType.MINUS -> {
+                TokenType.BANG, TokenType.MINUS,TokenType.Incrementing,TokenType.Subtraction -> {
                     return Statement.ExpressionStatement(expr.leftUnaryExpression())
                 }
 
@@ -151,16 +151,16 @@ class Parser(private val tokens: List<Token>) {
                     }
                 }
             }
-            val declarations = mutableListOf<Statement.VariableDeclaration>()
-            declarations.add(declaration())
+            val declaration = declaration()
+
             if (currentToken.type == TokenType.COMMA && isParams) {
                 consume(TokenType.COMMA)
             } else if (currentToken.type == TokenType.RIGHT_PAREN) {
-                return Statement.VariableStatement(declarations, isConst)
+                return Statement.VariableStatement(declaration, isConst)
             } else {
                 consume(TokenType.SEMICOLON, Translation.InvalidEND.get())
             }
-            return Statement.VariableStatement(declarations, isConst)
+            return Statement.VariableStatement(declaration, isConst)
         }
 
         fun blockStatement(): Statement.BlockStatement {
