@@ -1,3 +1,3 @@
 dependencies {
-    compileModule("module-utils")
+    compileModule("module-util")
 }

@@ -1,5 +1,5 @@
 dependencies {
-    compileModule("module-ast")
+    compileModule("module-core")
     compileModule("module-runtime")
-    compileModule("module-utils")
+    compileModule("module-util")
 }

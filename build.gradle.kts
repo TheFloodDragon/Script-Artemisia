@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    java
     `maven-publish`
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
     id("com.github.johnrengelman.shadow") version shadowJarVersion apply false
@@ -19,6 +20,8 @@ subprojects {
     }
 
     tasks {
+        // 测试
+        test { useJUnitPlatform() }
         // 编码设置
         withType<JavaCompile> { options.encoding = "UTF-8" }
         // Kotlin Jvm 设置
@@ -49,8 +52,8 @@ subprojects {
     // Java 版本设置
     java {
         withSourcesJar()
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     // 基本信息设置
