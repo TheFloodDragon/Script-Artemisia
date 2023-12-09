@@ -34,6 +34,7 @@ class Parser(private val tokens: List<Token>) {
                 TokenType.VAR -> return varStatement()
                 TokenType.TRY -> return tryStatement()
                 TokenType.LET -> return functionStatement()
+                TokenType.IMPORT -> return importStatement()
                 TokenType.SEMICOLON -> return Statement.EmptyStatement()
                 TokenType.PRIVATE,TokenType.PUBLIC -> return visitorStatement()
                 TokenType.DO -> return doWhileStatement()
@@ -265,6 +266,12 @@ class Parser(private val tokens: List<Token>) {
             }
             val state = statements()
             return state?.let { Statement.VisitorStatement(visitor, it) }
+        }
+        fun importStatement() : Statement.ImportStatement{
+            consume(TokenType.IMPORT)
+            val file = expr.expression()
+            consume(TokenType.SEMICOLON)
+            return Statement.ImportStatement(file)
         }
     }
 

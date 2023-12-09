@@ -26,7 +26,7 @@ enum class TokenType(val id: String) {
     VAR("var"),
     FOR("for"),
     IF("if"),
-    INCLUDE("include"),
+    IMPORT("import"),
     NULL("null"),
     WHILE("while"),
     TRUE("true"),

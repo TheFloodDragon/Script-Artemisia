@@ -38,7 +38,7 @@ class Lexer(private var source: String, private var file : File? = null) {
         "for" to TokenType.FOR,
         "if" to TokenType.IF,
         "const" to TokenType.CONST,
-        "include" to TokenType.INCLUDE,
+        "import" to TokenType.IMPORT,
         "null" to TokenType.NULL,
         "while" to TokenType.WHILE,
         "true" to TokenType.TRUE,

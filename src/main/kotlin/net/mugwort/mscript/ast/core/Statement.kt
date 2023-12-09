@@ -72,6 +72,16 @@
                 )
             }
         }
+        data class ImportStatement(val file : Expression): Statement(){
+            override fun toMap(): MutableMap<Any?, Any?> {
+                return mutableMapOf(
+                    "ImportStatement" to mutableMapOf(
+                        "type" to "ImportStatement",
+                        "import" to file,
+                    )
+                )
+            }
+        }
         data class VisitorStatement(val visitor: VisitorType,val state: Statement) : Statement() {
             override fun toMap(): MutableMap<Any?, Any?> {
                 return mutableMapOf(
