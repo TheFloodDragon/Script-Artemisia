@@ -1,6 +1,6 @@
 package net.mugwort.mscript.runtime.expection
 
-import net.mugwort.mscript.runtime.Translation
+import net.mugwort.mscript.runtime.other.Translation
 import net.mugwort.mscript.utils.Logger
 import kotlin.system.exitProcess
 

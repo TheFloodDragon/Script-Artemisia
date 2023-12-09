@@ -4,7 +4,7 @@ import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
 import net.mugwort.mscript.core.ast.token.Token
 import net.mugwort.mscript.core.ast.token.TokenType
-import net.mugwort.mscript.runtime.Translation
+import net.mugwort.mscript.runtime.other.Translation
 import net.mugwort.mscript.runtime.expection.thrower
 import net.mugwort.mscript.utils.JsonUtils
 
