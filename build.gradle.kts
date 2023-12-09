@@ -11,9 +11,7 @@ plugins {
 
 idea{
     module {
-        excludeDirs = setOf(file(".gradle")) +
-                listOf("builds")
-                    .map { file(it) }
+        excludeDirs = setOf(file(".gradle")) + listOf("artifacts").map { file(it) }
     }
 }
 
@@ -46,7 +44,7 @@ subprojects {
             archiveAppendix.set("")
             archiveClassifier.set("")
             archiveVersion.set(rootVersion)
-            destinationDirectory.set(file("$rootDir/builds"))
+            destinationDirectory.set(file("$rootDir/artifacts"))
             // Kotlin
             relocate("kotlin.", "kotlin${kotlinVersion.escapedVersion}.") { exclude("kotlin.Metadata") }
             relocate("kotlinx.", "kotlinx${kotlinVersion.escapedVersion}.")
