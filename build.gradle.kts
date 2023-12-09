@@ -10,6 +10,8 @@ repositories {
     maven("https://repo.huaweicloud.com/repository/maven/")
     maven("https://jitpack.io")
 }
+
+
 dependencies {
 
 }

@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":project:module-utils"))
+    implementation(project(":project:module-utils"))
 }
 
 tasks.test {

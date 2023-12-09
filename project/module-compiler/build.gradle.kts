@@ -10,9 +10,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":project:module-ast"))
-    compileOnly(project(":project:module-runtime"))
-    compileOnly(project(":project:module-utils"))
+    implementation(project(":project:module-ast"))
+    implementation(project(":project:module-runtime"))
+    implementation(project(":project:module-utils"))
 }
 
 tasks.test {

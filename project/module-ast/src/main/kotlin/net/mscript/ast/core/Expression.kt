@@ -2,49 +2,54 @@ package net.mscript.ast.core
 
 
 sealed class Expression {
-    data class Identifier(val name: String) : Expression(){
+    data class Identifier(val name: String) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "Identifier" to mutableMapOf("type" to "Identifier", "name" to name)
             )
         }
     }
-    data class NumericLiteral(val value: Double?) : Expression(){
+
+    data class NumericLiteral(val value: Double?) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "NumericLiteral" to mutableMapOf("type" to "NumericLiteral", "value" to value)
             )
         }
     }
-    data class StringLiteral(val value: String?) : Expression(){
+
+    data class StringLiteral(val value: String?) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "StringLiteral" to mutableMapOf("type" to "StringLiteral", "value" to value)
             )
         }
     }
-    data class ObjectLiteral(val value: Any?) : Expression(){
+
+    data class ObjectLiteral(val value: Any?) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "ObjectLiteral" to mutableMapOf("type" to "ObjectLiteral", "value" to value)
             )
         }
     }
-    data class BooleanLiteral(val value: Boolean?) : Expression(){
+
+    data class BooleanLiteral(val value: Boolean?) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "BooleanLiteral" to mutableMapOf("type" to "BooleanLiteral", "value" to value)
             )
         }
     }
-    data object NullLiteral : Expression(){
+
+    data object NullLiteral : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf("NullLiteral" to mutableMapOf("type" to "NullLiteral"))
         }
     }
 
 
-    data class BinaryExpression(val operator: Any?, val left: Expression, val right: Expression) : Expression(){
+    data class BinaryExpression(val operator: Any?, val left: Expression, val right: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "BinaryExpression" to mutableMapOf(
@@ -57,7 +62,7 @@ sealed class Expression {
         }
     }
 
-    data class GroupExpression(val expr: Expression) : Expression(){
+    data class GroupExpression(val expr: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "GroupExpression" to mutableMapOf(
@@ -68,7 +73,7 @@ sealed class Expression {
         }
     }
 
-    data class UnaryExpression(val operator: String, val argument: Expression) : Expression(){
+    data class UnaryExpression(val operator: String, val argument: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "UnaryExpression" to mutableMapOf(
@@ -79,7 +84,9 @@ sealed class Expression {
             )
         }
     }
-    data class MemberExpression(val objectExpression: Expression, val property: Expression, val computed: Boolean) : Expression(){
+
+    data class MemberExpression(val objectExpression: Expression, val property: Expression, val computed: Boolean) :
+        Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "MemberExpression" to mutableMapOf(
@@ -91,7 +98,8 @@ sealed class Expression {
             )
         }
     }
-    data class CallExpression(val caller: Identifier, val arguments: List<Expression>) : Expression(){
+
+    data class CallExpression(val caller: Identifier, val arguments: List<Expression>) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "CallExpression" to mutableMapOf(
@@ -103,7 +111,7 @@ sealed class Expression {
         }
     }
 
-    data class AssignmentExpression(val left: Expression, val operator: String, val right: Expression) : Expression(){
+    data class AssignmentExpression(val left: Expression, val operator: String, val right: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "AssignmentExpression" to mutableMapOf(
@@ -115,7 +123,8 @@ sealed class Expression {
             )
         }
     }
-    data class LogicalExpression(val operator: String, val left: Expression, val right: Expression) : Expression(){
+
+    data class LogicalExpression(val operator: String, val left: Expression, val right: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "LogicalExpression" to mutableMapOf(
@@ -127,5 +136,6 @@ sealed class Expression {
             )
         }
     }
+
     abstract fun toMap(): MutableMap<Any?, Any?>
 }

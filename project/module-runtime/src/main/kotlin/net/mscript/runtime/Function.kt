@@ -1,4 +1,4 @@
-package net.mugwort.mscript.core.runtime
+package net.mscript.runtime
 
 class Function {
 }

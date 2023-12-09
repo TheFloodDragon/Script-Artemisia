@@ -1,8 +1,8 @@
 package net.mscript.compiler
 
 import net.mscript.ast.token.Token
-import net.mugwort.mscript.core.ast.token.TokenType
-import net.mugwort.mscript.core.runtime.expection.thrower
+import net.mscript.ast.token.TokenType
+import net.mscript.runtime.expection.thrower
 import java.io.File
 
 

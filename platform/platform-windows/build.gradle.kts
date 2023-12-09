@@ -14,7 +14,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":project:module-compiler"))
+    implementation(project(":project:module-compiler"))
+    implementation("com.google.code.gson:gson:2.8.9")
 }
 
 application {
@@ -26,6 +27,7 @@ tasks{
         useJUnitPlatform()
     }
     build { dependsOn(shadowJar) }
+
     withType<ShadowJar> {
         relocate("kotlin.", "kotlin1921.")
     }

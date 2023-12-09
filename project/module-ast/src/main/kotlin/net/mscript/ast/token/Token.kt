@@ -1,7 +1,6 @@
 package net.mscript.ast.token
 
-import net.mugwort.mscript.core.ast.token.TokenType
-import net.mugwort.mscript.utils.JsonUtils
+import net.mscript.utils.JsonUtils
 
 class Token(var type: TokenType, var value: String) {
 
