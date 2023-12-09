@@ -4,8 +4,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     java
     `maven-publish`
+    id("idea")
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
     id("com.github.johnrengelman.shadow") version shadowJarVersion apply false
+}
+
+idea{
+    module {
+        excludeDirs = setOf(file(".gradle")) +
+                listOf("builds")
+                    .map { file(it) }
+    }
 }
 
 subprojects {
@@ -37,7 +46,7 @@ subprojects {
             archiveAppendix.set("")
             archiveClassifier.set("")
             archiveVersion.set(rootVersion)
-            destinationDirectory.set(file("$rootDir/outs"))
+            destinationDirectory.set(file("$rootDir/builds"))
             // Kotlin
             relocate("kotlin.", "kotlin${kotlinVersion.escapedVersion}.") { exclude("kotlin.Metadata") }
             relocate("kotlinx.", "kotlinx${kotlinVersion.escapedVersion}.")
@@ -46,7 +55,7 @@ subprojects {
 
     dependencies {
         // Kotlin标准库
-        compileOnly(kotlin("stdlib"))
+        //compileOnly(kotlin("stdlib"))
     }
 
     // Java 版本设置
