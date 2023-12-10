@@ -3,10 +3,9 @@ package net.mugwort.mscript.compiler
 import net.mugwort.mscript.core.ast.token.Token
 import net.mugwort.mscript.core.ast.token.TokenType
 import net.mugwort.mscript.runtime.expection.thrower
-import java.io.File
 
 
-class Lexer(private var source: String, private var file : File? = null) {
+class Lexer(private var source: String) {
     var tokens : ArrayList<Token> = ArrayList()
     private var start = 0
     private var current = 0
@@ -50,9 +49,6 @@ class Lexer(private var source: String, private var file : File? = null) {
     init {
         synchronized(this){
             current = start
-            if (file != null){
-               source = file!!.readText()
-            }
             scanToken()
             tokens.add(Token(TokenType.EOF, ""))
 
@@ -69,7 +65,7 @@ class Lexer(private var source: String, private var file : File? = null) {
                 '/' -> {
                     if (match('=')){
                         addToken(typeFinder())
-                    } else typeFinder()
+                    } else addToken(typeFinder())
                 }
                 '#' -> {
                     if (match('*')) {

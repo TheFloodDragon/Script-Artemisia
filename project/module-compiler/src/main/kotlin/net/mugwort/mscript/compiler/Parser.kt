@@ -16,7 +16,7 @@ class Parser(private val tokens: List<Token>) {
     private val statementList: ArrayList<Statement> = arrayListOf()
     private val expr: Expressions = Expressions()
     fun parser(): Statement.Program {
-        while (!isEnd) {
+        for (i in tokens){
             nextToken()
             Statements().statements()?.let { statementList.add(it) }
         }
@@ -45,6 +45,7 @@ class Parser(private val tokens: List<Token>) {
                 TokenType.WHILE -> return whileStatement()
                 TokenType.CLASS -> return classStatement()
                 TokenType.IDENTIFIER -> {
+                    println(tokens[currentTokenIndex].type)
                     return when (tokens[currentTokenIndex].type) {
                         TokenType.LEFT_PAREN -> {
                             val ret = Statement.ExpressionStatement(expr.CallExpression())
@@ -417,6 +418,7 @@ class Parser(private val tokens: List<Token>) {
 
 
         fun expression(): Expression {
+
             when (currentToken.type) {
                 TokenType.MINUS, TokenType.BANG -> {
                     val operator = currentToken.value
@@ -547,7 +549,6 @@ class Parser(private val tokens: List<Token>) {
             TokenType.NULL -> NullLiteral()
             TokenType.OBJECT -> ObjectLiteral()
             else -> {
-                println(currentToken)
                 thrower.SyntaxError("Literal: unexpected literal production")
                 Expression.NullLiteral
             }

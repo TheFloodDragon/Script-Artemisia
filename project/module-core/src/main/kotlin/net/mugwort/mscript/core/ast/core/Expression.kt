@@ -66,7 +66,7 @@ sealed class Expression {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "GroupExpression" to mutableMapOf(
-                    "type" to "BinaryParentExpression",
+                    "type" to "GroupExpression",
                     "group" to expr.toMap(),
                 )
             )
