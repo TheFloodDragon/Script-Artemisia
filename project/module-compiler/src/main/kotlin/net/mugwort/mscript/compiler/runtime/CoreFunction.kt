@@ -1,6 +1,6 @@
-package net.mugwort.mscript.runtime
+package net.mugwort.mscript.compiler.runtime
 
-import net.mugwort.mscript.runtime.function.NativeFunction
+import net.mugwort.mscript.runtime.Environment
 
 class CoreFunction(env: Environment) {
     private val map: MutableMap<String, NativeFunction> = mutableMapOf()

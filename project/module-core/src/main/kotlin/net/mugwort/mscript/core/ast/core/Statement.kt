@@ -101,15 +101,16 @@ sealed class Statement {
         }
     }
 
-    data class TryStatement(val body: BlockStatement, val exception: Expression, val catch: BlockStatement) :
+    data class TryStatement(val body: BlockStatement, val exception: Expression? = null, val catch: BlockStatement? = null,val finally : BlockStatement? = null) :
         Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "TryStatement" to mutableMapOf(
                     "type" to "TryStatement",
                     "body" to body.toMap(),
-                    "exception" to exception.toMap(),
-                    "catch" to catch.toMap(),
+                    "exception" to exception?.toMap(),
+                    "catch" to catch?.toMap(),
+                    "finally" to finally?.toMap()
                 )
             )
         }

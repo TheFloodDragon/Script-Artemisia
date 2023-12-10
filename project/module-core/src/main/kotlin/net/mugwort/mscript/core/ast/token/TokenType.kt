@@ -19,6 +19,7 @@ enum class TokenType(val id: String) {
     OR("||"),
     TRY("try"),
     CATCH("catch"),
+    FINALLY("finally"),
     IN("in"),
     BREAK("break"),
     CONTINUE("continue"),
@@ -64,6 +65,7 @@ enum class TokenType(val id: String) {
     SEMICOLON(";"),
     SLASH("/"),
     STAR("*"),
+    NEWLINE("\n"),
 
     LEFT_SQUARE("["),
     RIGHT_SQUARE("]"),

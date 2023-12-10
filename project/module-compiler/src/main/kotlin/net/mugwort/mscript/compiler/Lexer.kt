@@ -12,6 +12,7 @@ class Lexer(private var source: String) {
     private var line = 1
     private var column = 1
     private val keyWords: MutableMap<String, TokenType> = mutableMapOf(
+        "finally" to TokenType.FINALLY,
         "case" to TokenType.CASE,
         "switch" to TokenType.SWITCH,
         "public" to TokenType.PUBLIC,
@@ -115,7 +116,7 @@ class Lexer(private var source: String) {
                     }
                 }
                 '\n' -> {
-
+                    addToken(typeFinder())
                 }
                 ' ', '\t', '\r' -> Unit
                 '"', '\'', '`' -> setString(c)

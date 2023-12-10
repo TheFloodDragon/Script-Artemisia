@@ -1,17 +1,17 @@
 package net.mugwort.mscript.compiler
 
+import net.mugwort.mscript.compiler.runtime.CoreFunction
+import net.mugwort.mscript.compiler.runtime.Function
+import net.mugwort.mscript.compiler.runtime.NativeFunction
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.runtime.CoreFunction
 import net.mugwort.mscript.runtime.Environment
 import net.mugwort.mscript.runtime.expection.thrower
-import net.mugwort.mscript.runtime.function.Function
-import net.mugwort.mscript.runtime.function.NativeFunction
 
 
 class Interpreter(private val code : String) {
     private var globals: Environment = Environment()
-    private val parser : Parser = Parser(Lexer(code).tokens)
+    private val parser : Parser = Parser(code)
     private val program = parser.parser()
     private val programJson = parser.parserJson()
 
@@ -20,13 +20,13 @@ class Interpreter(private val code : String) {
     }
     fun execute(){
         for (body in program.body){
-            Statements().statement(body)
+            Statements().statement(body,globals)
         }
     }
     inner class Statements{
-        fun statement(body : Statement,parent: Environment? = null){
+        fun statement(body : Statement,env: Environment){
             when(body){
-                is Statement.BlockStatement -> blockStatement(body)
+                is Statement.BlockStatement -> blockStatement(body, env)
                 is Statement.CaseDeclaration -> TODO()
                 is Statement.ClassDeclaration -> TODO()
                 is Statement.DoWhileStatement -> TODO()
@@ -38,16 +38,16 @@ class Interpreter(private val code : String) {
                 is Statement.ReturnStatement -> TODO()
                 is Statement.SwitchStatement -> TODO()
                 is Statement.TryStatement -> TODO()
-                is Statement.VariableStatement -> Statements().varStatement(body,parent)
+                is Statement.VariableStatement -> Statements().varStatement(body,env)
                 is Statement.VisitorStatement -> TODO()
                 is Statement.WhileStatement -> TODO()
-                is Statement.ExpressionStatement -> Expressions().expressionStatement(body)
+                is Statement.ExpressionStatement -> Expressions().expressionStatement(body,env)
                 else ->{
 
                 }
             }
         }
-        private fun varStatement(statement: Statement.VariableStatement, environment: Environment? = null){
+        private fun varStatement(statement: Statement.VariableStatement, environment: Environment){
             fun define(environment: Environment){
                 val id = statement.declarations.id.name
                 val const = statement.const
@@ -62,14 +62,11 @@ class Interpreter(private val code : String) {
                     environment.define(id,init,const)
                 }
             }
-            if (environment == null){
-                define(globals)
-            }else{
-                define(environment)
-            }
+            define(environment)
+
         }
-        private fun blockStatement(statement: Statement.BlockStatement){
-            val env = Environment(globals)
+
+        fun blockStatement(statement: Statement.BlockStatement,env: Environment){
             for (body in statement.body){
                 if (body is Statement.ReturnStatement){
                     returnStatement(body)
@@ -78,19 +75,14 @@ class Interpreter(private val code : String) {
             }
         }
         private fun functionStatement(statement: Statement.FunctionDeclaration){
-            try {
-                blockStatement(statement.body)
-            }catch (e : ReturnException){
-                createFunction(statement,Expressions().expressionStatement(Statement.ExpressionStatement(e.expression)))
-            }finally {
-                createFunction(statement)
-            }
+            return createFunction(statement)
         }
         private fun returnStatement(result: Statement.ReturnStatement){
             if (result.argument == null){
                 throw ReturnException(Expression.NullLiteral,"return")
             }else{
-                throw ReturnException(result.argument!!,"return")
+                val a = result.argument as Statement.ExpressionStatement
+                throw ReturnException(a.expression,"return")
             }
         }
 
@@ -99,10 +91,17 @@ class Interpreter(private val code : String) {
     inner class Expressions{
         fun expressionStatement(body : Statement.ExpressionStatement,env: Environment? = null) : Any?{
             return when(val expr = body.expression){
-                is Expression.Identifier -> identifier(expr,env)
+                is Expression.Identifier -> {
+                    if (env == null){
+                        return globals.get(expr.name)
+                    }else{
+
+                        return env.get(expr.name)
+                    }
+                }
                 is Expression.GroupExpression -> group(expr)
                 is Expression.BinaryExpression -> binary(expr)
-                is Expression.CallExpression -> callFunction(expr)
+                is Expression.CallExpression -> callFunction(expr,env)
                 is Expression.NullLiteral,is Expression.StringLiteral,is Expression.BooleanLiteral,is Expression.ObjectLiteral,is Expression.NumericLiteral -> literal(expr)
                 else -> {
                     null
@@ -111,11 +110,11 @@ class Interpreter(private val code : String) {
         }
 
         private fun identifier(id:Expression.Identifier, env: Environment? = null): Any? {
-             if (env == null){
+            if (env == null){
                 return globals.get(id.name)
-             }else{
-                 return env.get(id.name)
-             }
+            }else{
+                return env.get(id.name)
+            }
         }
 
         private fun binary(expr: Expression.BinaryExpression): Number {
@@ -162,24 +161,30 @@ class Interpreter(private val code : String) {
         }
 
 
-        private fun callFunction(expr: Expression.CallExpression): Any? {
+        private fun callFunction(expr: Expression.CallExpression,env: Environment? = null): Any? {
             val params = arrayListOf<Any?>()
-            for (param in expr.arguments){
-                params.add(expressionStatement(Statement.ExpressionStatement(param)))
+            for (param in expr.arguments) {
+                if (env != null){
+                    params.add(expressionStatement(Statement.ExpressionStatement(param),env))
+                }else{
+                    params.add(expressionStatement(Statement.ExpressionStatement(param)))
+                }
             }
-            return runFunction(expr.caller.name,params)
+            return runFunction(expr.caller.name, params)
         }
     }
 
-    private fun createFunction(expr : Statement.FunctionDeclaration,ret : Any? = null): Function {
-        return Function(expr,globals,ret)
+    private fun createFunction(expr : Statement.FunctionDeclaration) {
+        return globals.define(expr.identifier.name, Function(expr,globals,this))
     }
 
     private fun runFunction(function: String,params: List<Any?>): Any? {
         val func = globals.get(function) ?: thrower.RuntimeException("Cannot Found $function")
         if (func is NativeFunction){
             return func.call(params)
-        }else{
+        }else if (func is Function){
+            return func.call(params)
+        } else{
             thrower.RuntimeException("The Variable $function isn`t Function")
         }
         return null

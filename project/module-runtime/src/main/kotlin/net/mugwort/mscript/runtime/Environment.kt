@@ -14,6 +14,10 @@ open class Environment {
         this.env = parent
     }
 
+    fun getValues(): MutableMap<String, Any?> {
+        return values
+    }
+
     fun get(key: String): Any? {
         if (values.keys.contains(key)) {
             return values[key]

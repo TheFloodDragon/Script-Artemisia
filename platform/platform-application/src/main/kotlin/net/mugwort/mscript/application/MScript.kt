@@ -9,7 +9,7 @@ open class MScript {
         @JvmStatic
         fun main(args:Array<String>){
             val code = File(System.getProperty("user.dir") + "/scripts/main.ms").readText()
-            Interpreter(code).printProgram().execute()
+            Interpreter(code).execute()
         }
     }
 }

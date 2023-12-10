@@ -1,4 +1,4 @@
-package net.mugwort.mscript.runtime.function
+package net.mugwort.mscript.compiler.runtime
 
 import net.mugwort.mscript.runtime.ICallable
 import net.mugwort.mscript.runtime.expection.thrower

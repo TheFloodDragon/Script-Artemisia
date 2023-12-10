@@ -8,17 +8,18 @@ import net.mugwort.mscript.runtime.expection.thrower
 import net.mugwort.mscript.runtime.other.Translation
 import net.mugwort.mscript.utils.JsonUtils
 
-class Parser(private val tokens: List<Token>) {
+class Parser(code : String) {
+    private var index = 0
+    private val tokens = Lexer(code).tokens
+    private var currentToken = tokens[index]
+    private var isEnd = currentToken.type == TokenType.EOF || index >= tokens.size
+    private val statementList : MutableList<Statement> = mutableListOf()
+    private val expr = expression()
+    private val state = statement()
 
-    private var currentTokenIndex = 0
-    private var currentToken: Token = tokens[currentTokenIndex]
-    private var isEnd: Boolean = false
-    private val statementList: ArrayList<Statement> = arrayListOf()
-    private val expr: Expressions = Expressions()
     fun parser(): Statement.Program {
-        for (i in tokens){
-            nextToken()
-            Statements().statements()?.let { statementList.add(it) }
+        while (!isEnd){
+            state.get()?.let { statementList.add(it) }
         }
         return Statement.Program(statementList)
     }
@@ -27,60 +28,61 @@ class Parser(private val tokens: List<Token>) {
         return JsonUtils.toJson(parser().toMap())
     }
 
-    private inner class Statements {
-        fun statements(): Statement? {
-            when (currentToken.type) {
-                TokenType.LEFT_BRACE -> return blockStatement()
-                TokenType.CONST, TokenType.VAL -> return varStatement(true)
-                TokenType.RETURN -> return returnStatement()
-                TokenType.VAR -> return varStatement()
-                TokenType.TRY -> return tryStatement()
-                TokenType.SWITCH -> return switchStatement()
-                TokenType.LET -> return functionStatement()
-                TokenType.IMPORT -> return importStatement()
-                TokenType.SEMICOLON -> return Statement.EmptyStatement()
-                TokenType.PRIVATE, TokenType.PUBLIC -> return visitorStatement()
-                TokenType.DO -> return doWhileStatement()
-                TokenType.FOR -> return forStatement()
-                TokenType.WHILE -> return whileStatement()
-                TokenType.CLASS -> return classStatement()
+
+    private inner class statement{
+        fun get() : Statement?{
+            return when(currentToken.type){
+                TokenType.VAR -> varStatement()
+                TokenType.CONST,TokenType.VAL -> varStatement(true)
+                TokenType.LEFT_BRACE -> blockStatement()
+                TokenType.RETURN -> returnStatement()
+                TokenType.WHILE -> whileStatement()
+                TokenType.DO -> doWhileStatement()
+                TokenType.CLASS -> classStatement()
+                TokenType.IF -> ifStatement()
+                TokenType.TRY -> tryStatement()
+                TokenType.PRIVATE,TokenType.PUBLIC -> visitorStatement()
+                TokenType.IMPORT -> importStatement()
+                TokenType.SWITCH -> switchStatement()
+                TokenType.LET -> functionStatement()
                 TokenType.IDENTIFIER -> {
-                    println(tokens[currentTokenIndex].type)
-                    return when (tokens[currentTokenIndex].type) {
+                    when (peek().type) {
                         TokenType.LEFT_PAREN -> {
-                            val ret = Statement.ExpressionStatement(expr.CallExpression())
-                            consume(TokenType.SEMICOLON)
+                            val ret = Statement.ExpressionStatement(expr.callee())
+                            spilt()
                             ret
                         }
-
-                        TokenType.DOT, TokenType.LEFT_SQUARE -> expr.MemberExpression()
-                            ?.let { Statement.ExpressionStatement(it) }
+                        TokenType.DOT, TokenType.LEFT_SQUARE -> Statement.ExpressionStatement(expr.member())
 
                         TokenType.Incrementing, TokenType.Subtraction -> {
-                            Statement.ExpressionStatement(expr.rightUnaryExpression())
+                            expr.unary()?.let { Statement.ExpressionStatement(it) }
                         }
 
                         else -> {
-                            Statement.ExpressionStatement(expr.AssignmentExpression())
+                            if (expr.logical.contains(peek().type)){
+                                Statement.ExpressionStatement(expr.logical(expr.get()))
+                            }else if(expr.binary.contains(peek().type)) {
+                                Statement.ExpressionStatement(expr.binary(expr.get()))
+                            }else{
+                                Statement.ExpressionStatement(expr.assignment())
+                            }
                         }
                     }
                 }
-
-                TokenType.BANG, TokenType.MINUS,TokenType.Incrementing,TokenType.Subtraction -> {
-                    return Statement.ExpressionStatement(expr.leftUnaryExpression())
+                TokenType.MINUS,TokenType.BANG -> expr.unary()?.let { Statement.ExpressionStatement(it) }
+                TokenType.NEWLINE -> {
+                    consume(TokenType.NEWLINE)
+                    return null
                 }
-
-                TokenType.IF -> return ifStatement()
                 else -> {
                     return if (currentToken.type != TokenType.EOF) {
-                        Statement.ExpressionStatement(expr.expression())
+                        Statement.ExpressionStatement(expr.get())
                     } else {
                         null
                     }
                 }
             }
         }
-
         fun paramGetter(): ArrayList<Statement.VariableStatement> {
             val params = ArrayList<Statement.VariableStatement>()
             consume(TokenType.LEFT_PAREN)
@@ -101,27 +103,29 @@ class Parser(private val tokens: List<Token>) {
             consume(TokenType.RIGHT_PAREN)
             return params
         }
-
         fun varStatement(isConst: Boolean = false, isParams: Boolean = false): Statement.VariableStatement {
             fun declaration(): Statement.VariableDeclaration {
-                val id = expr.Identifier()
+                val id = expr.identifier()
                 if (currentToken.type == TokenType.COLON) {
                     if (isConst && !check(TokenType.EQUAL)) {
                         thrower.SyntaxError("the Const Var Must be init!")
                     } else {
                         consume(TokenType.COLON)
-                        val init = expr.typeExpression()
+                        val init = expr.typeGetter()
 
                         if (currentToken.type == TokenType.EQUAL) {
                             consume(TokenType.EQUAL)
-                            val inits = expr.primaryExpression()
+                            if (init.values.first() != currentToken.type && init.values.first() != TokenType.OBJECT){
+                                thrower.SyntaxError("ValueType isn`t equal")
+                            }
+                            val inits = expr.primary()
                             return Statement.VariableDeclaration(id, inits)
                         }
                         return Statement.VariableDeclaration(id, init.keys.first())
                     }
                 }
                 consume(TokenType.EQUAL)
-                val init = expr.expression()
+                val init = expr.get()
                 return Statement.VariableDeclaration(id, init)
             }
             if (!isParams) {
@@ -159,72 +163,53 @@ class Parser(private val tokens: List<Token>) {
             } else if (currentToken.type == TokenType.RIGHT_PAREN) {
                 return Statement.VariableStatement(declaration, isConst)
             } else {
-                consume(TokenType.SEMICOLON, Translation.InvalidEND.get())
+                spilt()
             }
             return Statement.VariableStatement(declaration, isConst)
         }
-
         fun blockStatement(): Statement.BlockStatement {
             consume(TokenType.LEFT_BRACE)
             val statements = ArrayList<Statement>()
             while (currentToken.type != TokenType.RIGHT_BRACE) {
-                statements()?.let { statements.add(it) }
+                get()?.let { statements.add(it) }
             }
             consume(TokenType.RIGHT_BRACE)
             return Statement.BlockStatement(statements)
         }
-
         fun functionStatement(): Statement.FunctionDeclaration {
             consume(TokenType.LET)
-            val id = expr.Identifier()
+            val id = expr.identifier()
             val params = paramGetter()
 
             val body: Statement.BlockStatement = blockStatement()
             return Statement.FunctionDeclaration(id, params, body)
         }
-
         fun returnStatement(): Statement.ReturnStatement {
             consume(TokenType.RETURN)
-            val argument: Expression =
-                when (currentToken.type) {
-                    TokenType.IDENTIFIER -> {
-                        if (tokens[currentTokenIndex].type == TokenType.LEFT_PAREN) {
-                            expr.CallExpression()
-                        } else {
-                            expr.Identifier()
-                        }
-                    }
-
-                    else -> {
-                        expr.expression()
-                    }
-                }
-            if (argument !is Expression.CallExpression) consume(TokenType.SEMICOLON)
+            val argument: Expression = expr.get()
+            spilt()
             return Statement.ReturnStatement(argument)
         }
-
         fun whileStatement(): Statement.WhileStatement {
             consume(TokenType.WHILE)
             consume(TokenType.LEFT_PAREN)
-            val rule = expr.expression()
+            val rule = expr.get()
             consume(TokenType.RIGHT_PAREN)
             val body = blockStatement()
             return Statement.WhileStatement(rule, body)
         }
-
         fun doWhileStatement(): Statement.DoWhileStatement {
             consume(TokenType.DO)
             val body = blockStatement()
             consume(TokenType.WHILE)
             consume(TokenType.LEFT_PAREN)
-            val rule = expr.expression()
+            val rule = expr.get()
             consume(TokenType.RIGHT_PAREN)
             return Statement.DoWhileStatement(body, rule)
         }
-
         fun classStatement(): Statement.ClassDeclaration {
             consume(TokenType.CLASS)
-            val id = expr.Identifier()
+            val id = expr.identifier()
             if (currentToken.type == TokenType.LEFT_PAREN) {
                 val params = paramGetter()
                 val body = blockStatement()
@@ -234,11 +219,10 @@ class Parser(private val tokens: List<Token>) {
 
             return Statement.ClassDeclaration(id, null, body)
         }
-
         fun ifStatement(): Statement.IfStatement {
             consume(TokenType.IF)
             consume(TokenType.LEFT_PAREN)
-            val rules = expr.expression()
+            val rules = expr.get()
             consume(TokenType.RIGHT_PAREN)
             val consequent = blockStatement()
             if (currentToken.type == TokenType.ELSE) {
@@ -253,29 +237,27 @@ class Parser(private val tokens: List<Token>) {
             }
             return Statement.IfStatement(rules, consequent, null)
         }
-
-        fun forStatement(): Statement.ForStatement {
-            consume(TokenType.FOR)
-            consume(TokenType.LEFT_PAREN)
-            val init = expr.expression()
-            consume(TokenType.IN)
-            val rule = expr.expression()
-            consume(TokenType.RIGHT_PAREN)
-            val body = blockStatement()
-            return Statement.ForStatement(init, rule, body)
-        }
-
         fun tryStatement(): Statement.TryStatement {
             consume(TokenType.TRY)
             val body = blockStatement()
-            consume(TokenType.CATCH)
-            consume(TokenType.LEFT_PAREN)
-            val expect = expr.expression()
-            consume(TokenType.RIGHT_PAREN)
-            val catch = blockStatement()
-            return Statement.TryStatement(body, expect, catch)
+            if (currentToken.type == TokenType.FINALLY){
+                consume(TokenType.FINALLY)
+                val finally = blockStatement()
+                return Statement.TryStatement(body,null,null,finally)
+            }else{
+                consume(TokenType.CATCH)
+                consume(TokenType.LEFT_PAREN)
+                val expect = expr.get()
+                consume(TokenType.RIGHT_PAREN)
+                val catch = blockStatement()
+                if (currentToken.type == TokenType.FINALLY){
+                    consume(TokenType.FINALLY)
+                    val finally = blockStatement()
+                    return Statement.TryStatement(body,expect,catch,finally)
+                }
+                return Statement.TryStatement(body, expect, catch)
+            }
         }
-
         fun visitorStatement(): Statement.VisitorStatement? {
             val visitor = when (currentToken.type) {
                 TokenType.PRIVATE -> {
@@ -288,14 +270,14 @@ class Parser(private val tokens: List<Token>) {
                     Statement.VisitorType.PUBLIC
                 }
             }
-            val state = statements()
+            val state = get()
             return state?.let { Statement.VisitorStatement(visitor, it) }
         }
 
         fun importStatement(): Statement.ImportStatement {
             consume(TokenType.IMPORT)
-            val file = expr.expression()
-            consume(TokenType.SEMICOLON)
+            val file = expr.get()
+            spilt()
             return Statement.ImportStatement(file)
         }
 
@@ -304,18 +286,18 @@ class Parser(private val tokens: List<Token>) {
             fun case(): Statement.CaseDeclaration {
                 consume(TokenType.CASE)
                 consume(TokenType.LEFT_PAREN)
-                val rule = expr.expression()
+                val rule = expr.get()
                 consume(TokenType.RIGHT_PAREN)
                 consume(TokenType.COLON)
                 var body: Statement?
                 if (currentToken.type == TokenType.LEFT_BRACE) body = blockStatement() else {
-                    body = statements()
-                    nextToken()
+                    body = get()
+                    advance()
                 }
                 return Statement.CaseDeclaration(rule, body)
             }
             consume(TokenType.LEFT_PAREN)
-            val rule = expr.expression()
+            val rule = expr.get()
             consume(TokenType.RIGHT_PAREN)
             consume(TokenType.LEFT_BRACE)
             val case = ArrayList<Statement.CaseDeclaration>()
@@ -326,10 +308,8 @@ class Parser(private val tokens: List<Token>) {
             return Statement.SwitchStatement(rule, case)
         }
 
-
     }
-
-    private inner class Expressions {
+    private inner class expression{
         val complex = listOf(
             TokenType.PLUS_EQUAL,
             TokenType.MINUS_EQUAL,
@@ -344,6 +324,12 @@ class Parser(private val tokens: List<Token>) {
             TokenType.MODULUS,
             TokenType.SLASH
         )
+        val unary = listOf(
+           TokenType.BANG,
+            TokenType.MINUS,
+            TokenType.Incrementing,
+            TokenType.Subtraction
+        )
         val logical = listOf(
             TokenType.OR,
             TokenType.AND,
@@ -355,8 +341,24 @@ class Parser(private val tokens: List<Token>) {
             TokenType.EQUAL_EQUAL
         )
 
-        fun isBinaryOperator(): Boolean {
-            return binary.contains(currentToken.type)
+        fun get() : Expression{
+            return when(currentToken.type){
+                TokenType.IDENTIFIER -> {
+                    if (check(TokenType.LEFT_PAREN)) return callee()
+                    if (check(TokenType.DOT) || check(TokenType.LEFT_SQUARE)) return member()
+                    identifier()
+                }
+                else ->{
+                    val left = primary()
+                    if (binary.contains(currentToken.type)){
+                        return binary(left)
+                    }
+                    if (logical.contains(currentToken.type)){
+                        return logical(left)
+                    }
+                    return left
+                }
+            }
         }
 
         fun isLogicalOperator(): Boolean {
@@ -375,126 +377,117 @@ class Parser(private val tokens: List<Token>) {
             }
         }
 
-        fun AssignmentExpression(): Expression.AssignmentExpression {
-            val left = expression()
-            val operator = isAssignmentOperator().value
-            nextToken()
-            val right = expression()
-            consume(TokenType.SEMICOLON)
-            return Expression.AssignmentExpression(left, operator, right)
+        fun logical(left : Expression): Expression.LogicalExpression {
+            val operator = currentToken.value
+            advance()
+            val right = primary()
+            return Expression.LogicalExpression(operator, left, right)
         }
 
-        fun MemberExpression(): Expression {
-            val objectExpr = primaryExpression()
+        fun unary(): Expression.UnaryExpression? {
+            if (unary.contains(currentToken.type)){
+                val operator = currentToken.value
+                advance()
+                val right = primary()
+                spilt()
+                return Expression.UnaryExpression(operator, right)
+            }else if (check(TokenType.Subtraction) || check(TokenType.Incrementing)){
+                val operator = peek().value
+                val left = primary()
+                advance()
+                spilt()
+                return Expression.UnaryExpression(operator, left)
+            }
+            return null
+        }
+
+        fun binary(left : Expression): Expression.BinaryExpression {
+            val op = currentToken.value
+            advance()
+            val right = primary()
+            return Expression.BinaryExpression(op,left,right)
+        }
+        fun assignment(): Expression.AssignmentExpression {
+            val left = get()
+            val operator = isAssignmentOperator().value
+            val right = get()
+            spilt()
+            return Expression.AssignmentExpression(left, operator, right)
+        }
+        fun callee(): Expression.CallExpression {
+            val value: ArrayList<Expression> = arrayListOf()
+            val id = identifier()
+            consume(TokenType.LEFT_PAREN)
+            while (currentToken.type != TokenType.RIGHT_PAREN) {
+                if (currentToken.type == TokenType.COMMA) {
+                    consume(currentToken.type)
+                }
+                value.add(get())
+            }
+            consume(TokenType.RIGHT_PAREN)
+            return Expression.CallExpression(id, value)
+        }
+        fun member(): Expression {
+            val objectExpr = primary()
             var expr: Expression = Expression.NullLiteral
             while (currentToken.type == TokenType.DOT || currentToken.type == TokenType.LEFT_SQUARE) {
                 expr = if (currentToken.type == TokenType.DOT) {
                     consume(TokenType.DOT)
-                    val property = expression()
+                    val property = get()
                     Expression.MemberExpression(objectExpr, property, false)
                 } else {
                     consume(TokenType.LEFT_SQUARE)
-                    val property = expression()
+                    val property = get()
                     consume(TokenType.RIGHT_SQUARE)
                     Expression.MemberExpression(objectExpr, property, true)
                 }
             }
             return expr
         }
-
-        fun CallExpression(): Expression.CallExpression {
-            val value: ArrayList<Expression> = arrayListOf()
-            val id = Identifier()
-            consume(TokenType.LEFT_PAREN)
-            while (currentToken.type != TokenType.RIGHT_PAREN) {
-                if (currentToken.type == TokenType.COMMA) {
-                    consume(currentToken.type)
-                }
-                value.add(expression())
-            }
-            consume(TokenType.RIGHT_PAREN)
-            return Expression.CallExpression(id, value)
-        }
-
-
-        fun expression(): Expression {
-
-            when (currentToken.type) {
-                TokenType.MINUS, TokenType.BANG -> {
-                    val operator = currentToken.value
-                    nextToken()
-                    val right = primaryExpression()
-                    return Expression.UnaryExpression(operator, right)
-                }
-
+        fun primary(): Expression {
+            return when (currentToken.type) {
                 TokenType.IDENTIFIER -> {
-                    if (tokens[currentTokenIndex].type == TokenType.LEFT_PAREN) {
-                        return CallExpression()
-                    } else if (tokens[currentTokenIndex].type == TokenType.DOT || tokens[currentTokenIndex].type == TokenType.LEFT_SQUARE) {
-                        return MemberExpression()
-                    }
-                    return Identifier()
+                    return identifier()
+                }
+                TokenType.LEFT_PAREN -> {
+                    consume(TokenType.LEFT_PAREN)
+                    val ret = Expression.GroupExpression(get())
+                    consume(TokenType.RIGHT_PAREN)
+                    ret
                 }
 
-                else -> {
-                    when (tokens[currentTokenIndex].type) {
-                        TokenType.Incrementing, TokenType.Subtraction -> {
-                            val operator = tokens[currentTokenIndex].value
-                            val left = primaryExpression()
-                            nextToken()
-                            return Expression.UnaryExpression(operator, left)
-                        }
-
-                        else -> {
-                            var left = primaryExpression()
-                            while (isBinaryOperator()) {
-                                val operator = currentToken.value
-                                nextToken()
-                                val right = primaryExpression()
-                                left = Expression.BinaryExpression(operator, left, right)
-                            }
-                            while (isLogicalOperator()) {
-                                val operator = currentToken.value
-                                nextToken()
-                                val right = primaryExpression()
-                                left = Expression.LogicalExpression(operator, left, right)
-                            }
-                            return left
-                        }
-                    }
-                }
+                else -> Literal().literal
             }
         }
-
-        fun typeExpression(): MutableMap<Expression, TokenType> {
+        fun typeGetter(): MutableMap<Expression, TokenType> {
             return when (currentToken.type) {
                 TokenType.IDENTIFIER -> {
                     val identifier = Expression.Identifier(currentToken.value)
-                    nextToken()
+                    advance()
                     mutableMapOf(identifier to TokenType.IDENTIFIER)
                 }
 
                 TokenType.NUMBER -> {
                     val number = Expression.NumericLiteral(null)
-                    nextToken()
+                    advance()
                     mutableMapOf(number to TokenType.NUMBER)
                 }
 
                 TokenType.STRING -> {
                     val string = Expression.StringLiteral(null)
-                    nextToken()
+                    advance()
                     mutableMapOf(string to TokenType.STRING)
                 }
 
                 TokenType.BOOLEAN -> {
                     val boolean = Expression.BooleanLiteral(null)
-                    nextToken()
+                    advance()
                     mutableMapOf(boolean to TokenType.BOOLEAN)
                 }
 
                 TokenType.OBJECT -> {
                     val obj = Expression.ObjectLiteral(null)
-                    nextToken()
+                    advance()
                     mutableMapOf(obj to TokenType.OBJECT)
                 }
 
@@ -504,41 +497,9 @@ class Parser(private val tokens: List<Token>) {
                 }
             }
         }
-
-        fun leftUnaryExpression(): Expression.UnaryExpression {
-            val operator = currentToken.value
-            nextToken()
-            val right = primaryExpression()
-            consume(TokenType.SEMICOLON)
-            return Expression.UnaryExpression(operator, right)
-        }
-
-        fun rightUnaryExpression(): Expression.UnaryExpression {
-            val operator = tokens[currentTokenIndex].value
-            val left = primaryExpression()
-            nextToken()
-            consume(TokenType.SEMICOLON)
-            return Expression.UnaryExpression(operator, left)
-        }
-
-        fun Identifier(): Expression.Identifier {
+        fun identifier(): Expression.Identifier {
             return Expression.Identifier(consume(TokenType.IDENTIFIER).value)
         }
-
-        fun primaryExpression(): Expression {
-            return when (currentToken.type) {
-                TokenType.IDENTIFIER -> Identifier()
-                TokenType.LEFT_PAREN -> {
-                    consume(TokenType.LEFT_PAREN)
-                    val ret = Expression.GroupExpression(expression())
-                    consume(TokenType.RIGHT_PAREN)
-                    ret
-                }
-
-                else -> Literal().literal
-            }
-        }
-
     }
 
     private inner class Literal {
@@ -549,6 +510,7 @@ class Parser(private val tokens: List<Token>) {
             TokenType.NULL -> NullLiteral()
             TokenType.OBJECT -> ObjectLiteral()
             else -> {
+                println(currentToken.type)
                 thrower.SyntaxError("Literal: unexpected literal production")
                 Expression.NullLiteral
             }
@@ -583,40 +545,47 @@ class Parser(private val tokens: List<Token>) {
         }
     }
 
-    private fun peek(): Token? {
-        val nextIndex = currentTokenIndex + 1
-        return if (nextIndex < tokens.size) tokens[nextIndex] else null
+    private fun peek(): Token {
+        return if (!isEnd) tokens[index + 1] else currentToken
+    }
+    private fun past() : Token{
+        return tokens[index - 1]
+    }
+    private fun check(type: TokenType) : Boolean{
+        return peek().type == type
     }
 
-    private fun check(token: TokenType): Boolean {
-        return peek()?.type == token
-    }
-
-    private fun nextToken(): Token {
-        currentToken =
-            if (currentTokenIndex < tokens.size || currentToken.type != TokenType.EOF) tokens[currentTokenIndex++] else {
-                isEnd = true
-                if (currentToken.type == TokenType.EOF) isEnd = true
-                currentToken
-            }
+    private fun advance(): Token {
+        index += 1
+        currentToken = if (index < tokens.size) tokens[index] else currentToken
+        if (currentToken.type == TokenType.EOF || index >= tokens.size) isEnd = true
         return currentToken
     }
 
-    private fun consume(token: TokenType, error: String): Token {
-        val ctoken = currentToken
-        if (currentToken.type != token) {
+    private fun consume(tokenType: TokenType, error: String): Token {
+        val token = currentToken
+        if (currentToken.type != tokenType) {
             thrower.SyntaxError(error)
         }
-        nextToken()
-        return ctoken
+        advance()
+        return token
     }
 
-    private fun consume(token: TokenType): Token {
-        val ctoken = currentToken
-        if (!isEnd && ctoken.type != token) {
-            thrower.SyntaxError("Expect Token -> [\"${token.id}\"] but not Found? Just Found [\"${currentToken.value}\"]")
-        }
-        nextToken()
-        return ctoken
+    private fun spilt(){
+        if(currentToken.type != TokenType.NEWLINE && currentToken.type != TokenType.EOF) consume(TokenType.SEMICOLON)
+        else if (currentToken.type != TokenType.SEMICOLON && currentToken.type != TokenType.EOF && currentToken.type != TokenType.NEWLINE) consume(TokenType.SEMICOLON)
+        else if (currentToken.type != TokenType.EOF && currentToken.type != TokenType.NEWLINE) consume(TokenType.SEMICOLON)
+        else if (currentToken.type == TokenType.NEWLINE) consume(TokenType.NEWLINE)
+        else if (currentToken.type == TokenType.SEMICOLON) consume(TokenType.SEMICOLON)
     }
+
+    private fun consume(tokenType: TokenType): Token {
+        val token = currentToken
+        if (currentToken.type != tokenType) {
+            thrower.SyntaxError("Expect Token -> [\"${tokenType.id}\"] but not Found? Just Found [\"${currentToken.value}\"]")
+        }
+        advance()
+        return token
+    }
+
 }
