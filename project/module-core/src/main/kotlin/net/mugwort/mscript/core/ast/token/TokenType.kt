@@ -15,7 +15,7 @@ enum class TokenType(val id: String) {
     SWITCH("switch"),
     CASE("case"),
     VAL("val"),
-    LET("let"),
+    DEF("def"),
     OR("||"),
     TRY("try"),
     CATCH("catch"),

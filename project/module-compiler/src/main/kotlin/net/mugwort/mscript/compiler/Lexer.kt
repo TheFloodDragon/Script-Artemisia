@@ -23,7 +23,7 @@ class Lexer(private var source: String) {
         "this" to TokenType.THIS,
         "super" to TokenType.SUPER,
         "do" to TokenType.DO,
-        "let" to TokenType.LET,
+        "def" to TokenType.DEF,
         "in" to TokenType.IN,
         "return" to TokenType.RETURN,
         "Number" to TokenType.NUMBER,

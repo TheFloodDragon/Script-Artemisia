@@ -44,7 +44,7 @@ class Parser(code : String) {
                 TokenType.PRIVATE,TokenType.PUBLIC -> visitorStatement()
                 TokenType.IMPORT -> importStatement()
                 TokenType.SWITCH -> switchStatement()
-                TokenType.LET -> functionStatement()
+                TokenType.DEF -> functionStatement()
                 TokenType.IDENTIFIER -> {
                     when (peek().type) {
                         TokenType.LEFT_PAREN -> {
@@ -69,7 +69,7 @@ class Parser(code : String) {
                         }
                     }
                 }
-                TokenType.MINUS,TokenType.BANG -> expr.unary()?.let { Statement.ExpressionStatement(it) }
+                TokenType.MINUS,TokenType.BANG,TokenType.Incrementing,TokenType.Subtraction -> expr.unary()?.let { Statement.ExpressionStatement(it) }
                 TokenType.NEWLINE -> {
                     consume(TokenType.NEWLINE)
                     return null
@@ -177,7 +177,7 @@ class Parser(code : String) {
             return Statement.BlockStatement(statements)
         }
         fun functionStatement(): Statement.FunctionDeclaration {
-            consume(TokenType.LET)
+            consume(TokenType.DEF)
             val id = expr.identifier()
             val params = paramGetter()
 
@@ -343,9 +343,20 @@ class Parser(code : String) {
 
         fun get() : Expression{
             return when(currentToken.type){
+                TokenType.MINUS,TokenType.BANG,TokenType.Incrementing,TokenType.Subtraction -> unary()!!
                 TokenType.IDENTIFIER -> {
                     if (check(TokenType.LEFT_PAREN)) return callee()
                     if (check(TokenType.DOT) || check(TokenType.LEFT_SQUARE)) return member()
+                    if (binary.contains(peek().type)) {
+                        val left = primary()
+                        return binary(left)
+                    }else if (logical.contains(peek().type)){
+                        val left = primary()
+                        return logical(left)
+                    }else if (check(TokenType.Incrementing) || check(TokenType.Subtraction))
+                    {
+                        return unary()!!
+                    }
                     identifier()
                 }
                 else ->{
@@ -360,11 +371,6 @@ class Parser(code : String) {
                 }
             }
         }
-
-        fun isLogicalOperator(): Boolean {
-            return logical.contains(currentToken.type)
-        }
-
         fun isAssignmentOperator(): Token {
             if (currentToken.type == TokenType.EQUAL) return consume(TokenType.EQUAL)
             return when (currentToken.type) {

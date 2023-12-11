@@ -81,8 +81,7 @@ class Interpreter(private val code : String) {
             if (result.argument == null){
                 throw ReturnException(Expression.NullLiteral,"return")
             }else{
-                val a = result.argument as Statement.ExpressionStatement
-                throw ReturnException(a.expression,"return")
+                throw ReturnException(result.argument!!,"return")
             }
         }
 
@@ -92,15 +91,10 @@ class Interpreter(private val code : String) {
         fun expressionStatement(body : Statement.ExpressionStatement,env: Environment? = null) : Any?{
             return when(val expr = body.expression){
                 is Expression.Identifier -> {
-                    if (env == null){
-                        return globals.get(expr.name)
-                    }else{
-
-                        return env.get(expr.name)
-                    }
+                    return identifier(expr,env)
                 }
-                is Expression.GroupExpression -> group(expr)
-                is Expression.BinaryExpression -> binary(expr)
+                is Expression.GroupExpression -> group(expr,env)
+                is Expression.BinaryExpression -> binary(expr,env)
                 is Expression.CallExpression -> callFunction(expr,env)
                 is Expression.NullLiteral,is Expression.StringLiteral,is Expression.BooleanLiteral,is Expression.ObjectLiteral,is Expression.NumericLiteral -> literal(expr)
                 else -> {
@@ -117,45 +111,56 @@ class Interpreter(private val code : String) {
             }
         }
 
-        private fun binary(expr: Expression.BinaryExpression): Number {
-            var left = if (expr.left !is Expression.NumericLiteral){
-                expressionStatement(Statement.ExpressionStatement(expr.left))
-            }else{
+        private fun binary(expr: Expression.BinaryExpression,env: Environment?): Any {
+            var left = if (expr.left is Expression.NumericLiteral){
                 (expr.left as Expression.NumericLiteral).value!!
+            }else if (expr.left is Expression.StringLiteral){
+                (expr.left as Expression.StringLiteral).value!!
+            } else{
+                expressionStatement(Statement.ExpressionStatement(expr.left),env)
+
             }
             val operator = expr.operator
-            var right = if (expr.right !is Expression.NumericLiteral){
-                expressionStatement(Statement.ExpressionStatement(expr.right))
-            }else{
+            var right = if (expr.right is Expression.NumericLiteral){
                 (expr.right as Expression.NumericLiteral).value!!
+            }else if (expr.right is Expression.StringLiteral){
+                (expr.right as Expression.StringLiteral).value!!
+            } else{
+                expressionStatement(Statement.ExpressionStatement(expr.right),env)
+
             }
             if (left is Expression.GroupExpression){
-               left = group(left)
+               left = group(left,env)
             }
             if (right is Expression.GroupExpression){
-                right = group(right)
+                right = group(right,env)
             }
 
-            return math(left.toString().toDouble(),operator,right.toString().toDouble())
+
+            return math(left,operator,right)
         }
 
-        private fun group(expr : Expression.GroupExpression): Number? {
+        private fun group(expr : Expression.GroupExpression,env: Environment?): Any? {
             val type = expr.expr
             if (type is Expression.BinaryExpression){
-                return binary(type)
+                return binary(type,env)
             }
             return null
         }
 
-        private fun math(left: Double,op : Any?,right: Double) : Number{
-            return when(op){
-                "+" -> (left + right)
-                "-" -> (left - right)
-                "/" -> (left / right)
-                "%" -> (left % right)
-                "*" -> (left * right)
-                else -> {
-                    return 0
+        private fun math(left: Any?,op : Any?,right: Any?) : Any{
+            if (left is String){
+                return left + right
+            }else{
+                return when(op){
+                    "+" -> (left.toString().toDouble() + right.toString().toDouble())
+                    "-" -> (left.toString().toDouble() - right.toString().toDouble())
+                    "/" -> (left.toString().toDouble() / right.toString().toDouble())
+                    "%" -> (left.toString().toDouble() % right.toString().toDouble())
+                    "*" -> (left.toString().toDouble() * right.toString().toDouble())
+                    else -> {
+                        return 0
+                    }
                 }
             }
         }
