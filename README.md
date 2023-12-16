@@ -434,7 +434,7 @@
 
 
 
-## 构建
+# 构建
 **MacOS** / **Linux**
 ````
     ./gradlew build
@@ -445,7 +445,7 @@
     gradlew.bat buid
 ````
 
-## 开发人员
+# 开发人员
 
 主框架编写 ：艾乐([Mugwort](https://gitee.com/aile123))
 
