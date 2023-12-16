@@ -14,10 +14,4 @@ interface ICallable {
      * */
     fun call(arguments: List<Any?>): Any?
 
-    /**
-     * Bind: 表示将可调用对象绑定到调用站点
-     *  @param side 类型为List<object?>，表示调用站点的对象~
-     *
-     * */
-    fun bind(site: Any?)
 }

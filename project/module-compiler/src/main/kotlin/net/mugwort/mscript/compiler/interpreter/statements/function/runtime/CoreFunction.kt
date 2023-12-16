@@ -1,4 +1,4 @@
-package net.mugwort.mscript.compiler.runtime
+package net.mugwort.mscript.compiler.interpreter.statements.function.runtime
 
 import net.mugwort.mscript.runtime.Environment
 
@@ -15,16 +15,16 @@ class CoreFunction(env: Environment) {
     private fun registry(id: String, func: NativeFunction) {
         map[id] = func
     }
-    private enum class Core(val id: String, val func: NativeFunction){
+    enum class Core(val id: String, val func: NativeFunction){
         PRINTLN(
             "println",
-            NativeFunction(1){_,args ->
+            NativeFunction(1) { args ->
                 println(args[0])
             }
         ),
         PRINT(
         "print",
-            NativeFunction(1){_,args ->
+            NativeFunction(1) { args ->
                 print(args[0])
             }
         )

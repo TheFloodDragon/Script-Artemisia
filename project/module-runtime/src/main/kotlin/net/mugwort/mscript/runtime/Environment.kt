@@ -1,6 +1,7 @@
 package net.mugwort.mscript.runtime
 
 import net.mugwort.mscript.runtime.expection.thrower
+import net.mugwort.mscript.utils.JsonUtils
 
 open class Environment {
     private var env: Environment
@@ -59,4 +60,13 @@ open class Environment {
 
     }
 
+    override fun toString(): String {
+        return JsonUtils.toJson(mapOf("values" to mutableMapOf(
+            "keys" to values.keys,
+            "values" to values.values.toString()
+        ),"const" to mutableMapOf(
+            //"keys" to consts.keys,
+            //"values" to consts.values
+        )))
+    }
 }

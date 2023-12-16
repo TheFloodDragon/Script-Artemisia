@@ -1,15 +1,15 @@
-package net.mugwort.mscript.compiler.runtime
+package net.mugwort.mscript.compiler.interpreter.statements.function.runtime
 
-import net.mugwort.mscript.compiler.Interpreter
+import net.mugwort.mscript.compiler.interpreter.Interpreter
+import net.mugwort.mscript.compiler.interpreter.statements.block.BlockStatement
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
 import net.mugwort.mscript.runtime.Environment
 import net.mugwort.mscript.runtime.ICallable
 import net.mugwort.mscript.runtime.expection.thrower
 
-
-class Function(private val declaration: Statement.FunctionDeclaration,private val parent: Environment,private val interpreter : Interpreter) : ICallable {
-    private var site: Any? = null
+class Function(private val declaration: Statement.FunctionDeclaration, private val parent: Environment, private val interpreter : Interpreter) :
+    ICallable {
     override val paramCount: Int = declaration.params.count()
     override fun call(arguments: List<Any?>): Any? {
         val env = Environment(parent)
@@ -21,28 +21,25 @@ class Function(private val declaration: Statement.FunctionDeclaration,private va
             }
             if (getArgumentType(arguments[i]) != declaration.params[i].declarations.init) thrower.RuntimeException("Type not equals")
             env.define(declaration.params[i].declarations.id.name, arguments[i])
-            //println("${declaration.params[i].declarations.id.name} : ${arguments[i]}")
         }
         try {
-            interpreter.Statements().blockStatement(declaration.body,env)
+            BlockStatement().execute(declaration.body,env)
         }catch (e : Interpreter.ReturnException){
             return interpreter.Expressions().expressionStatement(Statement.ExpressionStatement(e.expression),env)
         }
         return null
     }
-    private fun getArgumentType(argument: Any?) : Expression{
+    private fun getArgumentType(argument: Any?) : Expression {
         return when(argument){
             is Number -> Expression.NumericLiteral(null)
             is String -> Expression.StringLiteral(null)
             is Boolean -> Expression.BooleanLiteral(null)
+            is Expression.Identifier -> Expression.Identifier(argument.name)
             else -> Expression.ObjectLiteral(null)
         }
     }
-    override fun bind(site: Any?) {
-        this.site = site
-    }
 
-    private fun unBind() {
-        this.site = null
+    override fun toString(): String {
+        return "Function"
     }
 }

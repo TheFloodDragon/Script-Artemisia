@@ -1,11 +1,9 @@
-package net.mugwort.mscript.compiler.runtime
+package net.mugwort.mscript.compiler.interpreter.statements.function.runtime
 
 import net.mugwort.mscript.runtime.ICallable
 import net.mugwort.mscript.runtime.expection.thrower
 
-
-typealias Caller = (Any?, List<Any?>) -> Any?
-
+typealias Caller = (List<Any?>) -> Any?
 class NativeFunction(arity: Int, private val caller: Caller) : ICallable {
     private var site: Any? = null
 
@@ -14,17 +12,9 @@ class NativeFunction(arity: Int, private val caller: Caller) : ICallable {
         if (arguments.size > paramCount){
             thrower.RuntimeException("Insufficient parameters!")
         }
-        val site = site
-        unBind()
-        return caller(site, arguments)
+        return caller(arguments)
     }
-
-    override fun bind(site: Any?) {
-        this.site = site
-    }
-
-    private fun unBind() {
-        this.site = null
+    override fun toString(): String {
+        return "NativeFunction"
     }
 }
-

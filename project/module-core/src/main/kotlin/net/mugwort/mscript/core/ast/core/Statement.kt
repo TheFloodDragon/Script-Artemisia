@@ -81,9 +81,9 @@ sealed class Statement {
     data class ImportStatement(val file: Expression) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
-                "ImportStatement" to mutableMapOf(
+                "importStatement" to mutableMapOf(
                     "type" to "ImportStatement",
-                    "import" to file,
+                    "Import" to file.toMap(),
                 )
             )
         }
@@ -166,9 +166,12 @@ sealed class Statement {
         }
     }
 
+
+
     data class FunctionDeclaration(
         val identifier: Expression.Identifier,
         val params: List<VariableStatement>,
+        val returnValue : Expression,
         val body: BlockStatement
     ) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
@@ -176,6 +179,7 @@ sealed class Statement {
                 "FunctionDeclaration" to mutableMapOf(
                     "type" to "FunctionDeclaration",
                     "identifier" to identifier.toMap(),
+                    "returnValue" to returnValue.toMap(),
                     "params" to params.map { it.toMap() },
                     "body" to body.toMap()
                 )

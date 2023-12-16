@@ -44,12 +44,16 @@ class Parser(code : String) {
                 TokenType.PRIVATE,TokenType.PUBLIC -> visitorStatement()
                 TokenType.IMPORT -> importStatement()
                 TokenType.SWITCH -> switchStatement()
-                TokenType.DEF -> functionStatement()
+                TokenType.FN -> functionStatement()
                 TokenType.IDENTIFIER -> {
                     when (peek().type) {
                         TokenType.LEFT_PAREN -> {
-                            val ret = Statement.ExpressionStatement(expr.callee())
-                            spilt()
+                            var ret = Statement.ExpressionStatement(expr.callee())
+                            if (currentToken.type == TokenType.DOT){
+                                ret = Statement.ExpressionStatement(expr.member(ret.expression))
+                                spilt()
+                                return ret
+                            }
                             ret
                         }
                         TokenType.DOT, TokenType.LEFT_SQUARE -> Statement.ExpressionStatement(expr.member())
@@ -177,12 +181,17 @@ class Parser(code : String) {
             return Statement.BlockStatement(statements)
         }
         fun functionStatement(): Statement.FunctionDeclaration {
-            consume(TokenType.DEF)
+            consume(TokenType.FN)
             val id = expr.identifier()
             val params = paramGetter()
-
+            val returnValue = if (currentToken.type == TokenType.COLON){
+                consume(TokenType.COLON)
+                expr.typeGetter().keys.first()
+            }else{
+                Expression.ObjectLiteral(null)
+            }
             val body: Statement.BlockStatement = blockStatement()
-            return Statement.FunctionDeclaration(id, params, body)
+            return Statement.FunctionDeclaration(id, params,returnValue,body)
         }
         fun returnStatement(): Statement.ReturnStatement {
             consume(TokenType.RETURN)
@@ -386,7 +395,7 @@ class Parser(code : String) {
         fun logical(left : Expression): Expression.LogicalExpression {
             val operator = currentToken.value
             advance()
-            val right = primary()
+            val right = get()
             return Expression.LogicalExpression(operator, left, right)
         }
 
@@ -394,12 +403,12 @@ class Parser(code : String) {
             if (unary.contains(currentToken.type)){
                 val operator = currentToken.value
                 advance()
-                val right = primary()
+                val right = get()
                 spilt()
                 return Expression.UnaryExpression(operator, right)
             }else if (check(TokenType.Subtraction) || check(TokenType.Incrementing)){
                 val operator = peek().value
-                val left = primary()
+                val left = get()
                 advance()
                 spilt()
                 return Expression.UnaryExpression(operator, left)
@@ -410,7 +419,7 @@ class Parser(code : String) {
         fun binary(left : Expression): Expression.BinaryExpression {
             val op = currentToken.value
             advance()
-            val right = primary()
+            val right = get()
             return Expression.BinaryExpression(op,left,right)
         }
         fun assignment(): Expression.AssignmentExpression {
@@ -433,8 +442,8 @@ class Parser(code : String) {
             consume(TokenType.RIGHT_PAREN)
             return Expression.CallExpression(id, value)
         }
-        fun member(): Expression {
-            val objectExpr = primary()
+        fun member(expr : Expression? = null): Expression {
+            val objectExpr = expr ?: primary()
             var expr: Expression = Expression.NullLiteral
             while (currentToken.type == TokenType.DOT || currentToken.type == TokenType.LEFT_SQUARE) {
                 expr = if (currentToken.type == TokenType.DOT) {
@@ -496,6 +505,11 @@ class Parser(code : String) {
                     advance()
                     mutableMapOf(obj to TokenType.OBJECT)
                 }
+                TokenType.VOID -> {
+                    val void = Expression.VoidLiteral
+                    advance()
+                    mutableMapOf(void to TokenType.VOID)
+                }
 
                 else -> {
                     thrower.SyntaxError(Translation.InvalidExpression.get())
@@ -515,8 +529,8 @@ class Parser(code : String) {
             TokenType.FALSE, TokenType.TRUE -> BooleanLiteral()
             TokenType.NULL -> NullLiteral()
             TokenType.OBJECT -> ObjectLiteral()
+            TokenType.VOID -> VoidLiteral()
             else -> {
-                println(currentToken.type)
                 thrower.SyntaxError("Literal: unexpected literal production")
                 Expression.NullLiteral
             }
@@ -543,6 +557,11 @@ class Parser(code : String) {
 
         fun ObjectLiteral(): Expression.ObjectLiteral {
             return Expression.ObjectLiteral(consume(currentToken.type).value)
+        }
+
+        fun VoidLiteral(): Expression.VoidLiteral{
+            consume(TokenType.VOID)
+            return Expression.VoidLiteral
         }
 
         fun NullLiteral(): Expression.NullLiteral {

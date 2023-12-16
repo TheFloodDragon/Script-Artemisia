@@ -10,7 +10,7 @@ open class IException(val id : String) {
         @Suppress("UNREACHABLE_CODE")
         fun send(id : String, message : String){
             Logger.fatal("${Translation.ExceptionOf.get()} $id : $message")
-            //throw RuntimeException()
+            throw RuntimeException()
             exitProcess(0)
         }
     }

@@ -1,5 +1,6 @@
 package net.mugwort.mscript.compiler
 
+import net.mugwort.mscript.core.ast.token.Location
 import net.mugwort.mscript.core.ast.token.Token
 import net.mugwort.mscript.core.ast.token.TokenType
 import net.mugwort.mscript.runtime.expection.thrower
@@ -7,10 +8,13 @@ import net.mugwort.mscript.runtime.expection.thrower
 
 class Lexer(private var source: String) {
     var tokens : ArrayList<Token> = ArrayList()
+
     private var start = 0
     private var current = 0
+
     private var line = 1
-    private var column = 1
+    private var column = 0
+
     private val keyWords: MutableMap<String, TokenType> = mutableMapOf(
         "finally" to TokenType.FINALLY,
         "case" to TokenType.CASE,
@@ -23,7 +27,7 @@ class Lexer(private var source: String) {
         "this" to TokenType.THIS,
         "super" to TokenType.SUPER,
         "do" to TokenType.DO,
-        "def" to TokenType.DEF,
+        "fn" to TokenType.FN,
         "in" to TokenType.IN,
         "return" to TokenType.RETURN,
         "Number" to TokenType.NUMBER,
@@ -116,6 +120,8 @@ class Lexer(private var source: String) {
                     }
                 }
                 '\n' -> {
+                    line += 1
+                    column = 0
                     addToken(typeFinder())
                 }
                 ' ', '\t', '\r' -> Unit
@@ -196,9 +202,27 @@ class Lexer(private var source: String) {
 
 
     private fun advance(): Char {
-        column++
-        return source[current++]
+        val char = source[current++]
+        updateLocation(char)
+        return char
     }
+
+
+    private fun updateLocation(char: Char) {
+        if (char == '\n') {
+            line++
+            column = 0
+        } else {
+            column++
+        }
+    }
+
+    private fun getLocation(): Location {
+        val startLocation = Location.Position(line, column)
+        val endLocation = Location.Position(line, column + 1)
+        return Location(startLocation, endLocation)
+    }
+
     private fun isEnd(): Boolean {
         return current >= source.length
     }
@@ -210,7 +234,7 @@ class Lexer(private var source: String) {
         addToken(type,typeFinder().id)
     }
     private fun addToken(type: TokenType, literal:String){
-        tokens.add(Token(type,literal))
+        tokens.add(Token(type,literal,))
     }
     private fun fatal(text:String){
         thrower.RuntimeException(text)

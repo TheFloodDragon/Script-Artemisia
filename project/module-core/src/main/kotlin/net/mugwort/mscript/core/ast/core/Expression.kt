@@ -10,6 +10,14 @@ sealed class Expression {
         }
     }
 
+    data object VoidLiteral : Expression() {
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "VoidLiteral" to mutableMapOf("type" to "VoidLiteral")
+            )
+        }
+    }
+
     data class NumericLiteral(val value: Double?) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
