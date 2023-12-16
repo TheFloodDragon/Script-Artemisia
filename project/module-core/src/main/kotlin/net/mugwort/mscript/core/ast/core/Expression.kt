@@ -81,13 +81,14 @@ sealed class Expression {
         }
     }
 
-    data class UnaryExpression(val operator: String, val argument: Expression) : Expression() {
+    data class UnaryExpression(val operator: String, val argument: Expression,val head : Boolean) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "UnaryExpression" to mutableMapOf(
                     "type" to "UnaryExpression",
                     "operator" to operator,
-                    "argument" to argument.toMap()
+                    "argument" to argument.toMap(),
+                    "head" to head
                 )
             )
         }

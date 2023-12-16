@@ -1,14 +1,6 @@
-class Shell{
-    fn test() : Shell{
-        println("awa")
-        return Shell
-    }
-    fn awa(){
-        println("a")
-        return Shell
-    }
-}
-
 fn main(){
-    Shell.test().awa()
+    var a = 1
+    var b = 5
+
+    println(1 == 2)
 }

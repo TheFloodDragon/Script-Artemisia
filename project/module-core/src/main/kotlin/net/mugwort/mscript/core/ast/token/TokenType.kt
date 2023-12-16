@@ -18,6 +18,7 @@ enum class TokenType(val id: String) {
     FN("fn"),
     OR("||"),
     TRY("try"),
+    EVENT("event"),
     CATCH("catch"),
     FINALLY("finally"),
     IN("in"),

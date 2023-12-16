@@ -1,7 +1,9 @@
-package net.mugwort.mscript.compiler.interpreter.statements.function.runtime
+package net.mugwort.mscript.compiler.interpreter.statements.function.core
 
 import net.mugwort.mscript.compiler.interpreter.Interpreter
+import net.mugwort.mscript.compiler.interpreter.expressions.ExpressionExecutor
 import net.mugwort.mscript.compiler.interpreter.statements.block.BlockStatement
+import net.mugwort.mscript.compiler.interpreter.statements.block.ReturnStatement
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
 import net.mugwort.mscript.runtime.Environment
@@ -23,9 +25,9 @@ class Function(private val declaration: Statement.FunctionDeclaration, private v
             env.define(declaration.params[i].declarations.id.name, arguments[i])
         }
         try {
-            BlockStatement().execute(declaration.body,env)
-        }catch (e : Interpreter.ReturnException){
-            return interpreter.Expressions().expressionStatement(Statement.ExpressionStatement(e.expression),env)
+            BlockStatement(interpreter).execute(declaration.body,env)
+        }catch (e : ReturnStatement.ReturnException){
+            return ExpressionExecutor.executor(e.expression,env,interpreter)
         }
         return null
     }

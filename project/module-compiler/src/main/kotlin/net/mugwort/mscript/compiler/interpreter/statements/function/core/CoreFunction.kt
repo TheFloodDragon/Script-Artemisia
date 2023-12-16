@@ -1,4 +1,4 @@
-package net.mugwort.mscript.compiler.interpreter.statements.function.runtime
+package net.mugwort.mscript.compiler.interpreter.statements.function.core
 
 import net.mugwort.mscript.runtime.Environment
 

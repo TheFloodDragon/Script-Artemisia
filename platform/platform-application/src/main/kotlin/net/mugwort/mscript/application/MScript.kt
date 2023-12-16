@@ -9,8 +9,6 @@ open class MScript {
         @JvmStatic
         fun main(args:Array<String>){
             Interpreter(File(System.getProperty("user.dir") + "/scripts/main.mg")).execute()
-            //Lexer(code).printf()
-
         }
     }
 }

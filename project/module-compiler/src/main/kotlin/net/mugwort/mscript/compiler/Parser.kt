@@ -41,6 +41,7 @@ class Parser(code : String) {
                 TokenType.CLASS -> classStatement()
                 TokenType.IF -> ifStatement()
                 TokenType.TRY -> tryStatement()
+                TokenType.EVENT -> eventStatement()
                 TokenType.PRIVATE,TokenType.PUBLIC -> visitorStatement()
                 TokenType.IMPORT -> importStatement()
                 TokenType.SWITCH -> switchStatement()
@@ -87,6 +88,13 @@ class Parser(code : String) {
                 }
             }
         }
+        fun eventStatement(): Statement.EventStatement {
+            consume(TokenType.EVENT)
+            val id = expr.identifier()
+            val body = blockStatement()
+            return Statement.EventStatement(id,body)
+        }
+
         fun paramGetter(): ArrayList<Statement.VariableStatement> {
             val params = ArrayList<Statement.VariableStatement>()
             consume(TokenType.LEFT_PAREN)
@@ -298,7 +306,7 @@ class Parser(code : String) {
                 val rule = expr.get()
                 consume(TokenType.RIGHT_PAREN)
                 consume(TokenType.COLON)
-                var body: Statement?
+                val body: Statement?
                 if (currentToken.type == TokenType.LEFT_BRACE) body = blockStatement() else {
                     body = get()
                     advance()
@@ -334,14 +342,12 @@ class Parser(code : String) {
             TokenType.SLASH
         )
         val unary = listOf(
-           TokenType.BANG,
+            TokenType.BANG,
             TokenType.MINUS,
             TokenType.Incrementing,
             TokenType.Subtraction
         )
         val logical = listOf(
-            TokenType.OR,
-            TokenType.AND,
             TokenType.LESS_EQUAL,
             TokenType.BANG_EQUAL,
             TokenType.GREATER,
@@ -392,9 +398,14 @@ class Parser(code : String) {
             }
         }
 
-        fun logical(left : Expression): Expression.LogicalExpression {
+        fun logical(left: Expression,unAdvance : Boolean = false): Expression.LogicalExpression {
             val operator = currentToken.value
             advance()
+            if (peek().type == TokenType.OR || peek().type == TokenType.AND) {
+                val right = get()
+                val ret = Expression.LogicalExpression(operator, left, right)
+                return logical(ret)
+            }
             val right = get()
             return Expression.LogicalExpression(operator, left, right)
         }
@@ -405,13 +416,13 @@ class Parser(code : String) {
                 advance()
                 val right = get()
                 spilt()
-                return Expression.UnaryExpression(operator, right)
+                return Expression.UnaryExpression(operator, right,true)
             }else if (check(TokenType.Subtraction) || check(TokenType.Incrementing)){
                 val operator = peek().value
                 val left = get()
                 advance()
                 spilt()
-                return Expression.UnaryExpression(operator, left)
+                return Expression.UnaryExpression(operator, left,false)
             }
             return null
         }
@@ -531,6 +542,7 @@ class Parser(code : String) {
             TokenType.OBJECT -> ObjectLiteral()
             TokenType.VOID -> VoidLiteral()
             else -> {
+                println(currentToken.type)
                 thrower.SyntaxError("Literal: unexpected literal production")
                 Expression.NullLiteral
             }

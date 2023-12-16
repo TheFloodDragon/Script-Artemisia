@@ -166,7 +166,17 @@ sealed class Statement {
         }
     }
 
-
+    data class EventStatement(val id : Expression.Identifier,val body: BlockStatement): Statement(){
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "ReturnStatement" to mutableMapOf(
+                    "type" to "ReturnStatement",
+                    "id" to id.toMap(),
+                    "body" to body.toMap()
+                )
+            )
+        }
+    }
 
     data class FunctionDeclaration(
         val identifier: Expression.Identifier,

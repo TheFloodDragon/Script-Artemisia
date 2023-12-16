@@ -7,10 +7,8 @@ import kotlin.system.exitProcess
 
 open class IException(val id : String) {
     companion object{
-        @Suppress("UNREACHABLE_CODE")
         fun send(id : String, message : String){
             Logger.fatal("${Translation.ExceptionOf.get()} $id : $message")
-            throw RuntimeException()
             exitProcess(0)
         }
     }

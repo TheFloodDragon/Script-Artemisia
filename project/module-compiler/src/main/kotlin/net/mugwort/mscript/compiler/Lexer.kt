@@ -16,6 +16,7 @@ class Lexer(private var source: String) {
     private var column = 0
 
     private val keyWords: MutableMap<String, TokenType> = mutableMapOf(
+        "event" to TokenType.EVENT,
         "finally" to TokenType.FINALLY,
         "case" to TokenType.CASE,
         "switch" to TokenType.SWITCH,

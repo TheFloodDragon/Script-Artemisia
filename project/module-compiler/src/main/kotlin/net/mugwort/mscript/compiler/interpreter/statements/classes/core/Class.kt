@@ -1,4 +1,4 @@
-package net.mugwort.mscript.compiler.interpreter.statements.classes
+package net.mugwort.mscript.compiler.interpreter.statements.classes.core
 
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
@@ -8,7 +8,7 @@ import net.mugwort.mscript.runtime.expection.thrower
 
 class Class(private val declaration : Statement.ClassDeclaration, private val parent: Environment,) : ICallable{
 
-    private val env : Environment = Environment(parent)
+    val env : Environment = Environment(parent)
     override val paramCount: Int
         get() = declaration.params?.size ?: 0
 
