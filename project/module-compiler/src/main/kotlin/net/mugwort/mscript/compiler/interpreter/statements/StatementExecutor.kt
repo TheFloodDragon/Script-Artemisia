@@ -36,6 +36,7 @@ abstract class StatementExecutor {
                 is Statement.VisitorStatement -> TODO()
                 is Statement.WhileStatement -> TODO()
                 is Statement.EventStatement -> TODO()
+                is Statement.ThisStatement -> env
             }
         }
     }

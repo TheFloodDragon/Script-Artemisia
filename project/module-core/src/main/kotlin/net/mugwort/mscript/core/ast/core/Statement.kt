@@ -177,7 +177,15 @@ sealed class Statement {
             )
         }
     }
-
+    data object ThisStatement: Statement(){
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "ThisStatement" to mutableMapOf(
+                    "type" to "ThisStatement",
+                )
+            )
+        }
+    }
     data class FunctionDeclaration(
         val identifier: Expression.Identifier,
         val params: List<VariableStatement>,

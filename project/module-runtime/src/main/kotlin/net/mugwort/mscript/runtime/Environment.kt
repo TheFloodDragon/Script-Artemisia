@@ -3,7 +3,7 @@ package net.mugwort.mscript.runtime
 import net.mugwort.mscript.runtime.expection.thrower
 import net.mugwort.mscript.utils.JsonUtils
 
-open class Environment {
+class Environment {
     private var env: Environment
     private var values: MutableMap<String, Any?> = mutableMapOf()
     private var consts : MutableMap<String,Any?> = mutableMapOf()
@@ -31,7 +31,11 @@ open class Environment {
         }
         return null
     }
-
+    fun defindAll(value : MutableMap<String, Any?>){
+        for (i in value.keys){
+            define(i,value[i])
+        }
+    }
     fun set(key: String, value: Any?) {
         if (values.keys.contains(key)){
             values[key] = value
@@ -46,12 +50,12 @@ open class Environment {
         return
     }
     fun define(key: String, value: Any?, const : Boolean = false){
-        if (values.keys.contains(key)) {
-            thrower.SyntaxError("cannot define variable '$key', it was defined")
-        }
-        if (consts.keys.contains(key)){
-            thrower.SyntaxError("cannot define variable '$key', it was defined")
-        }
+//        if (values.keys.contains(key)) {
+//            thrower.SyntaxError("cannot define variable '$key', it was defined")
+//        }
+//        if (consts.keys.contains(key)){
+//            thrower.SyntaxError("cannot define variable '$key', it was defined")
+//        }
         if (const){
             consts[key] = value
         }else{

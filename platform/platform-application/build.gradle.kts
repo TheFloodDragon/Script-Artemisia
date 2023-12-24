@@ -7,6 +7,7 @@ dependencies {
     shadowModule("module-runtime")
     shadowModule("module-util")
     shadowModule("module-compiler")
+    shadowModule("module-api")
     shadowGson()
 }
 

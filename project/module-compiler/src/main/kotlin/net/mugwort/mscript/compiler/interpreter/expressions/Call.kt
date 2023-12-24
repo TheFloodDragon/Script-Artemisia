@@ -1,11 +1,11 @@
 package net.mugwort.mscript.compiler.interpreter.expressions
 
+import net.mugwort.mscript.api.function.NativeFunction
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.compiler.interpreter.statements.classes.core.Class
 import net.mugwort.mscript.compiler.interpreter.statements.classes.core.NativeClass
+import net.mugwort.mscript.compiler.interpreter.statements.function.Function
 import net.mugwort.mscript.compiler.interpreter.statements.function.FunctionStatement
-import net.mugwort.mscript.compiler.interpreter.statements.function.core.Function
-import net.mugwort.mscript.compiler.interpreter.statements.function.core.NativeFunction
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
 import net.mugwort.mscript.runtime.Environment
@@ -44,13 +44,12 @@ class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() 
             is Class -> {
                 return caller.call(params)
             }
+            is NativeFunction -> {
+                return caller.onCall(params)
+            }
             is NativeClass ->{
                 return caller.call(params)
             }
-            is NativeFunction -> {
-                return caller.call(params)
-            }
-
             is Function -> {
                 return caller.call(params)
             }

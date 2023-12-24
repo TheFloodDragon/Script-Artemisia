@@ -1,4 +1,4 @@
-package net.mugwort.mscript.compiler.interpreter.statements.function.core
+package net.mugwort.mscript.compiler.interpreter.statements.function
 
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.compiler.interpreter.expressions.ExpressionExecutor

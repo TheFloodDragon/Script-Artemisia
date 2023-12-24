@@ -1,27 +1,25 @@
 package net.mugwort.mscript.compiler.interpreter
 
+import net.mugwort.mscript.api.MScript
+import net.mugwort.mscript.api.registries.FunctionRegistry
 import net.mugwort.mscript.compiler.Parser
 import net.mugwort.mscript.compiler.interpreter.expressions.Call
 import net.mugwort.mscript.compiler.interpreter.statements.StatementExecutor
-import net.mugwort.mscript.compiler.interpreter.statements.classes.core.NativeClass
-import net.mugwort.mscript.compiler.interpreter.statements.function.core.CoreFunction
-import net.mugwort.mscript.compiler.interpreter.statements.function.core.NativeFunction
 import net.mugwort.mscript.runtime.Environment
 import java.io.File
 
 
 class Interpreter(val file: File) {
-    var globals: Environment = Environment()
+    val bus = MScript.getBus()
+    var globals : Environment
     private val parser: Parser = Parser(file.readText())
     val program = parser.parser()
     private val programJson = parser.parserJson()
 
     init {
-        CoreFunction(globals)
-        globals.define("printProgram",NativeFunction(0){_ ->
-            printProgram()
-        })
-        globals.define("Console", NativeClass(mutableMapOf("println" to CoreFunction.Core.PRINTLN.func)))
+        FunctionRegistry().register(bus)
+        globals = bus.getEnv()
+        //println(bus.getEnv())
     }
 
     fun execute() {

@@ -2,7 +2,6 @@ package net.mugwort.mscript.compiler.interpreter.statements.function
 
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.compiler.interpreter.statements.StatementExecutor
-import net.mugwort.mscript.compiler.interpreter.statements.function.core.Function
 import net.mugwort.mscript.core.ast.core.Statement
 import net.mugwort.mscript.runtime.Environment
 
