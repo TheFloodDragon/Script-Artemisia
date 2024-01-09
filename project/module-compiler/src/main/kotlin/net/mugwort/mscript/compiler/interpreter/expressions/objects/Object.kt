@@ -1,15 +1,19 @@
 package net.mugwort.mscript.compiler.interpreter.expressions.objects
 
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.types.NativeFunction
+import net.mugwort.mscript.api.Environment
 
 
-class Object(id : Any?) {
-    private val env : Environment = Environment()
+open class Object(val id : Any?) {
+    val env : Environment = Environment()
     init {
-//        env.define("toString",
-//            NativeFunction(0){
-//            id.toString()
-//        })
+        env.define("this",id)
+        env.define("toString",
+            NativeFunction(0){
+                id.toString()
+        })
+        env.define("equals",NativeFunction(1){args ->
+            id?.equals(args)
+        })
     }
-
 }

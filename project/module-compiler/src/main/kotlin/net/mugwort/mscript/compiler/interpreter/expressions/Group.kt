@@ -2,7 +2,7 @@ package net.mugwort.mscript.compiler.interpreter.expressions
 
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.core.ast.core.Expression
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.Environment
 
 class Group(private val interpreter: Interpreter?) : ExpressionExecutor() {
     override val self: ExpressionExecutor

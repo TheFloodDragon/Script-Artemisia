@@ -132,7 +132,6 @@ sealed class Expression {
             )
         }
     }
-
     data class LogicalExpression(val operator: String, val left: Expression, val right: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(

@@ -3,7 +3,7 @@ package net.mugwort.mscript.compiler.interpreter.expressions
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.compiler.interpreter.expressions.runtime.Math
 import net.mugwort.mscript.core.ast.core.Expression
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.Environment
 
 class Binary(private val interpreter: Interpreter?) : ExpressionExecutor(){
     override val self: ExpressionExecutor
@@ -45,9 +45,7 @@ class Binary(private val interpreter: Interpreter?) : ExpressionExecutor(){
         if (right is Expression.GroupExpression) {
             right = Group(interpreter).visit(right, env)
         }
-
-
-        return Math(left, operator, right)
+        return Math(left, operator, right).get()
     }
 
 }

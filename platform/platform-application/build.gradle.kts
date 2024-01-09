@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation("org.fusesource.jansi:jansi:2.1.1")
     shadowModule("module-core")
     shadowModule("module-runtime")
     shadowModule("module-util")

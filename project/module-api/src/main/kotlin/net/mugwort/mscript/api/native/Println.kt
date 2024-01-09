@@ -1,6 +1,6 @@
 package net.mugwort.mscript.api.native
 
-import net.mugwort.mscript.api.function.NativeFunction
+import net.mugwort.mscript.api.types.NativeFunction
 
 class Println : NativeFunction() {
     override var params: Int = 0

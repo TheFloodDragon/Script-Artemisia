@@ -2,7 +2,7 @@ package net.mugwort.mscript.compiler.interpreter.expressions
 
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.core.ast.core.Expression
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.Environment
 import net.mugwort.mscript.runtime.expection.thrower
 
 class Unary(private val interpreter: Interpreter?) : ExpressionExecutor() {

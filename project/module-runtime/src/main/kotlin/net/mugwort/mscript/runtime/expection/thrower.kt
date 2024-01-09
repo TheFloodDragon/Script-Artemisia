@@ -1,6 +1,10 @@
 package net.mugwort.mscript.runtime.expection
 
+import net.mugwort.mscript.core.ast.token.Token
+import net.mugwort.mscript.runtime.Console
 import net.mugwort.mscript.runtime.other.Translation
+import java.io.File
+import kotlin.system.exitProcess
 
 object thrower {
 
@@ -15,4 +19,15 @@ object thrower {
     fun SyntaxError(message:String){
         SyntaxError().send(message)
     }
+    @JvmStatic
+    fun send(msg : String,err:String,file : File,token : Token){
+        Console.err("\n   $err: \n" +
+                "       in File ${file.absoluteFile}\n" +
+                "       line -> ${token.location.line}\n" +
+                "       column -> ${token.location.column}\n" +
+                "       $msg"
+        )
+        exitProcess(0)
+    }
+
 }

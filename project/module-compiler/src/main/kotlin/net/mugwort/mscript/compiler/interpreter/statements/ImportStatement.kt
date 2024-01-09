@@ -1,14 +1,14 @@
 package net.mugwort.mscript.compiler.interpreter.statements
 
+import net.mugwort.mscript.api.Environment
 import net.mugwort.mscript.compiler.Parser
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.runtime.Environment
 import net.mugwort.mscript.runtime.expection.thrower
 import java.io.File
 
-class ImportStatement(private val interpreter: Interpreter?) : StatementExecutor() {
+class ImportStatement(private val interpreter: Interpreter) : StatementExecutor() {
     override val self: StatementExecutor
         get() = this
 
@@ -37,7 +37,7 @@ class ImportStatement(private val interpreter: Interpreter?) : StatementExecutor
         }
 
         fun toImport(path: String) {
-            val parser = Parser(File(path).readText()).parser()
+            val parser = Parser(File(path).readText(),File(path)).parser()
             for (i in parser.body) {
                 executor(i, interpreter?.globals,interpreter)
             }

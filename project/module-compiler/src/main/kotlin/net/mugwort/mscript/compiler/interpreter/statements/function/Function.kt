@@ -1,12 +1,12 @@
 package net.mugwort.mscript.compiler.interpreter.statements.function
 
+import net.mugwort.mscript.api.Environment
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.compiler.interpreter.expressions.ExpressionExecutor
 import net.mugwort.mscript.compiler.interpreter.statements.block.BlockStatement
 import net.mugwort.mscript.compiler.interpreter.statements.block.ReturnStatement
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.runtime.Environment
 import net.mugwort.mscript.runtime.ICallable
 import net.mugwort.mscript.runtime.expection.thrower
 
@@ -21,12 +21,13 @@ class Function(private val declaration: Statement.FunctionDeclaration, private v
             if (arguments.size < size){
                 thrower.RuntimeException("Error! lost some params")
             }
-            if (getArgumentType(arguments[i]) != declaration.params[i].declarations.init) thrower.RuntimeException("Type not equals")
+            if (getArgumentType(arguments[i]) != declaration.params[i].declarations.init) thrower.RuntimeException("UnknownType!")
             env.define(declaration.params[i].declarations.id.name, arguments[i])
         }
         try {
             BlockStatement(interpreter).execute(declaration.body,env)
         }catch (e : ReturnStatement.ReturnException){
+            declaration.returnValue
             return ExpressionExecutor.executor(e.expression,env,interpreter)
         }
         return null
@@ -41,7 +42,4 @@ class Function(private val declaration: Statement.FunctionDeclaration, private v
         }
     }
 
-    override fun toString(): String {
-        return "Function"
-    }
 }

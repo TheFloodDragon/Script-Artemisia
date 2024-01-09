@@ -2,7 +2,7 @@ package net.mugwort.mscript.compiler.interpreter.statements.classes.core
 
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.Environment
 import net.mugwort.mscript.runtime.ICallable
 import net.mugwort.mscript.runtime.expection.thrower
 

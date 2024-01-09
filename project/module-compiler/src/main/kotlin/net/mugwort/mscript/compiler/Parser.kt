@@ -2,13 +2,15 @@ package net.mugwort.mscript.compiler
 
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
+import net.mugwort.mscript.core.ast.token.BigLocation
+import net.mugwort.mscript.core.ast.token.Location
 import net.mugwort.mscript.core.ast.token.Token
 import net.mugwort.mscript.core.ast.token.TokenType
 import net.mugwort.mscript.runtime.expection.thrower
-import net.mugwort.mscript.runtime.other.Translation
 import net.mugwort.mscript.utils.JsonUtils
+import java.io.File
 
-class Parser(code : String) {
+class Parser(code : String,val file : File) {
     private var index = 0
     private val tokens = Lexer(code).tokens
     private var currentToken = tokens[index]
@@ -16,12 +18,16 @@ class Parser(code : String) {
     private val statementList : MutableList<Statement> = mutableListOf()
     private val expr = expression()
     private val state = statement()
+    private var line = currentToken.location.line
+    private var column = currentToken.location.column
+
 
     fun parser(): Statement.Program {
         while (!isEnd){
             state.get()?.let { statementList.add(it) }
         }
-        return Statement.Program(statementList)
+        val end = Location(line + 1,1)
+        return Statement.Program(statementList, BigLocation(Location(1,1),end))
     }
 
     fun parserJson(): String? {
@@ -41,11 +47,13 @@ class Parser(code : String) {
                 TokenType.CLASS -> classStatement()
                 TokenType.IF -> ifStatement()
                 TokenType.TRY -> tryStatement()
+                TokenType.PRIVATE,TokenType.PUBLIC,TokenType.PROTECTED,TokenType.ALREADY -> visitorStatement()
+                TokenType.ENUM -> enumStatement()
                 TokenType.EVENT -> eventStatement()
-                TokenType.PRIVATE,TokenType.PUBLIC -> visitorStatement()
-                TokenType.IMPORT -> importStatement()
+                TokenType.INCLUDE -> importStatement()
                 TokenType.SWITCH -> switchStatement()
-                TokenType.FN -> functionStatement()
+                TokenType.DEF -> functionStatement()
+                TokenType.SEMICOLON -> Statement.EmptyStatement()
                 TokenType.IDENTIFIER -> {
                     when (peek().type) {
                         TokenType.LEFT_PAREN -> {
@@ -88,6 +96,80 @@ class Parser(code : String) {
                 }
             }
         }
+
+
+
+        fun enumStatement(): Statement.EnumStatement {
+            val start = Location(line,column)
+            consume(TokenType.ENUM)
+            val id = expression().identifier()
+            val enums = ArrayList<Expression>()
+            consume(TokenType.LEFT_BRACE)
+            while (currentToken.type != TokenType.RIGHT_BRACE){
+                if (currentToken.type == TokenType.COMMA){
+                    consume(TokenType.COMMA)
+                }
+                when(currentToken.type){
+                    TokenType.IDENTIFIER -> {
+                        if (expr.complex.contains(peek().type) ||  check(TokenType.EQUAL)){
+                            val left = expr.get()
+                            var op = ""
+                            if (!expr.complex.contains(currentToken.type)){
+                                op = expr.isAssignmentOperator().value
+                            }else{
+                                thrower.send("Assignment in Enumerations are only accepted EQUAL","Enumerations Error",file,currentToken)
+                            }
+                            val right = expr.get()
+                            enums.add(Expression.AssignmentExpression(left,op,right))
+                        }else if (!check(TokenType.RIGHT_BRACE) || !check(TokenType.COMMA)){
+                            thrower.send("Enumerations are only accepted Assignment and Identifier","Enumerations Error",file,currentToken)
+                        }else{
+                            enums.add(expr.identifier())
+                        }
+                    }
+                    TokenType.NEWLINE -> {
+                        spilt()
+                    }
+                    else -> {
+                        thrower.send("Enumerations are only accepted Assignment and Identifier","Enumerations Error",file,currentToken)
+                    }
+                }
+                if (currentToken.type == TokenType.RIGHT_BRACE) break
+            }
+            consume(TokenType.RIGHT_BRACE)
+            val end = Location(line,column)
+            return Statement.EnumStatement(id,enums, BigLocation(start,end))
+        }
+
+        fun visitorStatement(): Statement.VisitorStatement {
+            val visitor = when(currentToken.type) {
+                TokenType.PUBLIC -> {
+                    consume(currentToken.type)
+                    Statement.VisitorType.PUBLIC
+                }
+                TokenType.ALREADY -> {
+                    consume(currentToken.type)
+                    Statement.VisitorType.ALREADY
+                }
+                TokenType.PROTECTED -> {
+                    consume(currentToken.type)
+                    Statement.VisitorType.PROTECTED
+                }
+                TokenType.PRIVATE -> {
+                    consume(currentToken.type)
+                    Statement.VisitorType.PRIVATE
+                }
+                else -> {
+                    consume(currentToken.type)
+                    Statement.VisitorType.PUBLIC
+                }
+            }
+            val state = this.get()
+            return Statement.VisitorStatement(visitor,state)
+        }
+
+
+
         fun eventStatement(): Statement.EventStatement {
             consume(TokenType.EVENT)
             val id = expr.identifier()
@@ -116,19 +198,22 @@ class Parser(code : String) {
             return params
         }
         fun varStatement(isConst: Boolean = false, isParams: Boolean = false): Statement.VariableStatement {
+            val start = Location(line, column)
             fun declaration(): Statement.VariableDeclaration {
                 val id = expr.identifier()
                 if (currentToken.type == TokenType.COLON) {
+                    consume(TokenType.COLON)
                     if (isConst && !check(TokenType.EQUAL)) {
-                        thrower.SyntaxError("the Const Var Must be init!")
+                        println(currentToken)
+                        thrower.send("Constants must be initialized","NotInitializedError",file,currentToken)
                     } else {
-                        consume(TokenType.COLON)
+
                         val init = expr.typeGetter()
 
                         if (currentToken.type == TokenType.EQUAL) {
                             consume(TokenType.EQUAL)
                             if (init.values.first() != currentToken.type && init.values.first() != TokenType.OBJECT){
-                                thrower.SyntaxError("ValueType isn`t equal")
+                                thrower.send("Non-specified type","SpecifiedTypeError",file,currentToken)
                             }
                             val inits = expr.primary()
                             return Statement.VariableDeclaration(id, inits)
@@ -136,7 +221,12 @@ class Parser(code : String) {
                         return Statement.VariableDeclaration(id, init.keys.first())
                     }
                 }
-                consume(TokenType.EQUAL)
+                if (isConst && currentToken.type != TokenType.EQUAL){
+                    thrower.send("Constants must be initialized","NotInitializedError",file,currentToken)
+                }else{
+                    consume(TokenType.EQUAL)
+                }
+
                 val init = expr.get()
                 return Statement.VariableDeclaration(id, init)
             }
@@ -173,11 +263,13 @@ class Parser(code : String) {
             if (currentToken.type == TokenType.COMMA && isParams) {
                 consume(TokenType.COMMA)
             } else if (currentToken.type == TokenType.RIGHT_PAREN) {
-                return Statement.VariableStatement(declaration, isConst)
+                val end = Location(line, column - 1)
+                return Statement.VariableStatement(declaration, isConst, BigLocation(start,end))
             } else {
                 spilt()
             }
-            return Statement.VariableStatement(declaration, isConst)
+            val end = Location(line, column - 1)
+            return Statement.VariableStatement(declaration, isConst,BigLocation(start,end))
         }
         fun blockStatement(): Statement.BlockStatement {
             consume(TokenType.LEFT_BRACE)
@@ -189,7 +281,7 @@ class Parser(code : String) {
             return Statement.BlockStatement(statements)
         }
         fun functionStatement(): Statement.FunctionDeclaration {
-            consume(TokenType.FN)
+            consume(TokenType.DEF)
             val id = expr.identifier()
             val params = paramGetter()
             val returnValue = if (currentToken.type == TokenType.COLON){
@@ -240,6 +332,7 @@ class Parser(code : String) {
             consume(TokenType.IF)
             consume(TokenType.LEFT_PAREN)
             val rules = expr.get()
+
             consume(TokenType.RIGHT_PAREN)
             val consequent = blockStatement()
             if (currentToken.type == TokenType.ELSE) {
@@ -275,24 +368,9 @@ class Parser(code : String) {
                 return Statement.TryStatement(body, expect, catch)
             }
         }
-        fun visitorStatement(): Statement.VisitorStatement? {
-            val visitor = when (currentToken.type) {
-                TokenType.PRIVATE -> {
-                    consume(TokenType.PRIVATE)
-                    Statement.VisitorType.PRIVATE
-                }
-
-                else -> {
-                    consume(TokenType.PUBLIC)
-                    Statement.VisitorType.PUBLIC
-                }
-            }
-            val state = get()
-            return state?.let { Statement.VisitorStatement(visitor, it) }
-        }
 
         fun importStatement(): Statement.ImportStatement {
-            consume(TokenType.IMPORT)
+            consume(TokenType.INCLUDE)
             val file = expr.get()
             spilt()
             return Statement.ImportStatement(file)
@@ -360,8 +438,27 @@ class Parser(code : String) {
             return when(currentToken.type){
                 TokenType.MINUS,TokenType.BANG,TokenType.Incrementing,TokenType.Subtraction -> unary()!!
                 TokenType.IDENTIFIER -> {
-                    if (check(TokenType.LEFT_PAREN)) return callee()
-                    if (check(TokenType.DOT) || check(TokenType.LEFT_SQUARE)) return member()
+
+                    if (check(TokenType.LEFT_PAREN)) {
+                        val left = callee()
+                        if (binary.contains(currentToken.type)){
+                            return binary(left)
+                        }
+                        if (logical.contains(currentToken.type)){
+                            return logical(left)
+                        }
+                        return left
+                    }
+                    if (check(TokenType.DOT) || check(TokenType.LEFT_SQUARE)) {
+                        val left =  member()
+                        if (binary.contains(currentToken.type)){
+                            return binary(left)
+                        }
+                        if (logical.contains(currentToken.type)){
+                            return logical(left)
+                        }
+                        return left
+                    }
                     if (binary.contains(peek().type)) {
                         val left = primary()
                         return binary(left)
@@ -375,6 +472,9 @@ class Parser(code : String) {
                     identifier()
                 }
                 else ->{
+                    if (check(TokenType.DOT) || check(TokenType.LEFT_SQUARE)){
+                        return member()
+                    }
                     val left = primary()
                     if (binary.contains(currentToken.type)){
                         return binary(left)
@@ -386,6 +486,9 @@ class Parser(code : String) {
                 }
             }
         }
+        fun getLogical(){
+
+        }
         fun isAssignmentOperator(): Token {
             if (currentToken.type == TokenType.EQUAL) return consume(TokenType.EQUAL)
             return when (currentToken.type) {
@@ -396,6 +499,7 @@ class Parser(code : String) {
                 TokenType.MODULUS_EQUAL -> consume(complex[4])
                 else -> consume(TokenType.EQUAL)
             }
+
         }
 
         fun logical(left: Expression,unAdvance : Boolean = false): Expression.LogicalExpression {
@@ -453,11 +557,11 @@ class Parser(code : String) {
             consume(TokenType.RIGHT_PAREN)
             return Expression.CallExpression(id, value)
         }
-        fun member(expr : Expression? = null): Expression {
-            val objectExpr = expr ?: primary()
-            var expr: Expression = Expression.NullLiteral
+        fun member(expr: Expression? = null): Expression {
+            var objectExpr = expr ?: primary()
+
             while (currentToken.type == TokenType.DOT || currentToken.type == TokenType.LEFT_SQUARE) {
-                expr = if (currentToken.type == TokenType.DOT) {
+                objectExpr = if (currentToken.type == TokenType.DOT) {
                     consume(TokenType.DOT)
                     val property = get()
                     Expression.MemberExpression(objectExpr, property, false)
@@ -468,7 +572,8 @@ class Parser(code : String) {
                     Expression.MemberExpression(objectExpr, property, true)
                 }
             }
-            return expr
+
+            return objectExpr
         }
         fun primary(): Expression {
             return when (currentToken.type) {
@@ -481,7 +586,10 @@ class Parser(code : String) {
                     consume(TokenType.RIGHT_PAREN)
                     ret
                 }
-
+//                TokenType.DOT -> {
+//                    currentToken = tokens[index - 1]
+//                    return member()
+//                }
                 else -> Literal().literal
             }
         }
@@ -523,7 +631,7 @@ class Parser(code : String) {
                 }
 
                 else -> {
-                    thrower.SyntaxError(Translation.InvalidExpression.get())
+                    thrower.send("Unknown Type ['${currentToken.value}']","InvalidExpression",file,currentToken)
                     mutableMapOf(Expression.NullLiteral to TokenType.NULL)
                 }
             }
@@ -533,7 +641,7 @@ class Parser(code : String) {
         }
     }
 
-    private inner class Literal {
+    inner class Literal {
         val literal: Expression = when (currentToken.type) {
             TokenType.NUMBER -> NumericLiteral()
             TokenType.STRING -> StringLiteral()
@@ -542,11 +650,13 @@ class Parser(code : String) {
             TokenType.OBJECT -> ObjectLiteral()
             TokenType.VOID -> VoidLiteral()
             else -> {
-                println(currentToken.type)
-                thrower.SyntaxError("Literal: unexpected literal production")
+                thrower.send("Unexpected literal production ['${currentToken.value}']","LiteralError",file,currentToken)
                 Expression.NullLiteral
             }
         }
+
+
+
         val isLiteral: Boolean =
             currentToken.type == TokenType.NUMBER ||
                     currentToken.type == TokenType.STRING ||
@@ -564,6 +674,7 @@ class Parser(code : String) {
         }
 
         fun StringLiteral(): Expression.StringLiteral {
+
             return Expression.StringLiteral(consume(TokenType.STRING).value)
         }
 
@@ -595,6 +706,8 @@ class Parser(code : String) {
     private fun advance(): Token {
         index += 1
         currentToken = if (index < tokens.size) tokens[index] else currentToken
+        line = currentToken.location.line
+        column = currentToken.location.column
         if (currentToken.type == TokenType.EOF || index >= tokens.size) isEnd = true
         return currentToken
     }
@@ -616,10 +729,14 @@ class Parser(code : String) {
         else if (currentToken.type == TokenType.SEMICOLON) consume(TokenType.SEMICOLON)
     }
 
+
+
     private fun consume(tokenType: TokenType): Token {
         val token = currentToken
         if (currentToken.type != tokenType) {
-            thrower.SyntaxError("Expect Token -> [\"${tokenType.id}\"] but not Found? Just Found [\"${currentToken.value}\"]")
+            thrower.send("Expect Token ['${tokenType.id}'] but is ['${token.type.id}']","TokenNotFound",file,token)
+
+            //thrower.SyntaxError("Expect Token -> [\"${tokenType.id}\"] but not Found? Just Found [\"${currentToken.value}\"]")
         }
         advance()
         return token

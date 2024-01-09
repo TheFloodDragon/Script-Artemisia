@@ -1,25 +1,24 @@
 package net.mugwort.mscript.compiler.interpreter
 
+import net.mugwort.mscript.api.Environment
 import net.mugwort.mscript.api.MScript
 import net.mugwort.mscript.api.registries.FunctionRegistry
 import net.mugwort.mscript.compiler.Parser
 import net.mugwort.mscript.compiler.interpreter.expressions.Call
 import net.mugwort.mscript.compiler.interpreter.statements.StatementExecutor
-import net.mugwort.mscript.runtime.Environment
 import java.io.File
 
 
 class Interpreter(val file: File) {
     val bus = MScript.getBus()
     var globals : Environment
-    private val parser: Parser = Parser(file.readText())
+    private val parser: Parser = Parser(file.readText(),file)
     val program = parser.parser()
     private val programJson = parser.parserJson()
 
     init {
         FunctionRegistry().register(bus)
         globals = bus.getEnv()
-        //println(bus.getEnv())
     }
 
     fun execute() {

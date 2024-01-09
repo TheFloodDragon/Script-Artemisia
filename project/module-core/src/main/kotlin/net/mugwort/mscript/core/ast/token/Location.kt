@@ -1,18 +1,15 @@
 package net.mugwort.mscript.core.ast.token
 
-import net.mugwort.mscript.core.util.baseJson
-
 class Location(
-    var start : Position,
-    var end : Position
+    var line : Int,
+    var column : Int
 ) {
-    class Position(var line : Int, var column : Int){
-        override fun toString(): String {
-            return baseJson.toJson(mapOf("line" to line,"column" to column))
-        }
+
+    fun toMap(): Map<String, Int> {
+        return mapOf("line" to line, "column" to column)
     }
 
     override fun toString(): String {
-        return baseJson.toJson(mapOf("start" to start,"end" to end))
+        return mapOf("line" to line, "column" to column).toString()
     }
- }
+}

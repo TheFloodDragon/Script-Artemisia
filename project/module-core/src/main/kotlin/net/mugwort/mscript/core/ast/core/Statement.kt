@@ -1,11 +1,14 @@
 package net.mugwort.mscript.core.ast.core
 
+import net.mugwort.mscript.core.ast.token.BigLocation
+
 sealed class Statement {
-    data class Program(val body: List<Statement>) : Statement() {
+    data class Program(val body: List<Statement>,val location: BigLocation) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "Program" to mutableMapOf(
                     "type" to "program",
+                    "location" to location.toMap(),
                     "body" to body.map { it.toMap() }
                 )
             )
@@ -53,11 +56,12 @@ sealed class Statement {
         }
     }
 
-    data class VariableStatement(val declarations: VariableDeclaration, val const: Boolean) : Statement() {
+    data class VariableStatement(val declarations: VariableDeclaration, val const: Boolean,val location: BigLocation) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "VariableStatement" to mutableMapOf(
                     "type" to "VariableStatement",
+                    "location" to location.toMap(),
                     "const" to const,
                     "declarations" to declarations.toMap()
                 )
@@ -89,17 +93,6 @@ sealed class Statement {
         }
     }
 
-    data class VisitorStatement(val visitor: VisitorType, val state: Statement) : Statement() {
-        override fun toMap(): MutableMap<Any?, Any?> {
-            return mutableMapOf(
-                "VisitorStatement" to mutableMapOf(
-                    "type" to "VisitorStatement",
-                    "visitor" to visitor,
-                    "statement" to state.toMap(),
-                )
-            )
-        }
-    }
 
     data class TryStatement(val body: BlockStatement, val exception: Expression? = null, val catch: BlockStatement? = null,val finally : BlockStatement? = null) :
         Statement() {
@@ -128,6 +121,30 @@ sealed class Statement {
             )
         }
     }
+    data class VisitorStatement(val type: VisitorType, val state: Statement?) : Statement() {
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "VisitorStatement" to mutableMapOf(
+                    "type" to "VisitorStatement",
+                    "visitor" to type.id,
+                    "statement" to state?.toMap(),
+                )
+            )
+        }
+    }
+    data class EnumStatement(val id: Expression.Identifier,val enums : List<Expression>,val location: BigLocation) : Statement() {
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "EnumerationStatement" to mutableMapOf(
+                    "type" to "EnumerationStatement",
+                    "location" to location.toMap(),
+                    "id" to id.toMap(),
+                    "enum" to enums.map { it.toMap() },
+                )
+            )
+        }
+    }
+
 
     data class WhileStatement(val rule: Expression, val body: Statement) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
@@ -177,15 +194,7 @@ sealed class Statement {
             )
         }
     }
-    data object ThisStatement: Statement(){
-        override fun toMap(): MutableMap<Any?, Any?> {
-            return mutableMapOf(
-                "ThisStatement" to mutableMapOf(
-                    "type" to "ThisStatement",
-                )
-            )
-        }
-    }
+
     data class FunctionDeclaration(
         val identifier: Expression.Identifier,
         val params: List<VariableStatement>,
@@ -247,12 +256,15 @@ sealed class Statement {
         }
     }
 
-    enum class VisitorType {
-        PUBLIC,
-        PRIVATE
+
+    abstract fun toMap(): MutableMap<Any?, Any?>
+    enum class VisitorType(val id: String){
+        PUBLIC("public"),
+        PRIVATE("private"),
+        PROTECTED("protected"),
+        ALREADY("already")
     }
 
 
-    abstract fun toMap(): MutableMap<Any?, Any?>
 
 }

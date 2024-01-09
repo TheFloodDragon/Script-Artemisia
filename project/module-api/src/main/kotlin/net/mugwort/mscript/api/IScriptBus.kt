@@ -1,7 +1,5 @@
 package net.mugwort.mscript.api
 
-import net.mugwort.mscript.runtime.Environment
-
 
 class IScriptBus {
     private var env = Environment()
@@ -14,7 +12,11 @@ class IScriptBus {
         return this
     }
     fun mergeEnv(env: Environment): IScriptBus {
-        this.env.defindAll(env.getValues())
+
+        this.env.defineAll(env.getValue())
+        this.env.defineAll(env.getConst())
+        this.env.defineAll(env.getFunction())
+
         return this
     }
     fun getBus(): IScriptBus {

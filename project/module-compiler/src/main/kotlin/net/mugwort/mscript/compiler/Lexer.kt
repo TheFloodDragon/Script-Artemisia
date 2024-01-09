@@ -13,22 +13,20 @@ class Lexer(private var source: String) {
     private var current = 0
 
     private var line = 1
-    private var column = 0
+    private var column = 1
 
     private val keyWords: MutableMap<String, TokenType> = mutableMapOf(
         "event" to TokenType.EVENT,
         "finally" to TokenType.FINALLY,
         "case" to TokenType.CASE,
         "switch" to TokenType.SWITCH,
-        "public" to TokenType.PUBLIC,
-        "private" to TokenType.PRIVATE,
         "try" to TokenType.TRY,
         "catch" to TokenType.CATCH,
         "val" to TokenType.VAL,
         "this" to TokenType.THIS,
         "super" to TokenType.SUPER,
         "do" to TokenType.DO,
-        "fn" to TokenType.FN,
+        "def" to TokenType.DEF,
         "in" to TokenType.IN,
         "return" to TokenType.RETURN,
         "Number" to TokenType.NUMBER,
@@ -45,19 +43,25 @@ class Lexer(private var source: String) {
         "for" to TokenType.FOR,
         "if" to TokenType.IF,
         "const" to TokenType.CONST,
-        "import" to TokenType.IMPORT,
+        "include" to TokenType.INCLUDE,
         "null" to TokenType.NULL,
         "while" to TokenType.WHILE,
         "true" to TokenType.TRUE,
         "var" to TokenType.VAR,
+        "enum" to TokenType.ENUM,
+        /*  Visitor  */
+        "public" to TokenType.PUBLIC,
+        "private" to TokenType.PRIVATE,
+        "protected" to TokenType.PROTECTED,
+        "already" to TokenType.ALREADY,
+
     )
 
     init {
         synchronized(this){
             current = start
             scanToken()
-            tokens.add(Token(TokenType.EOF, ""))
-
+            tokens.add(Token(TokenType.EOF, "", Location(line,column)))
         }
     }
     private fun scanToken(){
@@ -69,29 +73,28 @@ class Lexer(private var source: String) {
                 '+' -> addToken(if (match('=')) typeFinder() else if(match('+')) typeFinder() else typeFinder())
                 '*' -> addToken(if (match('=')) typeFinder() else typeFinder())
                 '/' -> {
-                    if (match('=')){
+                    if (match('/')){
+                        if (match('*')) {
+                            while (!isEnd()) {
+                                if (look() == '*' && lookNext() == '/') {
+                                    advance()
+                                    advance()
+                                    break
+                                }
+                                if (look() == '\n') {
+                                    line++
+                                    column = 0
+                                }
+                                advance()
+                            }
+                        }else{
+                            while (look() != '\n' && !isEnd()) {
+                                advance()
+                            }
+                        }
+                    }else if (match('=')){
                         addToken(typeFinder())
                     } else addToken(typeFinder())
-                }
-                '#' -> {
-                    if (match('*')) {
-                        while (!isEnd()) {
-                            if (look() == '*' && lookNext() == '#') {
-                                advance()
-                                advance()
-                                break
-                            }
-                            if (look() == '\n') {
-                                line++
-                                column = 0
-                            }
-                            advance()
-                        }
-                    }else{
-                        while (look() != '\n' && !isEnd()) {
-                            advance()
-                        }
-                    }
                 }
                 '%' -> addToken(if (match('=')) typeFinder() else typeFinder())
                 '!' -> addToken(if (match('=')) typeFinder() else typeFinder())
@@ -203,26 +206,9 @@ class Lexer(private var source: String) {
 
 
     private fun advance(): Char {
-        val char = source[current++]
-        updateLocation(char)
-        return char
+        return source[current++]
     }
 
-
-    private fun updateLocation(char: Char) {
-        if (char == '\n') {
-            line++
-            column = 0
-        } else {
-            column++
-        }
-    }
-
-    private fun getLocation(): Location {
-        val startLocation = Location.Position(line, column)
-        val endLocation = Location.Position(line, column + 1)
-        return Location(startLocation, endLocation)
-    }
 
     private fun isEnd(): Boolean {
         return current >= source.length
@@ -235,7 +221,8 @@ class Lexer(private var source: String) {
         addToken(type,typeFinder().id)
     }
     private fun addToken(type: TokenType, literal:String){
-        tokens.add(Token(type,literal,))
+        tokens.add(Token(type,literal, Location(line,column)))
+        column += 1
     }
     private fun fatal(text:String){
         thrower.RuntimeException(text)

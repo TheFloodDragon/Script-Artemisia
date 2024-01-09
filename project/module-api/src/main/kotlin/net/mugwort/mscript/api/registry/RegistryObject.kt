@@ -1,6 +1,6 @@
 package net.mugwort.mscript.api.registry
 
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.Environment
 
 class RegistryObject {
     private var key : String? = null
@@ -17,8 +17,14 @@ class RegistryObject {
     }
 
 
-    fun registry(key : String,value : Any) : RegistryObject{
-        env?.define(key,value)
+    fun registry(key : String,value : Any,isFunction : Boolean) : RegistryObject{
+
+        if (isFunction){
+            env?.define(key,value,false,true)
+        }else{
+            env?.define(key,value)
+        }
+        //println(env)
         return RegistryObject(key,value,env)
     }
     fun getId(): String? {

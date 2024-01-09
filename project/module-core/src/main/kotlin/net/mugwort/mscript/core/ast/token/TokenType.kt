@@ -7,16 +7,10 @@ enum class TokenType(val id: String) {
     // Keywords
     CLASS("class"),
     CONST("const"),
-
-
-    PUBLIC("public"),
-    PRIVATE("private"),
-
     SWITCH("switch"),
     CASE("case"),
     VAL("val"),
-    FN("fn"),
-    OR("||"),
+    DEF("def"),
     TRY("try"),
     EVENT("event"),
     CATCH("catch"),
@@ -29,13 +23,23 @@ enum class TokenType(val id: String) {
     VAR("var"),
     FOR("for"),
     IF("if"),
-    IMPORT("import"),
+    INCLUDE("include"),
     NULL("null"),
     WHILE("while"),
     TRUE("true"),
+    RETURN("return"),
+    ENUM("enum"),
+
+
+    //VISITOR
+    PUBLIC("public"),
+    PRIVATE("private"),
+    PROTECTED("protected"),
+    ALREADY("already"),
+
 
     // Types
-    RETURN("return"),
+
     IDENTIFIER("identifier"),
     NUMBER("number"),
     STRING("string"),
@@ -54,6 +58,7 @@ enum class TokenType(val id: String) {
     STAR_EQUAL("*="),
     SLASH_EQUAL("/="),
     MODULUS_EQUAL("%="),
+    OR("||"),
     MODULUS("%"),
     LEFT_PAREN("("),
     RIGHT_PAREN(")"),

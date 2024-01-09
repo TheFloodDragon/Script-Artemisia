@@ -3,7 +3,7 @@ package net.mugwort.mscript.compiler.interpreter.statements
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.compiler.interpreter.expressions.ExpressionExecutor
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.Environment
 
 class VariableStatement(private val interpreter: Interpreter?) : StatementExecutor() {
     override val self: StatementExecutor

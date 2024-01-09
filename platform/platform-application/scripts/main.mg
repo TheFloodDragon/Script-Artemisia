@@ -1,1 +1,1 @@
-test()
+println("awa".toString())

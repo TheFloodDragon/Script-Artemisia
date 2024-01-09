@@ -1,9 +1,9 @@
 package net.mugwort.mscript.compiler.interpreter.statements.block
 
+import net.mugwort.mscript.api.Environment
 import net.mugwort.mscript.compiler.interpreter.statements.StatementExecutor
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.runtime.Environment
 
 class ReturnStatement : StatementExecutor() {
     override val self: StatementExecutor = this

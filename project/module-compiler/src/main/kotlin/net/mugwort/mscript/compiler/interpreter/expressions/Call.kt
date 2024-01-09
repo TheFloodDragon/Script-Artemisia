@@ -1,6 +1,7 @@
 package net.mugwort.mscript.compiler.interpreter.expressions
 
-import net.mugwort.mscript.api.function.NativeFunction
+import net.mugwort.mscript.api.Environment
+import net.mugwort.mscript.api.types.NativeFunction
 import net.mugwort.mscript.compiler.interpreter.Interpreter
 import net.mugwort.mscript.compiler.interpreter.statements.classes.core.Class
 import net.mugwort.mscript.compiler.interpreter.statements.classes.core.NativeClass
@@ -8,7 +9,6 @@ import net.mugwort.mscript.compiler.interpreter.statements.function.Function
 import net.mugwort.mscript.compiler.interpreter.statements.function.FunctionStatement
 import net.mugwort.mscript.core.ast.core.Expression
 import net.mugwort.mscript.core.ast.core.Statement
-import net.mugwort.mscript.runtime.Environment
 import net.mugwort.mscript.runtime.expection.thrower
 
 class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() {
@@ -19,11 +19,23 @@ class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() 
         val params = arrayListOf<Any?>()
         for (param in expr.arguments) {
             if (env != null) {
-                params.add(executor(param, env,interpreter))
+                val arg = executor(param, env,interpreter)
+                if (arg is Environment){
+                    params.add(arg.get("this"))
+                }else{
+                    params.add(arg)
+                }
+
             } else {
-                params.add(executor(param,null,interpreter))
+                val arg = executor(param,null,interpreter)
+                if (arg is Environment){
+                    params.add(arg.get("this"))
+                }else{
+                    params.add(arg)
+                }
             }
         }
+
         return caller(expr.caller.name, params, env)
     }
 
@@ -33,13 +45,14 @@ class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() 
                 if (statement is Statement.FunctionDeclaration) {
                     if (statement.identifier.name == calls) {
                         if (env?.get(calls) == null) {
-                           FunctionStatement(interpreter).newFunction(statement, env)
+                            FunctionStatement(interpreter).newFunction(statement, env)
                         }
                     }
                 }
             }
         }
-        val caller = env?.get(calls) ?: thrower.RuntimeException("Cannot Found $calls")
+
+        val caller = env?.get(calls) ?: interpreter?.globals?.get(calls) ?:thrower.RuntimeException("Cannot Found $calls")
         when (caller) {
             is Class -> {
                 return caller.call(params)

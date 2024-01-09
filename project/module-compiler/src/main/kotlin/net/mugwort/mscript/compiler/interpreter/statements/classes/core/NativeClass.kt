@@ -1,7 +1,7 @@
 package net.mugwort.mscript.compiler.interpreter.statements.classes.core
 
-import net.mugwort.mscript.api.function.NativeFunction
-import net.mugwort.mscript.runtime.Environment
+import net.mugwort.mscript.api.types.NativeFunction
+import net.mugwort.mscript.api.Environment
 import net.mugwort.mscript.runtime.ICallable
 import net.mugwort.mscript.runtime.expection.thrower
 

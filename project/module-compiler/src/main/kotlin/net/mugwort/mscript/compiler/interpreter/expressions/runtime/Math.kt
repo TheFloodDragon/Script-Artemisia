@@ -1,7 +1,7 @@
 package net.mugwort.mscript.compiler.interpreter.expressions.runtime
 
 class Math(private val left: Any?, private val op: Any?, private val right: Any?) {
-    private fun get(): Any {
+    fun get(): Any {
         if (left is String) {
             return left + right
         } else {

@@ -2,7 +2,7 @@ package net.mugwort.mscript.application
 
 import net.mugwort.mscript.api.IScriptBus
 import net.mugwort.mscript.api.MScript
-import net.mugwort.mscript.api.function.NativeFunction
+import net.mugwort.mscript.api.types.NativeFunction
 import net.mugwort.mscript.api.registry.DeferredRegister
 
 class testRegister {
