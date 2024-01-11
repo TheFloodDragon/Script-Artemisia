@@ -3,9 +3,9 @@ package net.mugwort.artemisia.compiler.interpreter
 import net.mugwort.artemisia.api.Environment
 import net.mugwort.artemisia.api.MScript
 import net.mugwort.artemisia.api.registries.FunctionRegistry
-import net.mugwort.mscript.compiler.Parser
-import net.mugwort.mscript.compiler.interpreter.expressions.Call
-import net.mugwort.mscript.compiler.interpreter.statements.StatementExecutor
+import net.mugwort.artemisia.compiler.Parser
+import net.mugwort.artemisia.compiler.interpreter.expressions.Call
+import net.mugwort.artemisia.compiler.interpreter.statements.StatementExecutor
 import java.io.File
 
 

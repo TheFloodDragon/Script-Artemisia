@@ -1,6 +1,6 @@
 package net.mugwort.artemisia.compiler.interpreter.expressions
 
-import net.mugwort.mscript.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.api.Environment
 

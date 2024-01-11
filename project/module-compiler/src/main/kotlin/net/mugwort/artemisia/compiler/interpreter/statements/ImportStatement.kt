@@ -1,11 +1,12 @@
 package net.mugwort.artemisia.compiler.interpreter.statements
 
 import net.mugwort.artemisia.api.Environment
-import net.mugwort.mscript.compiler.Parser
-import net.mugwort.mscript.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.Parser
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
 import net.mugwort.artemisia.runtime.expection.thrower
+
 import java.io.File
 
 class ImportStatement(private val interpreter: Interpreter) : StatementExecutor() {

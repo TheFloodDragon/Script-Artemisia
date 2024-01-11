@@ -1,7 +1,7 @@
 package net.mugwort.artemisia.compiler.interpreter.statements.block
 
 import net.mugwort.artemisia.api.Environment
-import net.mugwort.mscript.compiler.interpreter.statements.StatementExecutor
+import net.mugwort.artemisia.compiler.interpreter.statements.StatementExecutor
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
 

@@ -1,7 +1,7 @@
 package net.mugwort.artemisia.compiler.interpreter.expressions
 
 import net.mugwort.artemisia.api.Environment
-import net.mugwort.mscript.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.runtime.expection.thrower
 
@@ -9,7 +9,7 @@ class Logical(private val interpreter: Interpreter?) : ExpressionExecutor(){
     override val self: ExpressionExecutor
         get() = this
 
-    override fun visit(body: Expression, env: Environment?): Any? {
+    override fun visit(body: Expression, env: Environment?): Any {
         val logical = body as Expression.LogicalExpression
         val operator = logical.operator
 

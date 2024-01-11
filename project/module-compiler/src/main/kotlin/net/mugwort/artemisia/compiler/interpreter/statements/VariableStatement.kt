@@ -1,9 +1,11 @@
 package net.mugwort.artemisia.compiler.interpreter.statements
 
-import net.mugwort.mscript.compiler.interpreter.Interpreter
-import net.mugwort.mscript.compiler.interpreter.expressions.ExpressionExecutor
-import net.mugwort.artemisia.core.ast.core.Statement
 import net.mugwort.artemisia.api.Environment
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.interpreter.expressions.ExpressionExecutor
+import net.mugwort.artemisia.core.ast.core.Statement
+import net.mugwort.artemisia.core.ast.token.BigLocation
+import net.mugwort.artemisia.core.ast.token.Location
 
 class VariableStatement(private val interpreter: Interpreter?) : StatementExecutor() {
     override val self: StatementExecutor
@@ -16,7 +18,7 @@ class VariableStatement(private val interpreter: Interpreter?) : StatementExecut
             val const = statement.const
             val init = statement.declarations.init?.let {
                 Statement.ExpressionStatement(
-                    it
+                    it, BigLocation(Location(1,1), Location(1,1))
                 )
             }?.let { ExpressionExecutor.executor(it.expression,env,interpreter) }
             if (const) {

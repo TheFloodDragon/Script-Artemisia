@@ -12,7 +12,7 @@ import java.io.File
 
 class Parser(code : String,val file : File) {
     private var index = 0
-    private val tokens = net.mugwort.artemisia.compiler.Lexer(code).tokens
+    private val tokens = Lexer(code).tokens
     private var currentToken = tokens[index]
     private var isEnd = currentToken.type == TokenType.EOF || index >= tokens.size
     private val statementList : MutableList<Statement> = mutableListOf()
@@ -30,7 +30,7 @@ class Parser(code : String,val file : File) {
         return Statement.Program(statementList, BigLocation(Location(1,1),end))
     }
 
-    fun parserJson(): String? {
+    fun parserJson(): String {
         return JsonUtils.toJson(parser().toMap())
     }
 

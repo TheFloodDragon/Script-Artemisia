@@ -1,7 +1,7 @@
 package net.mugwort.artemisia.compiler.interpreter.statements.classes
 
-import net.mugwort.mscript.compiler.interpreter.statements.StatementExecutor
-import net.mugwort.mscript.compiler.interpreter.statements.classes.core.Class
+import net.mugwort.artemisia.compiler.interpreter.statements.StatementExecutor
+import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.Class
 import net.mugwort.artemisia.core.ast.core.Statement
 import net.mugwort.artemisia.api.Environment
 

@@ -190,7 +190,7 @@ class Lexer(private var source: String) {
         return char in '0'..'9'
     }
     private fun isString(char: Char): Boolean{
-        return char in 'A'..'Z' || char in 'a'..'z' || char == '_';
+        return char in 'A'..'Z' || char in 'a'..'z' || char == '_'
     }
     private fun look(): Char {
         return if (isEnd()) '\u0000' else source[current]

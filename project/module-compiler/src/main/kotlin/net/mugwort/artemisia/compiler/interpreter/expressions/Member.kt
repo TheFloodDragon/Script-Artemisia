@@ -1,10 +1,10 @@
 package net.mugwort.artemisia.compiler.interpreter.expressions
 
 import net.mugwort.artemisia.api.Environment
-import net.mugwort.mscript.compiler.interpreter.Interpreter
-import net.mugwort.mscript.compiler.interpreter.expressions.runtime.Literal
-import net.mugwort.mscript.compiler.interpreter.statements.classes.core.Class
-import net.mugwort.mscript.compiler.interpreter.statements.classes.core.NativeClass
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.interpreter.expressions.runtime.Literal
+import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.NativeClass
+import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.Class
 import net.mugwort.artemisia.core.ast.core.Expression
 
 class Member(private val interpreter: Interpreter?) : ExpressionExecutor() {
@@ -42,7 +42,7 @@ class Member(private val interpreter: Interpreter?) : ExpressionExecutor() {
                 else -> {
                     val get = executor(objectExpression, env, interpreter)
                     when (get) {
-                        is NativeClass  -> {
+                        is NativeClass -> {
                             val classEnv = get.call(listOf()) as? Environment
                             return executor(member.property, classEnv, interpreter)
                         }

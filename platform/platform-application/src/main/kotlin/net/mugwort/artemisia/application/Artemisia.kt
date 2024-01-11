@@ -29,7 +29,7 @@ open class Artemisia {
             println("")
 
             val builder = ArrayList<String>()
-            var code = builder.joinToString("\n");
+            var code = builder.joinToString("\n")
             while (true){
                 val input = Console.input()
                 if (input?.lowercase() == "#run"){

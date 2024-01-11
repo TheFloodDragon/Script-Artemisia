@@ -11,7 +11,7 @@ class NativeClass(private val functions:MutableMap<String, NativeFunction>) : IC
     override val paramCount: Int
         get() = 0
 
-    override fun call(arguments: List<Any?>): Any? {
+    override fun call(arguments: List<Any?>): Any {
         if (arguments.size > paramCount){
             thrower.RuntimeException("Insufficient parameters!")
         }

@@ -1,10 +1,10 @@
 package net.mugwort.artemisia.compiler.interpreter.statements.function
 
 import net.mugwort.artemisia.api.Environment
-import net.mugwort.mscript.compiler.interpreter.Interpreter
-import net.mugwort.mscript.compiler.interpreter.expressions.ExpressionExecutor
-import net.mugwort.mscript.compiler.interpreter.statements.block.BlockStatement
-import net.mugwort.mscript.compiler.interpreter.statements.block.ReturnStatement
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.interpreter.expressions.ExpressionExecutor
+import net.mugwort.artemisia.compiler.interpreter.statements.block.BlockStatement
+import net.mugwort.artemisia.compiler.interpreter.statements.block.ReturnStatement
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
 import net.mugwort.artemisia.runtime.ICallable

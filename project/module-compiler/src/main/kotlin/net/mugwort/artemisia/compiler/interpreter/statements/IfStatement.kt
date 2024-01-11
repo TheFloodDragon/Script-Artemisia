@@ -1,8 +1,8 @@
 package net.mugwort.artemisia.compiler.interpreter.statements
 
 import net.mugwort.artemisia.api.Environment
-import net.mugwort.mscript.compiler.interpreter.Interpreter
-import net.mugwort.mscript.compiler.interpreter.expressions.ExpressionExecutor
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.interpreter.expressions.ExpressionExecutor
 import net.mugwort.artemisia.core.ast.core.Statement
 
 class IfStatement(private val interpreter: Interpreter) : StatementExecutor() {

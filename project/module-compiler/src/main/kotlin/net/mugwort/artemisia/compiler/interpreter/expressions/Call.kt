@@ -2,11 +2,11 @@ package net.mugwort.artemisia.compiler.interpreter.expressions
 
 import net.mugwort.artemisia.api.Environment
 import net.mugwort.artemisia.api.types.NativeFunction
-import net.mugwort.mscript.compiler.interpreter.Interpreter
-import net.mugwort.mscript.compiler.interpreter.statements.classes.core.Class
-import net.mugwort.mscript.compiler.interpreter.statements.classes.core.NativeClass
-import net.mugwort.mscript.compiler.interpreter.statements.function.Function
-import net.mugwort.mscript.compiler.interpreter.statements.function.FunctionStatement
+import net.mugwort.artemisia.compiler.interpreter.Interpreter
+import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.Class
+import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.NativeClass
+import net.mugwort.artemisia.compiler.interpreter.statements.function.Function
+import net.mugwort.artemisia.compiler.interpreter.statements.function.FunctionStatement
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
 import net.mugwort.artemisia.runtime.expection.thrower
@@ -52,7 +52,7 @@ class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() 
             }
         }
 
-        val caller = env?.get(calls) ?: interpreter?.globals?.get(calls) ?: thrower.RuntimeException("Cannot Found $calls")
+        val caller = env?.get(calls) ?: interpreter?.globals?.get(calls)
         when (caller) {
             is Class -> {
                 return caller.call(params)

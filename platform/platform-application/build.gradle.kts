@@ -13,7 +13,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("${group}.application.MScript")
+    mainClass.set("${group}.application.Artemisia")
 }
 
 tasks {

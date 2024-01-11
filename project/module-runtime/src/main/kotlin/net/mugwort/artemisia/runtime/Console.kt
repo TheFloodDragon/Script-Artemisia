@@ -27,7 +27,7 @@ object Console {
     }
 
     fun format(content: String, colour : Ansi.Color) : Ansi {
-        return Ansi.ansi().fg(colour).a(content);
+        return Ansi.ansi().fg(colour).a(content)
 
     }
 
