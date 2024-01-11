@@ -1,4 +1,4 @@
-rootProject.name = "MScript"
+rootProject.name = "Artemisia"
 
 apply("platform")
 apply("project")

@@ -1,6 +1,6 @@
-const val rootName = "MScript"
-const val rootGroup = "net.mugwort.mscript"
-const val rootVersion = "0.0.1-DEV"
+const val rootName = "Artemisia"
+const val rootGroup = "net.mugwort.artemisia"
+const val rootVersion = "0.3.5-DEV"
 
 const val kotlinVersion = "1.9.21"
 const val shadowJarVersion = "8.1.1"
