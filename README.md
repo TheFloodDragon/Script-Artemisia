@@ -1,13 +1,12 @@
-# MScript
+# Artemisia
 
 #### 一个轻量化的脚本框架
 
 # 前言
 
-## · 什么是MScript?
+## · 什么是Artemisia?
 
-> MScript原名: Mugwort Script 是一个轻量化解析型动态语言
->
+
 > 项目于2023年11月8日开始编写
 >
 > 当前基于Kotlin
