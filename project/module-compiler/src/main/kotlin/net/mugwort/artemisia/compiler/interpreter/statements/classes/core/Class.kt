@@ -4,7 +4,7 @@ import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
 import net.mugwort.artemisia.api.Environment
 import net.mugwort.artemisia.runtime.ICallable
-import net.mugwort.artemisia.runtime.expection.thrower
+import net.mugwort.artemisia.api.expection.thrower
 
 class Class(private val declaration : Statement.ClassDeclaration, private val parent: Environment,) : ICallable {
 

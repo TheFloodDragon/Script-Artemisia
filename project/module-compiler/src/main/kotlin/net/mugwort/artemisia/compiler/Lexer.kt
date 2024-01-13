@@ -3,7 +3,7 @@ package net.mugwort.artemisia.compiler
 import net.mugwort.artemisia.core.ast.token.Location
 import net.mugwort.artemisia.core.ast.token.Token
 import net.mugwort.artemisia.core.ast.token.TokenType
-import net.mugwort.artemisia.runtime.expection.thrower
+import net.mugwort.artemisia.api.expection.thrower
 
 
 class Lexer(private var source: String) {
@@ -181,8 +181,10 @@ class Lexer(private var source: String) {
         val str = source.substring(start, current)
         val key = keyWords[str]
         if (key != null){
+            column += str.length
             addToken(key)
         }else{
+            column += str.length
             addToken(TokenType.IDENTIFIER,source.substring(start, current))
         }
     }

@@ -3,8 +3,8 @@ package net.mugwort.artemisia.compiler.interpreter.expressions
 import net.mugwort.artemisia.api.Environment
 import net.mugwort.artemisia.compiler.interpreter.Interpreter
 import net.mugwort.artemisia.compiler.interpreter.expressions.runtime.Literal
-import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.NativeClass
 import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.Class
+import net.mugwort.artemisia.compiler.interpreter.statements.classes.core.NativeClass
 import net.mugwort.artemisia.core.ast.core.Expression
 
 class Member(private val interpreter: Interpreter?) : ExpressionExecutor() {
@@ -26,11 +26,13 @@ class Member(private val interpreter: Interpreter?) : ExpressionExecutor() {
                     for (lie in objectExpression.arguments) {
                         args.add(Literal(lie).get())
                     }
-                    return Call(interpreter).caller(objectExpression.caller.name, args, env)
+                    return Call(interpreter).caller(objectExpression, args, env)
                 }
 
                 is Expression.MemberExpression,is Expression.Identifier  ->{
-                    val envs = literal(executor(member.objectExpression,env,interpreter))
+
+                    val envs = executor(member.objectExpression,env,interpreter) as Environment
+
                     return executor(member.property,envs,interpreter)
                 }
 

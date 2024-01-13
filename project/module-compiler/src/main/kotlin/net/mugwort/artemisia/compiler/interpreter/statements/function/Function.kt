@@ -1,6 +1,7 @@
 package net.mugwort.artemisia.compiler.interpreter.statements.function
 
 import net.mugwort.artemisia.api.Environment
+import net.mugwort.artemisia.api.expection.thrower
 import net.mugwort.artemisia.compiler.interpreter.Interpreter
 import net.mugwort.artemisia.compiler.interpreter.expressions.ExpressionExecutor
 import net.mugwort.artemisia.compiler.interpreter.statements.block.BlockStatement
@@ -8,7 +9,6 @@ import net.mugwort.artemisia.compiler.interpreter.statements.block.ReturnStateme
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
 import net.mugwort.artemisia.runtime.ICallable
-import net.mugwort.artemisia.runtime.expection.thrower
 
 class Function(private val declaration: Statement.FunctionDeclaration, private val parent: Environment, private val interpreter : Interpreter) :
     ICallable {
@@ -25,7 +25,7 @@ class Function(private val declaration: Statement.FunctionDeclaration, private v
             env.define(declaration.params[i].declarations.id.name, arguments[i])
         }
         try {
-            BlockStatement(interpreter).execute(declaration.body,env)
+            declaration.body?.let { BlockStatement(interpreter).execute(it,env) }
         }catch (e : ReturnStatement.ReturnException){
             declaration.returnValue
             return ExpressionExecutor.executor(e.expression,env,interpreter)

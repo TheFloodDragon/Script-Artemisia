@@ -1,0 +1,14 @@
+{
+  "main" : "net.mugwort.artemisia.stdlib.Stdlib",
+  "name": "stdlib",
+  "version": "1.0",
+  "author": "Mugwort",
+  "dependencies": [
+    {
+      "id": "Artemisia",
+      "version" : ">= 0.3"
+    }
+  ],
+  "description": "Artemisia Stdlib"
+
+}

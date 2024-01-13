@@ -1,7 +1,10 @@
 package net.mugwort.artemisia.api
 
+import net.mugwort.artemisia.api.module.Module
+
 
 class IScriptBus {
+    private var map : MutableMap<String,Environment> = mutableMapOf()
     private var env = Environment()
 
     fun getEnv(): Environment {
@@ -11,6 +14,15 @@ class IScriptBus {
         this.env = environment
         return this
     }
+    fun registerModule(module: Module){
+        val id = module.id
+        val env = module.ModuleEnv()
+        map[id] = env
+    }
+    fun getRegister(id : String): Environment? {
+        return map[id]
+    }
+
     fun mergeEnv(env: Environment): IScriptBus {
 
         this.env.defineAll(env.getValue())

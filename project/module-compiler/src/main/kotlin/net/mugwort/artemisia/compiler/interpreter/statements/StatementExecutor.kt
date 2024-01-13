@@ -7,7 +7,7 @@ import net.mugwort.artemisia.compiler.interpreter.statements.block.BlockStatemen
 import net.mugwort.artemisia.compiler.interpreter.statements.classes.ClassStatement
 import net.mugwort.artemisia.compiler.interpreter.statements.function.FunctionStatement
 import net.mugwort.artemisia.core.ast.core.Statement
-import net.mugwort.artemisia.runtime.Console
+import net.mugwort.artemisia.api.Console
 
 abstract class StatementExecutor {
 

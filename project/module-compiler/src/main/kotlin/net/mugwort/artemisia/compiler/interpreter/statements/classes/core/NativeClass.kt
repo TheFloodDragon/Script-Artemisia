@@ -3,7 +3,7 @@ package net.mugwort.artemisia.compiler.interpreter.statements.classes.core
 import net.mugwort.artemisia.api.types.NativeFunction
 import net.mugwort.artemisia.api.Environment
 import net.mugwort.artemisia.runtime.ICallable
-import net.mugwort.artemisia.runtime.expection.thrower
+import net.mugwort.artemisia.api.expection.thrower
 
 class NativeClass(private val functions:MutableMap<String, NativeFunction>) : ICallable {
     private val env : Environment = Environment()

@@ -1,5 +1,7 @@
 package net.mugwort.artemisia.core.ast.core
 
+import net.mugwort.artemisia.core.ast.token.BigLocation
+
 
 sealed class Expression {
     data class Identifier(val name: String) : Expression() {
@@ -108,11 +110,12 @@ sealed class Expression {
         }
     }
 
-    data class CallExpression(val caller: Identifier, val arguments: List<Expression>) : Expression() {
+    data class CallExpression(val caller: Identifier, val arguments: List<Expression>,val location: BigLocation) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "CallExpression" to mutableMapOf(
                     "type" to "CallExpression",
+                    "location" to location.toMap(),
                     "caller" to caller.toMap(),
                     "arguments" to arguments.map { it.toMap() }
                 )

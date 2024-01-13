@@ -1,6 +1,6 @@
-package net.mugwort.artemisia.runtime.expection
+package net.mugwort.artemisia.api.expection
 
-import net.mugwort.artemisia.runtime.Console
+import net.mugwort.artemisia.api.Console
 import net.mugwort.artemisia.runtime.other.Translation
 import kotlin.system.exitProcess
 

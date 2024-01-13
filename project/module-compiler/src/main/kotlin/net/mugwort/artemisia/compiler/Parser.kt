@@ -6,7 +6,8 @@ import net.mugwort.artemisia.core.ast.token.BigLocation
 import net.mugwort.artemisia.core.ast.token.Location
 import net.mugwort.artemisia.core.ast.token.Token
 import net.mugwort.artemisia.core.ast.token.TokenType
-import net.mugwort.artemisia.runtime.expection.thrower
+import net.mugwort.artemisia.runtime.encrypt.Encryptor
+import net.mugwort.artemisia.api.expection.thrower
 import net.mugwort.artemisia.utils.JsonUtils
 import java.io.File
 
@@ -24,6 +25,10 @@ class Parser(code : String,val file : File) {
 
     fun parser(): Statement.Program {
         while (!isEnd){
+            if (thrower.endProcess){
+                val end = Location(line + 1,1)
+                return Statement.Program(statementList, BigLocation(Location(1,1),end))
+            }
             state.get()?.let { statementList.add(it) }
         }
         val end = Location(line + 1,1)
@@ -33,7 +38,11 @@ class Parser(code : String,val file : File) {
     fun parserJson(): String {
         return JsonUtils.toJson(parser().toMap())
     }
-
+    fun printEncode(){
+        for (i in Encryptor(parser()).encode()){
+            println(i)
+        }
+    }
 
     private inner class statement{
         fun get() : Statement?{
@@ -131,12 +140,12 @@ class Parser(code : String,val file : File) {
                             if (!expr.complex.contains(currentToken.type)){
                                 op = expr.isAssignmentOperator().value
                             }else{
-                                thrower.send("Assignment in Enumerations are only accepted EQUAL","Enumerations Error",file,currentToken)
+                                thrower.send("Assignment in Enumerations are only accepted EQUAL","Enumerations Error",file,BigLocation(currentToken.location,currentToken.location))
                             }
                             val right = expr.get()
                             enums.add(Expression.AssignmentExpression(left,op,right))
                         }else if (!check(TokenType.RIGHT_BRACE) || !check(TokenType.COMMA)){
-                            thrower.send("Enumerations are only accepted Assignment and Identifier","Enumerations Error",file,currentToken)
+                            thrower.send("Enumerations are only accepted Assignment and Identifier","Enumerations Error",file,BigLocation(currentToken.location,currentToken.location))
                         }else{
                             enums.add(expr.identifier())
                         }
@@ -145,7 +154,7 @@ class Parser(code : String,val file : File) {
                         spilt()
                     }
                     else -> {
-                        thrower.send("Enumerations are only accepted Assignment and Identifier","Enumerations Error",file,currentToken)
+                        thrower.send("Enumerations are only accepted Assignment and Identifier","Enumerations Error",file,BigLocation(currentToken.location,currentToken.location))
                     }
                 }
                 if (currentToken.type == TokenType.RIGHT_BRACE) break
@@ -223,7 +232,7 @@ class Parser(code : String,val file : File) {
                     consume(TokenType.COLON)
                     if (isConst && !check(TokenType.EQUAL)) {
                         println(currentToken)
-                        thrower.send("Constants must be initialized","NotInitializedError",file,currentToken)
+                        thrower.send("Constants must be initialized","NotInitializedError",file,BigLocation(currentToken.location,currentToken.location))
                     } else {
 
                         val init = expr.typeGetter()
@@ -231,7 +240,7 @@ class Parser(code : String,val file : File) {
                         if (currentToken.type == TokenType.EQUAL) {
                             consume(TokenType.EQUAL)
                             if (init.values.first() != currentToken.type && init.values.first() != TokenType.OBJECT){
-                                thrower.send("Non-specified type","SpecifiedTypeError",file,currentToken)
+                                thrower.send("Non-specified type","SpecifiedTypeError",file,BigLocation(currentToken.location,currentToken.location))
                             }
                             val inits = expr.primary()
                             return Statement.VariableDeclaration(id, inits)
@@ -240,7 +249,7 @@ class Parser(code : String,val file : File) {
                     }
                 }
                 if (isConst && currentToken.type != TokenType.EQUAL){
-                    thrower.send("Constants must be initialized","NotInitializedError",file,currentToken)
+                    thrower.send("Constants must be initialized","NotInitializedError",file,BigLocation(currentToken.location,currentToken.location))
                 }else{
                     consume(TokenType.EQUAL)
                 }
@@ -311,9 +320,13 @@ class Parser(code : String,val file : File) {
             }else{
                 Expression.ObjectLiteral(null)
             }
-            val body: Statement.BlockStatement = blockStatement()
+            if (currentToken.type == TokenType.LEFT_BRACE){
+                val body: Statement.BlockStatement = blockStatement()
+                val end = getEnd()
+                return Statement.FunctionDeclaration(id, params,returnValue,body, BigLocation(start,end))
+            }
             val end = getEnd()
-            return Statement.FunctionDeclaration(id, params,returnValue,body, BigLocation(start,end))
+            return Statement.FunctionDeclaration(id, params,returnValue,null, BigLocation(start,end))
         }
         fun returnStatement(): Statement.ReturnStatement {
             val start = Location(line,column)
@@ -589,6 +602,7 @@ class Parser(code : String,val file : File) {
             return Expression.AssignmentExpression(left, operator, right)
         }
         fun callee(): Expression.CallExpression {
+            val start = Location(line, column)
             val value: ArrayList<Expression> = arrayListOf()
             val id = identifier()
             consume(TokenType.LEFT_PAREN)
@@ -599,7 +613,8 @@ class Parser(code : String,val file : File) {
                 value.add(get())
             }
             consume(TokenType.RIGHT_PAREN)
-            return Expression.CallExpression(id, value)
+            val end = getEnd()
+            return Expression.CallExpression(id, value, BigLocation(start, end))
         }
         fun member(expr: Expression? = null): Expression {
             var objectExpr = expr ?: primary()
@@ -675,7 +690,7 @@ class Parser(code : String,val file : File) {
                 }
 
                 else -> {
-                    thrower.send("Unknown Type ['${currentToken.value}']","InvalidExpression",file,currentToken)
+                    thrower.send("Unknown Type ['${currentToken.value}']","InvalidExpression",file, BigLocation(currentToken.location,currentToken.location))
                     mutableMapOf(Expression.NullLiteral to TokenType.NULL)
                 }
             }
@@ -694,7 +709,8 @@ class Parser(code : String,val file : File) {
             TokenType.OBJECT -> ObjectLiteral()
             TokenType.VOID -> VoidLiteral()
             else -> {
-                thrower.send("Unexpected literal production ['${currentToken.value}']","LiteralError",file,currentToken)
+                thrower.send("Unexpected literal production ['${currentToken.value}']","LiteralError",file,BigLocation(currentToken.location,currentToken.location))
+
                 Expression.NullLiteral
             }
         }
@@ -785,12 +801,11 @@ class Parser(code : String,val file : File) {
     private fun consume(tokenType: TokenType): Token {
         val token = currentToken
         if (currentToken.type != tokenType) {
-            thrower.send("Expect Token ['${tokenType.id}'] but is ['${token.type.id}']","TokenNotFound",file,token)
+            thrower.send("Expect Token ['${tokenType.id}'] but is ['${token.type.id}']","TokenNotFound",file,BigLocation(token.location,token.location))
 
             //thrower.SyntaxError("Expect Token -> [\"${tokenType.id}\"] but not Found? Just Found [\"${currentToken.value}\"]")
         }
         advance()
         return token
     }
-
 }

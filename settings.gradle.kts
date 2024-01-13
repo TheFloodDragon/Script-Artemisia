@@ -1,5 +1,6 @@
 rootProject.name = "Artemisia"
 
+apply("plugins")
 apply("platform")
 apply("project")
 

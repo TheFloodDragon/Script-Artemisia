@@ -1,4 +1,4 @@
-package net.mugwort.artemisia.runtime
+package net.mugwort.artemisia.api
 
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole

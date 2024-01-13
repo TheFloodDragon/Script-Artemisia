@@ -1,12 +1,11 @@
 package net.mugwort.artemisia.compiler.interpreter.statements
 
 import net.mugwort.artemisia.api.Environment
+import net.mugwort.artemisia.api.expection.thrower
 import net.mugwort.artemisia.compiler.Parser
 import net.mugwort.artemisia.compiler.interpreter.Interpreter
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
-import net.mugwort.artemisia.runtime.expection.thrower
-
 import java.io.File
 
 class ImportStatement(private val interpreter: Interpreter) : StatementExecutor() {
@@ -38,14 +37,23 @@ class ImportStatement(private val interpreter: Interpreter) : StatementExecutor(
         }
 
         fun toImport(path: String) {
-            val parser = Parser(File(path).readText(),File(path)).parser()
-            for (i in parser.body) {
-                executor(i, interpreter?.globals,interpreter)
+            val file = File(path)
+            val envs = Environment()
+            if (interpreter.bus.getRegister(file.name.substringBeforeLast(".")) != null){
+                val module = interpreter.bus.getRegister(file.name.substringBeforeLast("."))
+                interpreter.globals.define(file.name.substringBeforeLast("."),module)
+            }else{
+                val parser = Parser(file.readText(),file).parser()
+                for (i in parser.body) {
+                    executor(i,envs,interpreter)
+                }
+                interpreter.globals.define(file.name.substringBeforeLast("."),envs)
             }
+
         }
         getImport(import.file)
-        val path = interpreter?.file?.parentFile?.path + "/" + id.joinToString(separator = "/") + ".mg"
-        if (File(path).exists()) {
+        val path = interpreter.file.parentFile?.path + "/" + id.joinToString(separator = "/") + ".ari"
+        if (File(path).exists() || interpreter.bus.getRegister(File(path).name.substringBeforeLast(".")) != null) {
             toImport(path)
         } else {
             if (File(path).isDirectory) thrower.RuntimeException("The File is Directory")

@@ -9,7 +9,7 @@ import net.mugwort.artemisia.compiler.interpreter.statements.function.Function
 import net.mugwort.artemisia.compiler.interpreter.statements.function.FunctionStatement
 import net.mugwort.artemisia.core.ast.core.Expression
 import net.mugwort.artemisia.core.ast.core.Statement
-import net.mugwort.artemisia.runtime.expection.thrower
+import net.mugwort.artemisia.api.expection.thrower
 
 class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() {
     override val self: ExpressionExecutor = this
@@ -36,10 +36,11 @@ class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() 
             }
         }
 
-        return caller(expr.caller.name, params, env)
+        return caller(expr, params, env)
     }
 
-    fun caller(calls: String, params: List<Any?>, env: Environment?): Any? {
+    fun caller(expr: Expression.CallExpression, params: List<Any?>, env: Environment?): Any? {
+        val calls = expr.caller.name
         if (interpreter != null){
             for (statement in interpreter.program.body) {
                 if (statement is Statement.FunctionDeclaration) {
@@ -68,7 +69,10 @@ class Call(private val interpreter: Interpreter? = null) : ExpressionExecutor() 
             }
 
             else -> {
-                thrower.RuntimeException("The Variable $calls isn`t Function")
+                interpreter?.let {
+                    thrower.send("Connot Found Function $calls","FunctionNotFound",
+                        it.file,expr.location)
+                }
             }
         }
         return null

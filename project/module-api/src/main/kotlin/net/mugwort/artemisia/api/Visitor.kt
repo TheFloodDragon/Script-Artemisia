@@ -3,20 +3,21 @@ package net.mugwort.artemisia.api
 import net.mugwort.artemisia.api.expection.thrower
 import net.mugwort.artemisia.api.types.NativeFunction
 
-class Environment {
-    private var env: Environment
+class Visitor {
+    private var visitor: Visitor
+
+    constructor() {
+        this.visitor = this
+    }
+
+    constructor(parent: Visitor) {
+        this.visitor = parent
+    }
+
 
     private var values: MutableMap<String, Any?> = mutableMapOf()
     private var consts : MutableMap<String,Any?> = mutableMapOf()
     private var functions : MutableMap<String,Any?> = mutableMapOf()
-
-    constructor() {
-        this.env = this
-    }
-
-    constructor(parent: Environment) {
-        this.env = parent
-    }
 
     fun getValue(): MutableMap<String, Any?> {
         return values
@@ -42,8 +43,8 @@ class Environment {
         if (consts.keys.contains(key)){
             return consts[key]
         }
-        if (env != this) {
-            return env.get(key)
+        if ( visitor != this) {
+            return visitor.get(key)
         }
         return null
     }
@@ -62,8 +63,8 @@ class Environment {
             return
         }
         if (consts.keys.contains(key)) thrower.SyntaxError("Cannot set const variable '$key'")
-        if (env != this) {
-            env.set(key,value)
+        if (visitor != this) {
+            visitor.set(key,value)
             return
         }
         thrower.SyntaxError("Undefined variable '$key' to set.")
@@ -79,16 +80,5 @@ class Environment {
         }
     }
 
-    override fun toString(): String {
-        return mapOf("values" to mutableMapOf(
-            "keys" to values.keys,
-            "values" to values.values.toString()
-        ),"const" to mutableMapOf(
-            "keys" to consts.keys,
-            "values" to consts.values
-        ), "function" to mutableMapOf(
-            "keys" to functions.keys,
-            "values" to functions.values
-        )).toString()
-    }
+
 }

@@ -213,7 +213,7 @@ sealed class Statement {
         val identifier: Expression.Identifier,
         val params: List<VariableStatement>,
         val returnValue : Expression,
-        val body: BlockStatement,
+        val body: BlockStatement?,
         val location: BigLocation
     ) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
@@ -224,7 +224,7 @@ sealed class Statement {
                     "identifier" to identifier.toMap(),
                     "returnValue" to returnValue.toMap(),
                     "params" to params.map { it.toMap() },
-                    "body" to body.toMap()
+                    "body" to body?.toMap()
                 )
             )
         }
