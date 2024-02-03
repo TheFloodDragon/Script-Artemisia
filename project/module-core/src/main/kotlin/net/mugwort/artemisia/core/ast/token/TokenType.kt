@@ -19,23 +19,24 @@ enum class TokenType(val id: String) {
     BREAK("break"),
     CONTINUE("continue"),
     ELSE("else"),
-    FALSE("false"),
     VAR("var"),
     FOR("for"),
     IF("if"),
     IMPORT("import"),
-    NULL("null"),
+
     WHILE("while"),
-    TRUE("true"),
-    RETURN("return"),
-    ENUM("enum"),
-
-
-    //VISITOR
     PUBLIC("public"),
     PRIVATE("private"),
     PROTECTED("protected"),
     ALREADY("already"),
+    RETURN("return"),
+    ENUM("enum"),
+
+    NULL("null"),
+    FALSE("false"),
+    TRUE("true"),
+    //VISITOR
+
 
 
     // Types
