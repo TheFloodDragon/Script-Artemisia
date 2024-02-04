@@ -1,5 +1,5 @@
 const val rootName = "Artemisia"
-const val rootGroup = "net.mugwort.artemisia"
+const val rootGroup = "net.artemisia"
 const val rootVersion = "0.3.5-DEV"
 
 const val kotlinVersion = "1.9.21"
