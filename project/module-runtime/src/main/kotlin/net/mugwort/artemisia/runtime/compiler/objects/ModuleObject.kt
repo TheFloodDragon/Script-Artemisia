@@ -6,17 +6,22 @@ import net.mugwort.artemisia.runtime.compiler.Object
 /*
     <魔数>
     <版本>
-    <常量池数据总数>
+    <常量池数据总长度>
     <常量池>
         | <索引> <类型> <长度> <值>
-    <主代码区数据量>
+    <主代码区数据长度>
     <主代码区>
         | <代码索引> <常量池数据索引>
-    <方法区数据量>
+    <方法区数据长度>
     <方法区>
         | <方法类型|type> <名称|id> <参数|arg>
-    <文件信息区数据量>
-    <文件信息>
+    <文件信息区数据长度>
+    <文件地址>
+    <编译日期数据长度>
+    <编译日期>
+    <编译类型长度>
+    <编译类型>
+    <30个0x00占位符>
 */
 
 
@@ -24,8 +29,11 @@ class ModuleObject(
     private val version : ByteArray,
     private val constants : ConstantPool,
     private val code : ArrayList<CodeObject>,
-    val functions : ArrayList<FunctionObject>,
-    private val file : ByteArray
+    private val functions : ArrayList<FunctionObject>,
+    private val visitors : ArrayList<VisitorObject>,
+    private val file : ByteArray,
+    private val date : ByteArray
+
 ) : Object() {
     override fun toByte(): ByteArray {
         val array : ArrayList<Byte> = arrayListOf()
@@ -51,8 +59,22 @@ class ModuleObject(
             array.add(functions.indexOf(i).toByte())
             array.addAll(i.toByte().toList())
         }
+        array.add(visitors.size.toByte())
+        for (i in visitors){
+            array.add(visitors.indexOf(i).toByte())
+            array.addAll(i.toByte().toList())
+        }
         array.add(file.toList().size.toByte())
         array.addAll(file.toList())
+        array.add(date.size.toByte())
+        array.addAll(date.toList())
+        array.add("<M>".toByteArray().size.toByte())
+        array.addAll("<M>".toByteArray().toList())
+        array.add(0x20)
+        for (i in 0 until 30){
+            array.add(0x00)
+        }
+
 
         return array.toByteArray()
     }

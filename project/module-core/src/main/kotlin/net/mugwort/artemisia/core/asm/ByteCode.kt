@@ -2,6 +2,23 @@ package net.mugwort.artemisia.core.asm
 
 abstract class ByteCode(val byte: Byte) {
 
+    data class LoadModule(val moduleFile : ByteArray) : ByteCode(0x4A){
+        override fun toArray(): ByteArray {
+            val array : ArrayList<Byte> = arrayListOf()
+            array.add(byte)
+            array.addAll(moduleFile.toList())
+            return array.toByteArray()
+        }
+    }
+
+    data class Call(val callID : Byte) : ByteCode(0x4A){
+        override fun toArray(): ByteArray {
+            val array : ArrayList<Byte> = arrayListOf()
+            array.add(byte)
+            array.add(callID)
+            return array.toByteArray()
+        }
+    }
 
 
     data class Push(val index : Byte) : ByteCode(0x22){

@@ -9,6 +9,7 @@ class CodeObject(
 
     override fun toByte(): ByteArray {
         val list : ArrayList<Byte> = arrayListOf()
+        list.add(command.toArray().size.toByte())
         list.addAll(command.toArray().toList())
         return list.toByteArray()
     }
