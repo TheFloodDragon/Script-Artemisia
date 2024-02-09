@@ -1,4 +1,4 @@
-package net.artemisia.runtime.compiler.objects
+package net.artemisia.runtime.compiler.objects.module
 
 import net.artemisia.runtime.compiler.Object
 

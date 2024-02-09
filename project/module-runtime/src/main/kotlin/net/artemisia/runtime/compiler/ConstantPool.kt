@@ -15,7 +15,14 @@ class ConstantPool(private val pool : MutableMap<Int,ArrayList<Byte>> = mutableM
         pool[index] = list
         index += 1
     }
+    fun push(v : ArrayList<Byte>){
+        val list : ArrayList<Byte> = arrayListOf()
 
+        list.addAll(v.toList())
+
+        pool[index] = list
+        index += 1
+    }
     fun getPool(): MutableMap<Int, ArrayList<Byte>> {
         return pool
     }

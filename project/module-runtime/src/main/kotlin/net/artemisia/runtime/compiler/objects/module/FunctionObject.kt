@@ -1,6 +1,7 @@
-package net.artemisia.runtime.compiler.objects
+package net.artemisia.runtime.compiler.objects.module
 
 import net.artemisia.runtime.compiler.Object
+import net.artemisia.runtime.compiler.objects.other.IdentifierObject
 
 class FunctionObject(
     val id : IdentifierObject,
@@ -11,17 +12,17 @@ class FunctionObject(
 ): Object() {
     override fun toByte(): ByteArray {
         val array = createArray()
+        array.addAll(id.toByte().toList())
         array.add(args.size.toByte())
         for (i in args){
             array.addAll(i.toByte().toList())
         }
-        array.add(id.len.toByte())
-        array.addAll(id.toByte().toList())
-        array.add(codes.size.toByte())
+        array.add((codes.size * 2).toByte())
         for (i in codes){
             array.addAll(i.toByte().toList())
         }
-        array.add(0,array.size.toByte())
+        array.add(returnType.toByte().size.toByte())
+        array.addAll(returnType.toByte().toList())
         return array.toByteArray()
     }
 }

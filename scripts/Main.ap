@@ -1,6 +1,11 @@
-def Hello(){
-    println("HelloWorld")
+val a = "11"
+
+def a(){
 
 }
 
-println("end")
+event onJoin(awa : onJoinEvent){
+
+
+}
+

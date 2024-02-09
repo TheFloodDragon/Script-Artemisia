@@ -9,6 +9,7 @@ dependencies {
     shadowModule("module-util")
     shadowModule("module-compiler")
     shadowModule("module-api")
+    shadowModule("module-vm")
     shadowGson()
 }
 

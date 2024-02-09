@@ -76,13 +76,14 @@ sealed class Statement {
         }
     }
 
-    data class VariableDeclaration(val id: Expression.Identifier, val init: Expression?) : Statement() {
+    data class VariableDeclaration(val id: Expression.Identifier, val init: Expression?,val type : Expression?) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "VariableDeclaration" to mutableMapOf(
                     "type" to "VariableDeclaration",
                     "id" to id.toMap(),
-                    "init" to init?.toMap()
+                    "init" to init?.toMap(),
+                    "type" to type?.toMap()
                 )
             )
         }
@@ -196,13 +197,18 @@ sealed class Statement {
         }
     }
 
-    data class EventStatement(val id : Expression.Identifier, val body: BlockStatement, val location: BigLocation): Statement(){
+    data class EventStatement(
+        val id : Expression.Identifier,
+        val params: List<VariableStatement>,
+        val body: BlockStatement,
+        val location: BigLocation): Statement(){
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "ReturnStatement" to mutableMapOf(
                     "type" to "ReturnStatement",
                     "location" to location.toMap(),
                     "id" to id.toMap(),
+                    "params" to params.map { it.toMap() },
                     "body" to body.toMap()
                 )
             )

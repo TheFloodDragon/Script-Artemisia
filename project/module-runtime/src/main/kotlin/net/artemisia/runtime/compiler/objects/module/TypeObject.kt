@@ -1,4 +1,4 @@
-package net.artemisia.runtime.compiler.objects
+package net.artemisia.runtime.compiler.objects.module
 
 import net.artemisia.runtime.compiler.Object
 
@@ -13,7 +13,10 @@ class TypeObject(val type : Type, val obj : Object? = null) : Object(){
     override fun toByte(): ByteArray {
         val list : ArrayList<Byte> = arrayListOf()
         list.add(type.id)
-        if (obj != null) list.addAll(obj.toByte().toList())
+        if (obj != null) {
+            list.addAll(obj.toByte().toList())
+        } else list.add(0x00)
+
         return list.toByteArray()
     }
 }

@@ -5,7 +5,11 @@ import net.artemisia.core.asm.ByteCode
 import net.artemisia.core.ast.core.Expression
 import net.artemisia.core.ast.core.Statement
 import net.artemisia.runtime.compiler.ConstantPool
-import net.artemisia.runtime.compiler.objects.*
+import net.artemisia.runtime.compiler.objects.module.*
+import net.artemisia.runtime.compiler.objects.other.BooleanObject
+import net.artemisia.runtime.compiler.objects.other.IdentifierObject
+import net.artemisia.runtime.compiler.objects.other.NumberObject
+import net.artemisia.runtime.compiler.objects.other.StringObject
 import java.io.File
 import java.time.LocalDateTime
 
@@ -13,36 +17,25 @@ import java.time.LocalDateTime
 class Compiler(private val file : File) {
     private val body = Parser(file.readText(),file).parser().body
 
+    private var lastCommand : ByteCode = ByteCode.SaveVariable(0x00)
+    private var stacksize : Int = 1
     private val constants = ConstantPool()
     private val codes : ArrayList<CodeObject> = arrayListOf()
 
     private val funcs : ArrayList<FunctionObject> = arrayListOf()
+    private val listeners : ArrayList<EventObject> = arrayListOf()
     private val visits : ArrayList<VisitorObject> = arrayListOf()
+
+
 
     private val currentDateTime = LocalDateTime.now()
 
-    init {
-        for (obj in body){
-            if (obj is Statement.VariableStatement) {
-                visits.add(VisitorObject(VisitorObject.VisitorType.PUBLIC, VisitorObject.VisitObject.VARIABLE))
-            }else if (obj is Statement.FunctionDeclaration) {
-                visits.add(VisitorObject(VisitorObject.VisitorType.PUBLIC, VisitorObject.VisitObject.FUNCTION))
-            }else if (obj is Statement.VisitorStatement) {
-                if (obj.state is Statement.VariableStatement){
-                    visits.add(VisitorObject(VisitorObject.VisitorType.PUBLIC, VisitorObject.VisitObject.VARIABLE))
-                }
-                if (obj.state is Statement.FunctionDeclaration){
-                    visits.add(VisitorObject(VisitorObject.VisitorType.PUBLIC, VisitorObject.VisitObject.FUNCTION))
-                }
-            }
-        }
-    }
     fun save(){
         for (i in body){
             codes.addAll(statement(i,constants))
         }
         val compiled = File(file.parentFile.path + "/" + file.nameWithoutExtension + ".apc")
-        val obj = ModuleObject(byteArrayOf(0x00,0x00,0x30,0x00),constants,codes,funcs,visits,file.absolutePath.toString().toByteArray(),
+        val obj = ModuleObject(byteArrayOf(0x00,0x00,3.toByte(),0x00),stacksize,constants,codes,funcs,listeners,visits,file.absolutePath.toString().toByteArray(),
             byteArrayOf(
                 0x01,
                 currentDateTime.year.toByte(),
@@ -60,11 +53,7 @@ class Compiler(private val file : File) {
         compiled.createNewFile()
     }
 
-
-
-
-
-    private fun statement(s : Statement, pool: ConstantPool) : ArrayList<CodeObject> {
+    private fun statement(s : Statement, pool: ConstantPool,autoVisitor : Boolean = true) : ArrayList<CodeObject> {
 
         return when(s){
             is Statement.BlockStatement -> {
@@ -79,19 +68,39 @@ class Compiler(private val file : File) {
             is Statement.DoWhileStatement -> TODO()
             is Statement.EmptyStatement -> TODO()
             is Statement.EnumStatement -> TODO()
-            is Statement.EventStatement -> TODO()
+            is Statement.EventStatement -> {
+                val args : ArrayList<ArgObject> = arrayListOf()
+                val array : ArrayList<CodeObject> = arrayListOf()
+                val id = TypeGetter(s.id)
+                for (i in s.params){
+                    val type = TypeGetter(i.declarations.type!!)
+                    args.add(
+                        ArgObject(
+                            IdentifierObject(i.declarations.id.name.length,i.declarations.id.name),
+                            type
+                        )
+                    )
+                }
+
+                val codes = statement(s.body,pool)
+                val event = EventObject((id.obj as IdentifierObject),args,codes)
+                listeners.add(event)
+                array.add(toCode(ByteCode.EventListener(listeners.indexOf(event).toByte())))
+                array
+            }
             is Statement.ExpressionStatement -> {
                 val array : ArrayList<CodeObject> = arrayListOf()
                 if (s.expression is Expression.CallExpression){
                     val caller = expression(s.expression,pool)
                     for (expr in (s.expression as Expression.CallExpression).arguments){
-                        val index = pool.search(expression(expr,pool).toList())
-                        array.add(toCode(ByteCode.Push(index!!.toByte())))
+                        array.addAll(statement(Statement.ExpressionStatement(expr,s.location),pool))
                     }
                     val index = pool.search(caller.toList())
                     array.add(toCode(ByteCode.Call(index!!.toByte())))
+                }else{
+                    val index = pool.search(expression(s.expression,pool).toList())
+                    array.add(toCode(ByteCode.Push(index!!.toByte())))
                 }
-
                 array
             }
             is Statement.ForStatement -> TODO()
@@ -100,24 +109,26 @@ class Compiler(private val file : File) {
                 val array : ArrayList<CodeObject> = arrayListOf()
                 val id = TypeGetter(s.identifier)
                 for (i in s.params){
-                    val type = TypeGetter(i.declarations.init!!)
-                    if(type.obj != null){
-                        args.add(
-                            ArgObject(
-                                IdentifierObject(i.declarations.id.name.length,i.declarations.id.name),
-                                type,
-                                type.obj!!
-                            )
+                    val type = TypeGetter(i.declarations.type!!)
+                    args.add(
+                        ArgObject(
+                            IdentifierObject(i.declarations.id.name.length,i.declarations.id.name),
+                            type
                         )
-                    }else{
-                        thrower.send("Not Params Type","NoType",file,s.location)
-                    }
+                    )
                 }
                 val codes = statement(s.body!!,pool)
                 val returnType = TypeGetter(s.returnValue)
                 val func = FunctionObject((id.obj as IdentifierObject),args,codes,returnType)
                 funcs.add(func)
                 array.add(toCode(ByteCode.CreateFunction(funcs.indexOf(func).toByte())))
+                if (autoVisitor) {
+                    visits.add(
+                        VisitorObject(
+                            VisitorObject.VisitorType.PUBLIC,
+                            VisitorObject.VisitObject.FUNCTION,funcs.indexOf(func))
+                    )
+                }
                 array
             }
             is Statement.IfStatement -> {
@@ -133,14 +144,46 @@ class Compiler(private val file : File) {
             is Statement.VariableDeclaration -> TODO()
             is Statement.VariableStatement -> {
                 val id = expression(s.declarations.id,pool)
-                val value = expression(s.declarations.init!!,pool)
-                val vIndex = pool.search(value.toList())
-                val iIndex = pool.search(id.toList())
-
                 val array : ArrayList<CodeObject> = arrayListOf()
-                array.add(toCode(ByteCode.Push(vIndex!!.toByte())))
-                array.add(toCode(ByteCode.SaveItem(iIndex!!.toByte())))
-                array
+                if (s.declarations.init != null && s.const){
+
+
+                    val iIndex = pool.search(id.toList())
+                    array.addAll(statement(Statement.ExpressionStatement(s.declarations.init!!,s.location),pool))
+                    typeInvoke(s.declarations.type,pool)?.let { toCode(it) }?.let { array.add(it) }
+                    array.add(toCode(ByteCode.SaveConstant(iIndex!!.toByte())))
+                    if (autoVisitor) {
+                        visits.add(
+                            VisitorObject(
+                                VisitorObject.VisitorType.PUBLIC,
+                                VisitorObject.VisitObject.VARIABLE,iIndex
+                            )
+                        )
+                    }
+                    return array
+                }else if (!s.const && s.declarations.init == null){
+                    val iIndex = pool.search(id.toList())
+                    typeInvoke(s.declarations.type,pool)?.let { toCode(it) }?.let { array.add(it) }
+                    array.add(toCode(ByteCode.SetVariable(iIndex!!.toByte())))
+                    if (autoVisitor) {
+                        visits.add(
+                            VisitorObject(
+                                VisitorObject.VisitorType.PUBLIC,
+                                VisitorObject.VisitObject.VARIABLE,iIndex
+                            )
+                        )
+                    }
+                    return array
+                }else if (!s.const && s.declarations.init != null){
+                    val iIndex = pool.search(id.toList())
+                    array.addAll(statement(Statement.ExpressionStatement(s.declarations.init!!,s.location),pool))
+                    typeInvoke(s.declarations.type,pool)?.let { toCode(it) }?.let { array.add(it) }
+                    array.add(toCode(ByteCode.SaveVariable(iIndex!!.toByte())))
+                    return array
+                }else {
+                    thrower.send("Constant Must Init","notInit",file,s.location,true)
+                    return array
+                }
             }
             is Statement.WhileStatement -> TODO()
             else -> arrayListOf()
@@ -168,7 +211,6 @@ class Compiler(private val file : File) {
                 val ret = IdentifierObject(e.name.length,e.name)
                 val array = arrayListOf(TypeObject.Type.IDENTIFIER.id)
                 array.addAll(ret.toByte().toList())
-                array.add(1,ret.len.toByte())
                 if (pool.search(array) == null){
                     pool.push(TypeObject.Type.IDENTIFIER.id,ret.id.toByteArray())
                 }
@@ -178,12 +220,16 @@ class Compiler(private val file : File) {
             is Expression.MemberExpression -> TODO()
             Expression.NullLiteral -> TODO()
             is Expression.NumericLiteral -> {
-                val ret = NumberObject(e.value!!)
                 val array = ArrayList<Byte>()
+                if (e.value == null) {
+                    return array.toByteArray()
+                }
+                val ret = NumberObject(e.value!!)
+
 
                 array.addAll(ret.toByte().toList())
                 array.add(0, TypeObject.Type.NUMBER.id)
-                array.add(1,ret.getLen())
+                array.add(1, ret.getLen())
                 if (pool.search(array)== null){
                     pool.push(TypeObject.Type.NUMBER.id,ret.toByte())
                 }
@@ -191,8 +237,13 @@ class Compiler(private val file : File) {
             }
             is Expression.ObjectLiteral -> TODO()
             is Expression.StringLiteral -> {
-                val ret = StringObject(e.value!!)
                 val array = ArrayList<Byte>()
+                if (e.value == null) {
+                    return array.toByteArray()
+                }
+
+                val ret = StringObject(e.value!!)
+
                 array.addAll(ret.toByte().toList())
                 array.add(0, TypeObject.Type.STRING.id)
                 array.add(1,ret.toByte().size.toByte())
@@ -206,11 +257,33 @@ class Compiler(private val file : File) {
         }
     }
 
+    fun variableType(i : Expression,pool: ConstantPool) : Byte{
+        return when(val init = i){
+            is Expression.StringLiteral -> {
+                0x01
+            }
+            is Expression.NumericLiteral -> {
+                0x02
+            }
+            is Expression.BooleanLiteral -> {
+                0x03
+            }
+
+            is Expression.Identifier -> {
+                val value = expression(i,pool)
+                constants.search(value.toList())!!.toByte()
+            }
+            else -> {
+                0x00
+            }
+        }
+    }
+
     fun TypeGetter(i : Expression): TypeObject {
        return when(val init = i){
             is Expression.BooleanLiteral -> {
                 if (init.value != null) {
-                    TypeObject(TypeObject.Type.BOOLEAN,BooleanObject(init.value!!))
+                    TypeObject(TypeObject.Type.BOOLEAN, BooleanObject(init.value!!))
                 } else {
                     TypeObject(TypeObject.Type.BOOLEAN)
                 }
@@ -218,17 +291,18 @@ class Compiler(private val file : File) {
 
             is Expression.StringLiteral -> {
                 if (init.value != null) {
-                    TypeObject(TypeObject.Type.STRING,StringObject(init.value!!))
+                    TypeObject(TypeObject.Type.STRING, StringObject(init.value!!))
                 } else {
                     TypeObject(TypeObject.Type.STRING)
                 }
             }
             is Expression.Identifier -> {
-                TypeObject(TypeObject.Type.IDENTIFIER,IdentifierObject(init.name.length,init.name))
+
+                TypeObject(TypeObject.Type.IDENTIFIER, IdentifierObject(init.name.length,init.name))
             }
             is Expression.NumericLiteral -> {
                 if (init.value != null) {
-                    TypeObject(TypeObject.Type.NUMBER,NumberObject(init.value!!))
+                    TypeObject(TypeObject.Type.NUMBER, NumberObject(init.value!!))
                 } else {
                     TypeObject(TypeObject.Type.NUMBER)
                 }
@@ -240,10 +314,16 @@ class Compiler(private val file : File) {
     }
 
     fun toCode(command: ByteCode): CodeObject {
+        if (command is ByteCode.Push && lastCommand is ByteCode.Push) stacksize += 1
+        lastCommand = command
         return CodeObject(command)
     }
-    fun addFunction(){
-
+    fun typeInvoke(expr : Expression?,pool:ConstantPool): ByteCode? {
+        if (expr != null) {
+            val type = variableType(expr, pool)
+            return ByteCode.InvokeType(type)
+        }
+        return null
     }
 }
 

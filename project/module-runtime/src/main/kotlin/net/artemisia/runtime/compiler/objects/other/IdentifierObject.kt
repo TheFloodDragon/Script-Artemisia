@@ -1,4 +1,4 @@
-package net.artemisia.runtime.compiler.objects
+package net.artemisia.runtime.compiler.objects.other
 
 import net.artemisia.runtime.compiler.Object
 
@@ -12,7 +12,7 @@ class IdentifierObject(val len : Int,val id: String) : Object(){
         val array = createArray()
         array.add(len.toByte())
         array.addAll(id.toByteArray().toList())
-        return id.toByteArray()
+        return array.toByteArray()
     }
 
 }

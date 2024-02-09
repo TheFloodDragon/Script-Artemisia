@@ -1,4 +1,4 @@
-package net.artemisia.runtime.compiler.objects
+package net.artemisia.runtime.compiler.objects.other
 
 import net.artemisia.runtime.compiler.Object
 import java.nio.ByteBuffer
@@ -10,8 +10,14 @@ class NumberObject(private val double: Double) : Object(){
     }
 
     override fun toByte(): ByteArray {
-        if (isInt(double)) return byteArrayOf(double.toInt().toByte())
-        return doubleToBytes(double)
+        val array = createArray()
+        if (isInt(double)){
+            array.addAll(byteArrayOf(double.toInt().toByte()).toList())
+            return array.toByteArray()
+        }
+        array.addAll(doubleToBytes(double).toList())
+
+        return array.toByteArray()
     }
 
     fun doubleToBytes(value: Double): ByteArray {

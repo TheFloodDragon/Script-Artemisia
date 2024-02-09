@@ -1,9 +1,10 @@
 package net.artemisia.api.expection
 
-import net.artemisia.core.ast.token.BigLocation
 import net.artemisia.api.Console
+import net.artemisia.core.ast.token.BigLocation
 import net.artemisia.runtime.other.Translation
 import java.io.File
+import kotlin.system.exitProcess
 
 object thrower {
     var endProcess = false
@@ -19,9 +20,10 @@ object thrower {
         SyntaxError().send(message)
     }
     @JvmStatic
-    fun send(msg : String,err:String,file : File,location : BigLocation){
+    fun send(msg : String,err:String,file : File,location : BigLocation,end : Boolean = false){
         Console.err("${file.name}:${location.start.line}:${location.end.column} : ${err} : ${msg}\n" + draw(file, location))
         endProcess = true
+        if (end) exitProcess(0)
     }
     private fun draw(file : File,location: BigLocation): String {
         val texts = file.readLines()
@@ -32,7 +34,8 @@ object thrower {
         val lines = StringBuilder(" ".repeat(errorLine.length))
 
         lines.insert(modified.indexOf("|"),"| ")
-        lines.insert(modified.indexOf("|") + location.start.column," ^")
+        val insertIndex = (modified.indexOf("|") + location.start.column).coerceAtMost(lines.length)
+        lines.insert(insertIndex, " ^")
 
         for (i in lines.indexOf("^") + 1 until modified.length) {
             lines.setCharAt(i, '~')
