@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 
 object Logger {
-    enum class Level(id:String){
+    enum class Level(id: String) {
         /*
             「ALL」: 最低等级的，用于打开所有日志记录。
 
@@ -31,10 +31,12 @@ object Logger {
         TRACE("Trace"),
         ALL("All")
     }
-    fun info(text:String){
+
+    fun info(text: String) {
         println("[${LocalDate.now()}|MScript|${Level.INFO}] $text")
     }
-    fun fatal(text:String){
+
+    fun fatal(text: String) {
         println("[${LocalDate.now()}|MScript|${Level.FATAL}] $text")
     }
 

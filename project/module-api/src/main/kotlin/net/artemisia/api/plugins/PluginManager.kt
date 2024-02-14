@@ -12,7 +12,8 @@ import java.util.jar.JarFile
 
 class PluginManager {
 
-    private val plugins : MutableMap<String,Double> = mutableMapOf()
+    private val plugins: MutableMap<String, Double> = mutableMapOf()
+
     data class Dependency(
         val id: String,
         val version: String
@@ -27,13 +28,14 @@ class PluginManager {
         val description: String
     )
 
-    fun addPlugin(id:String,version: Double){
+    fun addPlugin(id: String, version: Double) {
         plugins[id] = version
     }
 
     fun getPlugins(): MutableMap<String, Double> {
         return plugins
     }
+
     private fun getResource(jar: String, file: String): String? {
         try {
             val jarFile = JarFile(jar)
@@ -59,10 +61,10 @@ class PluginManager {
         return gson.fromJson(info, PluginInfo::class.java)
     }
 
-    fun loadPlugins(dir: File){
-        for (file in dir.listFiles()!!){
-            if (file.extension == "jar"){
-                val info = getResource(file.path,"plugin.json")?.let { pluginInfo(it) }
+    fun loadPlugins(dir: File) {
+        for (file in dir.listFiles()!!) {
+            if (file.extension == "jar") {
+                val info = getResource(file.path, "plugin.json")?.let { pluginInfo(it) }
                 Console.info("LoadPlugin ['${info?.name}'] of version ${info?.version}")
                 val url = URL("file:///${file.absoluteFile}")
                 try {
@@ -71,9 +73,9 @@ class PluginManager {
                     if (info != null) {
                         plugins[info.name] = info.version.toDouble()
                     }
-                    for (depend in info?.dependencies!!){
+                    for (depend in info?.dependencies!!) {
                         val depends = depends(depend)
-                        if (!depends){
+                        if (!depends) {
                             throw Exception("Plugin need ${depend.id} version ${depend.version} but it is ${plugins[depend.id]}")
                         }
                     }
@@ -84,7 +86,7 @@ class PluginManager {
                     } else {
                         println("插件主类未实现ArtemisiaPlugin接口")
                     }
-                }catch (e : Exception){
+                } catch (e: Exception) {
                     Console.err("CantLoad ['${info?.name}'] is update?")
                     e.printStackTrace()
                 }
@@ -93,18 +95,18 @@ class PluginManager {
         }
     }
 
-    private fun depends(depends : Dependency): Boolean {
+    private fun depends(depends: Dependency): Boolean {
         val id = depends.id
         val version = splitVersion(depends.version)
-        if (!plugins.keys.contains(id)){
+        if (!plugins.keys.contains(id)) {
             throw Exception("Plugin depend on $id")
-        }else{
+        } else {
             val pv = plugins[id]
             val dv = version[1].toDouble()
             if (pv != null) {
 
-                when(version[0]){
-                    ">=" -> return  dv >= pv
+                when (version[0]) {
+                    ">=" -> return dv >= pv
                     "<=" -> return dv <= pv
                     "=" -> return dv == pv
                     ">" -> return dv > pv

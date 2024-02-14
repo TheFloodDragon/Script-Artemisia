@@ -27,28 +27,30 @@ import net.artemisia.runtime.compiler.Object
 
 
 class ModuleObject(
-    private val version : ByteArray,
-    private val stacksize : Int,
-    private val constants : ConstantPool,
-    private val code : ArrayList<CodeObject>,
-    private val functions : ArrayList<FunctionObject>,
-    private val listeners : ArrayList<EventObject>,
-    private val visitors : ArrayList<VisitorObject>,
-    private val file : ByteArray,
-    private val date : ByteArray
+    private val version: ByteArray,
+    private val stacksize: Int,
+    private val constants: ConstantPool,
+    private val code: ArrayList<CodeObject>,
+    private val functions: ArrayList<FunctionObject>,
+    private val listeners: ArrayList<EventObject>,
+    private val visitors: ArrayList<VisitorObject>,
+    private val file: ByteArray,
+    private val date: ByteArray
 
 ) : Object() {
     override fun toByte(): ByteArray {
-        val array : ArrayList<Byte> = arrayListOf()
-        array.addAll(arrayListOf(
-            (0xAE).toByte(),(0xBE).toByte(),(0xEE).toByte(),(0xEE).toByte()
-        ))
+        val array: ArrayList<Byte> = arrayListOf()
+        array.addAll(
+            arrayListOf(
+                (0xAE).toByte(), (0xBE).toByte(), (0xEE).toByte(), (0xEE).toByte()
+            )
+        )
         array.addAll(version.toList())
         array.add(stacksize.toString().length.toByte())
         array.add(stacksize.toByte())
 
         var size = 0
-        for (key in constants.getPool().keys){
+        for (key in constants.getPool().keys) {
             array.add(key.toByte())
             val value = constants.getPool()[key]!!
             array.add(value[0])
@@ -56,32 +58,32 @@ class ModuleObject(
 
             size += value[1] + 3
 
-            array.addAll(value.subList(2,value.size))
+            array.addAll(value.subList(2, value.size))
         }
 
-        array.add(9 + stacksize.toString().length.toByte() ,size.toByte())
+        array.add(9 + stacksize.toString().length.toByte(), size.toByte())
 
 
         array.add((code.size * 2).toByte())
-        for (i in code){
+        for (i in code) {
             array.addAll(i.toByte().toList())
         }
 
 
         array.add(functions.size.toByte())
-        for (i in functions){
+        for (i in functions) {
             array.add(functions.indexOf(i).toByte())
             array.addAll(i.toByte().toList())
         }
 
         array.add(listeners.size.toByte())
-        for (i in listeners){
+        for (i in listeners) {
             array.add(listeners.indexOf(i).toByte())
             array.addAll(i.toByte().toList())
         }
 
         array.add((visitors.size * 4).toByte())
-        for (i in visitors){
+        for (i in visitors) {
             array.add(visitors.indexOf(i).toByte())
             array.addAll(i.toByte().toList())
         }
@@ -90,7 +92,7 @@ class ModuleObject(
         array.add(date.size.toByte())
         array.addAll(date.toList())
 
-        for (i in 0 until 30){
+        for (i in 0 until 30) {
             array.add(0x00)
         }
 

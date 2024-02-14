@@ -3,7 +3,7 @@ package net.artemisia.application.command
 import net.artemisia.api.Console
 import java.util.*
 
-class CommandProcessor  {
+class CommandProcessor {
     val commands = mutableMapOf<String, Command>()
 
     fun registerCommand(command: Command) {

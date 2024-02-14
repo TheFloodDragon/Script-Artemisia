@@ -4,12 +4,12 @@ import net.artemisia.api.Console
 import net.artemisia.application.command.CommandProcessor
 import net.artemisia.application.command.stdlib.Echo
 import net.artemisia.application.command.stdlib.Help
-import net.artemisia.application.plugin.Plugins
+import net.artemisia.application.plugin.PluginLoader
 import org.fusesource.jansi.Ansi
 
 class Console {
-    val plugin = Plugins()
-    fun init(){
+    val plugin = PluginLoader()
+    fun init() {
         print("[ ")
         Console.print("title", Ansi.Color.BLUE)
         print(" ] ")
@@ -20,7 +20,7 @@ class Console {
         Console.info("Welcome to Use Artemisia of Application Mode")
         println("")
 
-        plugin.manager.addPlugin("Artemisia",0.3)
+        plugin.manager.addPlugin("Artemisia", 0.3)
         plugin.init()
 
         println(" ")

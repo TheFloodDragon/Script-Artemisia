@@ -6,7 +6,6 @@ import org.gradle.kotlin.dsl.project
 
 fun PluginAware.applyPlugins() {
     apply(plugin = "maven-publish")
-    apply(plugin = "com.github.johnrengelman.shadow")
     apply(plugin = "org.jetbrains.kotlin.jvm")
 }
 

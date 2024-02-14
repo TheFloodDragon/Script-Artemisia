@@ -7,7 +7,7 @@ import net.artemisia.core.ast.token.TokenType
 
 
 class Lexer(private var source: String) {
-    var tokens : ArrayList<Token> = ArrayList()
+    var tokens: ArrayList<Token> = ArrayList()
 
     private var start = 0
     private var current = 0
@@ -58,22 +58,23 @@ class Lexer(private var source: String) {
         "protected" to TokenType.PROTECTED,
         "already" to TokenType.ALREADY,
 
-    )
+        )
 
     init {
-        synchronized(this){
+        synchronized(this) {
             current = start
             scanToken()
-            tokens.add(Token(TokenType.EOF, "", Location(line,column)))
+            tokens.add(Token(TokenType.EOF, "", Location(line, column)))
         }
     }
-    private fun scanToken(){
-        while (!isEnd()){
+
+    private fun scanToken() {
+        while (!isEnd()) {
             start = current
-            when(val c = advance()){
-                '(', ')', '.', ',','{',']','[','}',':',';' -> addToken(typeFinder())
-                '-' -> addToken(if (match('=')) typeFinder() else if(match('-')) typeFinder() else if(match('>')) typeFinder() else typeFinder())
-                '+' -> addToken(if (match('=')) typeFinder() else if(match('+')) typeFinder() else typeFinder())
+            when (val c = advance()) {
+                '(', ')', '.', ',', '{', ']', '[', '}', ':', ';' -> addToken(typeFinder())
+                '-' -> addToken(if (match('=')) typeFinder() else if (match('-')) typeFinder() else if (match('>')) typeFinder() else typeFinder())
+                '+' -> addToken(if (match('=')) typeFinder() else if (match('+')) typeFinder() else typeFinder())
                 '*' -> addToken(if (match('=')) typeFinder() else typeFinder())
                 '/' -> {
                     if (match('/')) {
@@ -100,6 +101,7 @@ class Lexer(private var source: String) {
                         addToken(typeFinder())
                     }
                 }
+
                 '%' -> addToken(if (match('=')) typeFinder() else typeFinder())
                 '!' -> addToken(if (match('=')) typeFinder() else typeFinder())
                 '>' -> addToken(if (match('=')) typeFinder() else typeFinder())
@@ -113,6 +115,7 @@ class Lexer(private var source: String) {
                         addToken(typeFinder())
                     }
                 }
+
                 '&' -> {
                     if (match('&')) {
                         addToken(typeFinder())
@@ -120,6 +123,7 @@ class Lexer(private var source: String) {
                         fatal("Unexpected character '&'")
                     }
                 }
+
                 '|' -> {
                     if (match('|')) {
                         addToken(typeFinder())
@@ -127,11 +131,13 @@ class Lexer(private var source: String) {
                         fatal("Unexpected character '|'")
                     }
                 }
+
                 '\n' -> {
                     line += 1
                     column = 0
                     addToken(typeFinder())
                 }
+
                 ' ', '\t', '\r' -> Unit
                 '"', '\'', '`' -> setString(c)
                 else -> {
@@ -150,6 +156,7 @@ class Lexer(private var source: String) {
 
 
     }
+
     private fun setString(quote: Char) {
         while ((look() != quote) && !isEnd()) {
             if (look() == '\n') {
@@ -166,44 +173,51 @@ class Lexer(private var source: String) {
         advance()
         addToken(TokenType.STRING, source.substring(start + 1, current - 1))
     }
-    private fun setNumber(){
-        while (isNumber(look())){
+
+    private fun setNumber() {
+        while (isNumber(look())) {
             advance()
         }
-        if (look() == '.' && isNumber(lookNext())){
+        if (look() == '.' && isNumber(lookNext())) {
             advance()
-            while (isNumber(look())){
+            while (isNumber(look())) {
                 advance()
             }
         }
         addToken(TokenType.NUMBER, source.substring(start, current))
     }
-    private fun setIdentifier(){
-        while (isNumber(look()) || isString(look())){
+
+    private fun setIdentifier() {
+        while (isNumber(look()) || isString(look())) {
             advance()
         }
         val str = source.substring(start, current)
         val key = keyWords[str]
-        if (key != null){
+        if (key != null) {
             column += str.length
             addToken(key)
-        }else{
+        } else {
             column += str.length
-            addToken(TokenType.IDENTIFIER,source.substring(start, current))
+            addToken(TokenType.IDENTIFIER, source.substring(start, current))
         }
     }
+
     private fun isNumber(char: Char): Boolean {
         return char in '0'..'9'
     }
-    private fun isString(char: Char): Boolean{
+
+    private fun isString(char: Char): Boolean {
         return char in 'A'..'Z' || char in 'a'..'z' || char == '_'
     }
+
     private fun look(): Char {
         return if (isEnd()) '\u0000' else source[current]
     }
-    private fun lookNext():Char{
+
+    private fun lookNext(): Char {
         return if (current + 1 >= source.length) '\u0000' else source[current + 1]
     }
+
     private fun match(c: Char): Boolean {
         if (look() != c) return false
         advance()
@@ -219,22 +233,27 @@ class Lexer(private var source: String) {
     private fun isEnd(): Boolean {
         return current >= source.length
     }
-    private fun typeFinder(index : Int = 0) : TokenType {
+
+    private fun typeFinder(index: Int = 0): TokenType {
         val id: String = source.substring(start, current + index)
         return TokenType.fromId(id.lowercase())!!
     }
+
     private fun addToken(type: TokenType) {
-        addToken(type,typeFinder().id)
+        addToken(type, typeFinder().id)
     }
-    private fun addToken(type: TokenType, literal:String){
-        tokens.add(Token(type,literal, Location(line,column)))
+
+    private fun addToken(type: TokenType, literal: String) {
+        tokens.add(Token(type, literal, Location(line, column)))
         column += 1
     }
-    private fun fatal(text:String){
+
+    private fun fatal(text: String) {
         thrower.RuntimeException(text)
     }
-    fun printf(){
-        for (i in tokens){
+
+    fun printf() {
+        for (i in tokens) {
             println(i)
         }
     }

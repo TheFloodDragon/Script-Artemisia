@@ -7,7 +7,7 @@ import net.artemisia.runtime.compiler.Object
 */
 
 
-class IdentifierObject(val len : Int,val id: String) : Object(){
+class IdentifierObject(val len: Int, val id: String) : Object() {
     override fun toByte(): ByteArray {
         val array = createArray()
         array.add(len.toByte())

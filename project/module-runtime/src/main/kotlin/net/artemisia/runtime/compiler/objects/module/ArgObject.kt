@@ -4,8 +4,8 @@ import net.artemisia.runtime.compiler.Object
 import net.artemisia.runtime.compiler.objects.other.IdentifierObject
 
 class ArgObject(
-    val id : IdentifierObject,
-    val type : TypeObject,
+    val id: IdentifierObject,
+    val type: TypeObject,
 ) : Object() {
     override fun toByte(): ByteArray {
         val arg = createArray()

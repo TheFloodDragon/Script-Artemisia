@@ -1,11 +1,11 @@
 package net.artemisia.runtime.compiler
 
-class Stack<E>(private val size : Int) {
+class Stack<E>(private val size: Int) {
     private var array: ArrayList<E> = arrayListOf()
     private var top = -1
 
     fun push(j: E) {
-       array[++top] = j
+        array[++top] = j
     }
 
     fun pop(): E {

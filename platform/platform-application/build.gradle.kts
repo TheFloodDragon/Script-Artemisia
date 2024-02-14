@@ -16,7 +16,3 @@ dependencies {
 application {
     mainClass.set("${group}.application.Artemisia")
 }
-
-tasks {
-    build { dependsOn(shadowJar) }
-}

@@ -2,7 +2,7 @@ package net.artemisia.runtime.compiler.objects.module
 
 import net.artemisia.runtime.compiler.Object
 
-class DateObject(val y : Int,val m : Int,val d : Int,val h : Int, val mm : Int) : Object(){
+class DateObject(val y: Int, val m: Int, val d: Int, val h: Int, val mm: Int) : Object() {
     override fun toByte(): ByteArray {
         val array = array()
         return array.toByteArray()

@@ -41,7 +41,6 @@ enum class TokenType(val id: String) {
     //VISITOR
 
 
-
     // Types
 
     IDENTIFIER("identifier"),
@@ -95,6 +94,7 @@ enum class TokenType(val id: String) {
     SUPER("super"),
     THIS("this"),
     LOGICAL_NOT("!"),
+
     // EOF
     EOF("eof");
 

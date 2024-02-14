@@ -1,4 +1,3 @@
-
 import net.artemisia.application.command.Command
 import net.artemisia.application.command.CommandInfo
 import java.io.File

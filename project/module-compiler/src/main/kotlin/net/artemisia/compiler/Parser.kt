@@ -32,17 +32,23 @@ class Parser(code: String, val file: File) {
         val end = Location(line + 1, 1)
         return Statement.Program(statementList, BigLocation(Location(1, 1), end))
     }
+
     fun parserJson(): String {
-        for (i in tokens){
+        for (i in tokens) {
             println(i)
         }
         return JsonUtils.toJson(parser().toMap())
     }
+
     private inner class statement {
         fun get(): Statement? {
             //根据当前token的类型，返回不同的语句
             return when (currentToken.type) {
-                TokenType.CONSTRUCTOR -> Statement.ExpressionStatement(constructorStatement(),constructorStatement().location)
+                TokenType.CONSTRUCTOR -> Statement.ExpressionStatement(
+                    constructorStatement(),
+                    constructorStatement().location
+                )
+
                 TokenType.VAR -> varStatement()
                 TokenType.CONST, TokenType.VAL -> varStatement(true)
                 TokenType.LEFT_BRACE -> blockStatement()
@@ -93,9 +99,9 @@ class Parser(code: String, val file: File) {
                                 Statement.ExpressionStatement(expr.logical(expr.get()), BigLocation(start, end))
                             } else if (expr.binary.contains(peek().type)) {
                                 Statement.ExpressionStatement(expr.binary(expr.get()), BigLocation(start, end))
-                            } else if (check(TokenType.TO)){
+                            } else if (check(TokenType.TO)) {
                                 Statement.ExpressionStatement(expr.toExpr(expr.get()), BigLocation(start, end))
-                            }else{
+                            } else {
                                 Statement.ExpressionStatement(expr.assignment(), BigLocation(start, end))
                             }
                         }
@@ -225,7 +231,7 @@ class Parser(code: String, val file: File) {
             val params = paramGetter()
             val body = blockStatement()
             val end = getEnd()
-            return Statement.EventStatement(id,params,body, BigLocation(start, end))
+            return Statement.EventStatement(id, params, body, BigLocation(start, end))
         }
 
         //获取参数
@@ -269,9 +275,9 @@ class Parser(code: String, val file: File) {
                         if (currentToken.type == TokenType.EQUAL) {
                             consume(TokenType.EQUAL)
                             val inits = expr.get()
-                            return Statement.VariableDeclaration(id, inits,inits)
+                            return Statement.VariableDeclaration(id, inits, inits)
                         }
-                        return Statement.VariableDeclaration(id, null,init.keys.first())
+                        return Statement.VariableDeclaration(id, null, init.keys.first())
                     }
                 }
                 if (isConst && currentToken.type != TokenType.EQUAL) {
@@ -286,7 +292,7 @@ class Parser(code: String, val file: File) {
                     if (currentToken.type == TokenType.EQUAL) {
                         consume(TokenType.EQUAL)
                         val inits = expr.get()
-                        return Statement.VariableDeclaration(id, inits,null)
+                        return Statement.VariableDeclaration(id, inits, null)
                     }
                     thrower.send(
                         "Variable Type Must set",
@@ -297,7 +303,7 @@ class Parser(code: String, val file: File) {
                     )
                 }
                 val init = expr.get()
-                return Statement.VariableDeclaration(id, init,init)
+                return Statement.VariableDeclaration(id, init, init)
             }
             if (!isParams) {
                 if (isConst) {
@@ -374,6 +380,7 @@ class Parser(code: String, val file: File) {
             val end = getEnd()
             return Statement.FunctionDeclaration(id, params, returnValue, null, BigLocation(start, end))
         }
+
         fun returnStatement(): Statement.ReturnStatement {
             val start = Location(line, column)
             consume(TokenType.RETURN)
@@ -410,26 +417,27 @@ class Parser(code: String, val file: File) {
             val start = Location(line, column)
             consume(TokenType.CONSTRUCTOR)
             val params = paramGetter()
-            if (currentToken.type == TokenType.LEFT_BRACE){
+            if (currentToken.type == TokenType.LEFT_BRACE) {
                 val end = getEnd()
-                return Expression.Constructor(params,body = blockStatement(), BigLocation(start, end))
+                return Expression.Constructor(params, body = blockStatement(), BigLocation(start, end))
             }
             val end = getEnd()
-            return Expression.Constructor(params,null, BigLocation(start, end))
+            return Expression.Constructor(params, null, BigLocation(start, end))
         }
 
-        fun classStatement(isInterface : Boolean = false): Statement.ClassDeclaration {
+        fun classStatement(isInterface: Boolean = false): Statement.ClassDeclaration {
             var ext = false
             fun getInherit(): Expression.CallExpression {
-                if (currentToken.type == TokenType.IMPL){
+                if (currentToken.type == TokenType.IMPL) {
                     consume(TokenType.IMPL)
                     return expr.get() as Expression.CallExpression
-                }else{
+                } else {
                     consume(TokenType.EXT)
                     ext = true
                     return expr.get() as Expression.CallExpression
                 }
             }
+
             val start = Location(line, column)
             consume(TokenType.CLASS)
             val id = expr.identifier()
@@ -438,20 +446,20 @@ class Parser(code: String, val file: File) {
                 val inherit = getInherit()
                 val body = blockStatement()
                 val end = getEnd()
-                return if (ext){
-                    Statement.ClassDeclaration(id, params, inherit,null,body,isInterface,BigLocation(start, end))
-                }else{
-                    Statement.ClassDeclaration(id, params,null,inherit,body,isInterface,BigLocation(start, end))
+                return if (ext) {
+                    Statement.ClassDeclaration(id, params, inherit, null, body, isInterface, BigLocation(start, end))
+                } else {
+                    Statement.ClassDeclaration(id, params, null, inherit, body, isInterface, BigLocation(start, end))
                 }
 
             }
             val inherit = getInherit()
             val body = blockStatement()
             val end = getEnd()
-            return if (ext){
-                Statement.ClassDeclaration(id,null, inherit,null,body,isInterface,BigLocation(start, end))
-            }else{
-                Statement.ClassDeclaration(id, null,null,inherit,body,isInterface,BigLocation(start, end))
+            return if (ext) {
+                Statement.ClassDeclaration(id, null, inherit, null, body, isInterface, BigLocation(start, end))
+            } else {
+                Statement.ClassDeclaration(id, null, null, inherit, body, isInterface, BigLocation(start, end))
             }
         }
 
@@ -546,6 +554,7 @@ class Parser(code: String, val file: File) {
         }
 
     }
+
     private inner class expression {
         val complex = listOf(
             TokenType.PLUS_EQUAL,
@@ -601,7 +610,7 @@ class Parser(code: String, val file: File) {
                         }
                         return left
                     }
-                    if (check(TokenType.TO)){
+                    if (check(TokenType.TO)) {
                         val left = primary()
                         return toExpr(left)
                     }
@@ -622,7 +631,7 @@ class Parser(code: String, val file: File) {
                         return member()
                     }
                     val left = primary()
-                    if (check(TokenType.TO)){
+                    if (check(TokenType.TO)) {
                         return toExpr(left)
                     }
                     if (binary.contains(currentToken.type)) {
@@ -639,7 +648,7 @@ class Parser(code: String, val file: File) {
         fun toExpr(left: Expression): Expression.ToExpression {
             consume(TokenType.TO)
             val right = primary()
-            return Expression.ToExpression(left,right)
+            return Expression.ToExpression(left, right)
 
         }
 
@@ -807,6 +816,7 @@ class Parser(code: String, val file: File) {
             return Expression.Identifier(consume(TokenType.IDENTIFIER).value)
         }
     }
+
     inner class Literal {
         val literal: Expression = when (currentToken.type) {
             TokenType.NUMBER -> NumericLiteral()
@@ -863,15 +873,19 @@ class Parser(code: String, val file: File) {
             return Expression.NullLiteral
         }
     }
+
     private fun peek(): Token {
         return if (!isEnd) tokens[index + 1] else currentToken
     }
+
     private fun past(): Token {
         return tokens[index - 1]
     }
+
     private fun check(type: TokenType): Boolean {
         return peek().type == type
     }
+
     private fun advance(): Token {
         index += 1
         currentToken = if (index < tokens.size) tokens[index] else currentToken
@@ -880,6 +894,7 @@ class Parser(code: String, val file: File) {
         if (currentToken.type == TokenType.EOF || index >= tokens.size) isEnd = true
         return currentToken
     }
+
     private fun consume(tokenType: TokenType, error: String): Token {
         val token = currentToken
         if (currentToken.type != tokenType) {
@@ -888,6 +903,7 @@ class Parser(code: String, val file: File) {
         advance()
         return token
     }
+
     private fun spilt() {
         if (currentToken.type != TokenType.NEWLINE && currentToken.type != TokenType.EOF) consume(TokenType.SEMICOLON)
         else if (currentToken.type != TokenType.SEMICOLON && currentToken.type != TokenType.EOF && currentToken.type != TokenType.NEWLINE) consume(
@@ -897,6 +913,7 @@ class Parser(code: String, val file: File) {
         else if (currentToken.type == TokenType.NEWLINE) consume(TokenType.NEWLINE)
         else if (currentToken.type == TokenType.SEMICOLON) consume(TokenType.SEMICOLON)
     }
+
     private fun getEnd(): Location {
         return if (check(TokenType.NEWLINE)) {
             Location(line, column)
@@ -904,9 +921,10 @@ class Parser(code: String, val file: File) {
             Location(line, column - 1)
         }
     }
+
     private fun consume(tokenType: TokenType): Token {
         val token = currentToken
-        if (currentToken.type == TokenType.EOF){
+        if (currentToken.type == TokenType.EOF) {
             isEnd = true
         }
         if (currentToken.type != tokenType) {

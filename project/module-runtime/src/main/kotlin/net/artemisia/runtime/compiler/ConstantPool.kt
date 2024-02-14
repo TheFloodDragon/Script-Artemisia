@@ -1,12 +1,12 @@
 package net.artemisia.runtime.compiler
 
-class ConstantPool(private val pool : MutableMap<Int,ArrayList<Byte>> = mutableMapOf()) {
+class ConstantPool(private val pool: MutableMap<Int, ArrayList<Byte>> = mutableMapOf()) {
     private var index = 0
 
 
     //index | type | len | value
-    fun push(type : Byte,value : ByteArray){
-        val list : ArrayList<Byte> = arrayListOf()
+    fun push(type: Byte, value: ByteArray) {
+        val list: ArrayList<Byte> = arrayListOf()
 
         list.add(type)
         list.add(value.size.toByte())
@@ -15,25 +15,30 @@ class ConstantPool(private val pool : MutableMap<Int,ArrayList<Byte>> = mutableM
         pool[index] = list
         index += 1
     }
-    fun push(v : ArrayList<Byte>){
-        val list : ArrayList<Byte> = arrayListOf()
+
+    fun push(v: ArrayList<Byte>) {
+        val list: ArrayList<Byte> = arrayListOf()
 
         list.addAll(v.toList())
 
         pool[index] = list
         index += 1
     }
+
     fun getPool(): MutableMap<Int, ArrayList<Byte>> {
         return pool
     }
-    fun get(i : Int): ArrayList<Byte>? {
+
+    fun get(i: Int): ArrayList<Byte>? {
         return pool[i]
     }
-    fun search(value : ArrayList<Byte>): Int? {
+
+    fun search(value: ArrayList<Byte>): Int? {
         val entry = pool.entries.find { it.value == value }
         return entry?.key
     }
-    fun search(value : List<Byte>): Int? {
+
+    fun search(value: List<Byte>): Int? {
         val entry = pool.entries.find { it.value == value }
         return entry?.key
     }

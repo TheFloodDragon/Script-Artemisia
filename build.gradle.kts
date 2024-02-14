@@ -1,18 +1,9 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    java
+    `java-library`
     `maven-publish`
-    id("idea")
-    id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
-    id("com.github.johnrengelman.shadow") version shadowJarVersion apply false
-}
-
-idea{
-    module {
-        excludeDirs = setOf(file(".gradle")) + listOf("artifacts").map { file(it) }
-    }
+    kotlin("jvm") version kotlinVersion
 }
 
 subprojects {
@@ -31,24 +22,6 @@ subprojects {
         test { useJUnitPlatform() }
         // 编码设置
         withType<JavaCompile> { options.encoding = "UTF-8" }
-        // Kotlin Jvm 设置
-        withType<KotlinCompile> {
-            kotlinOptions {
-                jvmTarget = "1.8"
-                freeCompilerArgs = listOf("-Xjvm-default=all")
-            }
-        }
-        // ShadowJar 基本设置
-        withType<ShadowJar> {
-            // Options
-            archiveAppendix.set("")
-            archiveClassifier.set("")
-            archiveVersion.set(rootVersion)
-            destinationDirectory.set(file("$rootDir/artifacts"))
-            // Kotlin
-            relocate("kotlin.", "kotlin${kotlinVersion.escapedVersion}.") { exclude("kotlin.Metadata") }
-            relocate("kotlinx.", "kotlinx${kotlinVersion.escapedVersion}.")
-        }
     }
 
     dependencies {
@@ -58,9 +31,17 @@ subprojects {
 
     // Java 版本设置
     java {
+        withJavadocJar()
         withSourcesJar()
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+            freeCompilerArgs = listOf("-Xjvm-default=all")
+        }
     }
 
     // 基本信息设置

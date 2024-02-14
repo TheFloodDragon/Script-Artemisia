@@ -1,8 +1,8 @@
 package net.artemisia.core.ast.token
 
 class Location(
-    var line : Int,
-    var column : Int
+    var line: Int,
+    var column: Int
 ) {
 
     fun toMap(): Map<String, Int> {

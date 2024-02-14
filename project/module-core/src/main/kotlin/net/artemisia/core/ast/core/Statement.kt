@@ -62,7 +62,8 @@ sealed class Statement {
         }
     }
 
-    data class VariableStatement(val declarations: VariableDeclaration, val const: Boolean, val location: BigLocation) : Statement() {
+    data class VariableStatement(val declarations: VariableDeclaration, val const: Boolean, val location: BigLocation) :
+        Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "VariableStatement" to mutableMapOf(
@@ -76,7 +77,8 @@ sealed class Statement {
         }
     }
 
-    data class VariableDeclaration(val id: Expression.Identifier, val init: Expression?,val type : Expression?) : Statement() {
+    data class VariableDeclaration(val id: Expression.Identifier, val init: Expression?, val type: Expression?) :
+        Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "VariableDeclaration" to mutableMapOf(
@@ -102,7 +104,13 @@ sealed class Statement {
     }
 
 
-    data class TryStatement(val body: BlockStatement, val exception: Expression? = null, val catch: BlockStatement? = null, val finally : BlockStatement? = null, val location: BigLocation) :
+    data class TryStatement(
+        val body: BlockStatement,
+        val exception: Expression? = null,
+        val catch: BlockStatement? = null,
+        val finally: BlockStatement? = null,
+        val location: BigLocation
+    ) :
         Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
@@ -118,7 +126,12 @@ sealed class Statement {
         }
     }
 
-    data class IfStatement(val rule: Expression, val consequent: Statement, val alternate: Statement?, val location: BigLocation) : Statement() {
+    data class IfStatement(
+        val rule: Expression,
+        val consequent: Statement,
+        val alternate: Statement?,
+        val location: BigLocation
+    ) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "IfStatement" to mutableMapOf(
@@ -131,6 +144,7 @@ sealed class Statement {
             )
         }
     }
+
     data class VisitorStatement(val type: VisitorType, val state: Statement?, val location: BigLocation) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
@@ -143,7 +157,9 @@ sealed class Statement {
             )
         }
     }
-    data class EnumStatement(val id: Expression.Identifier, val enums : List<Expression>, val location: BigLocation) : Statement() {
+
+    data class EnumStatement(val id: Expression.Identifier, val enums: List<Expression>, val location: BigLocation) :
+        Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "EnumerationStatement" to mutableMapOf(
@@ -171,7 +187,12 @@ sealed class Statement {
         }
     }
 
-    data class ForStatement(val init: Expression, val rule: Expression, val body: Statement, val location: BigLocation) : Statement() {
+    data class ForStatement(
+        val init: Expression,
+        val rule: Expression,
+        val body: Statement,
+        val location: BigLocation
+    ) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "ForStatement" to mutableMapOf(
@@ -198,10 +219,11 @@ sealed class Statement {
     }
 
     data class EventStatement(
-        val id : Expression.Identifier,
+        val id: Expression.Identifier,
         val params: List<VariableStatement>,
         val body: BlockStatement,
-        val location: BigLocation): Statement(){
+        val location: BigLocation
+    ) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "ReturnStatement" to mutableMapOf(
@@ -218,7 +240,7 @@ sealed class Statement {
     data class FunctionDeclaration(
         val identifier: Expression.Identifier,
         val params: List<VariableStatement>,
-        val returnValue : Expression,
+        val returnValue: Expression,
         val body: BlockStatement?,
         val location: BigLocation
     ) : Statement() {
@@ -249,7 +271,8 @@ sealed class Statement {
         }
     }
 
-    data class SwitchStatement(val init: Expression, val body: List<CaseDeclaration>, val location: BigLocation) : Statement() {
+    data class SwitchStatement(val init: Expression, val body: List<CaseDeclaration>, val location: BigLocation) :
+        Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "SwitchStatement" to mutableMapOf(
@@ -263,13 +286,11 @@ sealed class Statement {
     }
 
 
-
-
     data class ClassDeclaration(
         val identifier: Expression.Identifier,
         val params: List<VariableStatement>?,
-        val ext : Expression.CallExpression?,
-        val impl : Expression.CallExpression?,
+        val ext: Expression.CallExpression?,
+        val impl: Expression.CallExpression?,
         val body: BlockStatement,
         val isInterface: Boolean,
         val location: BigLocation
@@ -292,13 +313,12 @@ sealed class Statement {
 
 
     abstract fun toMap(): MutableMap<Any?, Any?>
-    enum class VisitorType(val id: String){
+    enum class VisitorType(val id: String) {
         PUBLIC("public"),
         PRIVATE("private"),
         PROTECTED("protected"),
         ALREADY("already")
     }
-
 
 
 }

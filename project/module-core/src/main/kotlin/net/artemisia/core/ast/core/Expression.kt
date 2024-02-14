@@ -83,7 +83,7 @@ sealed class Expression {
         }
     }
 
-    data class UnaryExpression(val operator: String, val argument: Expression, val head : Boolean) : Expression() {
+    data class UnaryExpression(val operator: String, val argument: Expression, val head: Boolean) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "UnaryExpression" to mutableMapOf(
@@ -110,7 +110,8 @@ sealed class Expression {
         }
     }
 
-    data class CallExpression(val caller: Identifier, val arguments: List<Expression>, val location: BigLocation) : Expression() {
+    data class CallExpression(val caller: Identifier, val arguments: List<Expression>, val location: BigLocation) :
+        Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "CallExpression" to mutableMapOf(
@@ -135,6 +136,7 @@ sealed class Expression {
             )
         }
     }
+
     data class LogicalExpression(val operator: String, val left: Expression, val right: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
@@ -147,7 +149,12 @@ sealed class Expression {
             )
         }
     }
-    data class Constructor(val params: List<Statement.VariableStatement>, val body: Statement.BlockStatement?,val location: BigLocation) : Expression(){
+
+    data class Constructor(
+        val params: List<Statement.VariableStatement>,
+        val body: Statement.BlockStatement?,
+        val location: BigLocation
+    ) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "Constructor" to mutableMapOf(
@@ -158,7 +165,8 @@ sealed class Expression {
             )
         }
     }
-    data class ToExpression(val left: Expression,val right: Expression) : Expression(){
+
+    data class ToExpression(val left: Expression, val right: Expression) : Expression() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
                 "ToExpression" to mutableMapOf(
@@ -169,8 +177,6 @@ sealed class Expression {
             )
         }
     }
-
-
 
 
     abstract fun toMap(): MutableMap<Any?, Any?>

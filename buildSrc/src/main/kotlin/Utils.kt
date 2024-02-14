@@ -1,6 +1,3 @@
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
 import java.net.URL
 
 val currentISODate: String
@@ -14,6 +11,3 @@ val systemOS: String
 
 val systemIP: String
     get() = URL("http://ipinfo.io/ip").readText()
-
-val String.escapedVersion
-    get() = this.replace(".", "").replace("_", "").replace("-", "")

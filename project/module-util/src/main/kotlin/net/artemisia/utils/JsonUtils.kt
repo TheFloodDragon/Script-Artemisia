@@ -11,7 +11,8 @@ object JsonUtils {
         val jsonElement = JsonParser.parseString(jsonString)
         return gson.toJson(jsonElement)
     }
-    object Unicode{
+
+    object Unicode {
 
         private fun Int.toHexString(): String = Integer.toHexString(this)
 

@@ -12,7 +12,8 @@ abstract class NativeEvent {
         }
         return env
     }
-    fun <E> addParams(string: String,value : E){
-        env.define(string,value)
+
+    fun <E> addParams(string: String, value: E) {
+        env.define(string, value)
     }
 }

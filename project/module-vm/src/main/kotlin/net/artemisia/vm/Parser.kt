@@ -6,13 +6,13 @@ import java.nio.ByteBuffer
 import kotlin.text.Charsets.UTF_8
 
 
-class Parser(private val code : ByteArray) {
-    private var index : Int = 8
-    private val magic : ByteArray = code.sliceArray(0 until 4)
+class Parser(private val code: ByteArray) {
+    private var index: Int = 8
+    private val magic: ByteArray = code.sliceArray(0 until 4)
     val version = code.sliceArray(4 until 8)
     val stacksize = run {
         val size = code[index].toInt()
-        val value =  code[index + size]
+        val value = code[index + size]
         advance(size)
         value
     }
@@ -21,14 +21,14 @@ class Parser(private val code : ByteArray) {
         val poolSize = look().toInt()
         advance()
         val pool = ConstantPool()
-        val array = spiltCode(poolSize,false)
+        val array = spiltCode(poolSize, false)
         var i = 0
-        while (true){
+        while (true) {
             if (i >= poolSize) break
             val index = array[i].toInt()
             i += 1
             val t = array[i]
-            i+= 1
+            i += 1
             val len = array[i]
             i += 1
             val v = array.sliceArray(i until i + len)
@@ -37,38 +37,44 @@ class Parser(private val code : ByteArray) {
                 TypeObject.Type.NUMBER.id -> {
                     "Number"
                 }
+
                 TypeObject.Type.BOOLEAN.id -> {
                     "Boolean"
                 }
+
                 TypeObject.Type.IDENTIFIER.id -> {
                     "Identifier"
                 }
+
                 TypeObject.Type.STRING.id -> {
                     "String"
                 }
+
                 else -> {
                     "Void"
                 }
             }
-            val value = when(type){
+            val value = when (type) {
                 "Number" -> {
                     try {
                         ByteBuffer.wrap(v).getDouble()
-                    }catch (e : Exception){
+                    } catch (e: Exception) {
                         v[0].toInt()
                     }
                 }
+
                 "Boolean" -> v[0] == 0x01.toByte()
                 "Identifier" -> v.toString(UTF_8)
                 "String" -> {
 
                     v.toString(UTF_8)
                 }
+
                 else -> {
                     ""
                 }
             }
-            pool.add(index, arrayListOf(type,value))
+            pool.add(index, arrayListOf(type, value))
 
         }
         index += poolSize
@@ -76,18 +82,19 @@ class Parser(private val code : ByteArray) {
     }
     val codes = getCode(code)
     private fun getCode(code: ByteArray): MutableMap<Int, ArrayList<String>> {
-        fun toByte(i : Int): Byte {
+        fun toByte(i: Int): Byte {
             return i.toByte()
         }
+
         val len = look()
         advance()
         val codes = spiltCode(len.toInt())
-        val codeMap : MutableMap<Int,ArrayList<String>> = mutableMapOf()
+        val codeMap: MutableMap<Int, ArrayList<String>> = mutableMapOf()
         var i = 0
         var mapIndex = 0
-        while (true){
+        while (true) {
             if (i >= len) break
-            val type = when(codes[i]){
+            val type = when (codes[i]) {
                 toByte(0x4A) -> "LoadModule"
                 toByte(0x2A) -> "Call"
                 toByte(0x6A) -> "EventListener"
@@ -98,25 +105,28 @@ class Parser(private val code : ByteArray) {
                 toByte(0x13) -> "SaveConstant"
 
                 toByte(0x14) -> "InvokeType"
-                else -> { "" }
+                else -> {
+                    ""
+                }
             }
             i += 1
             val index = codes[i]
             i += 1
-            codeMap[mapIndex] = arrayListOf(type,index.toString())
+            codeMap[mapIndex] = arrayListOf(type, index.toString())
             mapIndex += 1
         }
         return codeMap
     }
+
     val functions = run {
         var iSize = 0
         val oSize = look().toInt()
-        val funcMap : MutableMap<Int,ArrayList<Any>> = mutableMapOf()
+        val funcMap: MutableMap<Int, ArrayList<Any>> = mutableMapOf()
         if (oSize == 0) {
             return@run funcMap
         }
         advance()
-        while (true){
+        while (true) {
             if (iSize >= oSize) break
             val index = look()
             advance()
@@ -124,23 +134,23 @@ class Parser(private val code : ByteArray) {
             val argsSize = look().toInt()
             advance()
             var argsISize = 0
-            val args : MutableMap<Int,ArrayList<Any>> = mutableMapOf()
-            while (true){
+            val args: MutableMap<Int, ArrayList<Any>> = mutableMapOf()
+            while (true) {
                 if (argsISize >= argsSize) break
                 advance()
                 val ids = getIdentifier()
                 val type = getType()
-                if (type.size >= 2){
+                if (type.size >= 2) {
                     val value = type[1]
-                    args[argsISize] = arrayListOf(ids,type,value)
-                }else{
-                    args[argsISize] = arrayListOf(ids,type)
+                    args[argsISize] = arrayListOf(ids, type, value)
+                } else {
+                    args[argsISize] = arrayListOf(ids, type)
                 }
                 argsISize += 1
             }
-            val code = getCode(spiltCode(look().toInt(),false))
+            val code = getCode(spiltCode(look().toInt(), false))
             val returnType = getType()
-            funcMap[index.toInt()] = arrayListOf(id,args,code,returnType)
+            funcMap[index.toInt()] = arrayListOf(id, args, code, returnType)
             iSize += 1
         }
 
@@ -152,11 +162,11 @@ class Parser(private val code : ByteArray) {
         var i = 0
         val size = look().toInt()
         advance()
-        val listeners : MutableMap<Int,ArrayList<Any>> = mutableMapOf()
+        val listeners: MutableMap<Int, ArrayList<Any>> = mutableMapOf()
         if (size == 0) {
             return@run listeners
         }
-        while (true){
+        while (true) {
             if (i >= size) break
             val index = look()
             advance()
@@ -164,26 +174,26 @@ class Parser(private val code : ByteArray) {
             val argsSize = look().toInt()
             advance()
             var argsISize = 0
-            val args : MutableMap<Int,ArrayList<Any>> = mutableMapOf()
+            val args: MutableMap<Int, ArrayList<Any>> = mutableMapOf()
 
-            while (true){
+            while (true) {
                 if (argsISize >= argsSize) break
                 advance()
                 val ids = getIdentifier()
 
                 val type = getType()
 
-                if (type.size >= 2){
+                if (type.size >= 2) {
                     val value = type[1]
-                    args[argsISize] = arrayListOf(ids,type,value)
-                }else{
-                    args[argsISize] = arrayListOf(ids,type)
+                    args[argsISize] = arrayListOf(ids, type, value)
+                } else {
+                    args[argsISize] = arrayListOf(ids, type)
                 }
                 argsISize += 1
             }
 
-            val code = getCode(spiltCode(look().toInt(),false))
-            listeners[index.toInt()] = arrayListOf(id,args,code)
+            val code = getCode(spiltCode(look().toInt(), false))
+            listeners[index.toInt()] = arrayListOf(id, args, code)
             i += 1
         }
 
@@ -192,31 +202,31 @@ class Parser(private val code : ByteArray) {
 
     val visitors = run {
         val size = look().toInt()
-        val visitorMap : MutableMap<Int,ArrayList<Any>> = mutableMapOf()
-        if(size == 0){
+        val visitorMap: MutableMap<Int, ArrayList<Any>> = mutableMapOf()
+        if (size == 0) {
             return@run visitorMap
         }
         advance()
         var i = 0
-        while (true){
+        while (true) {
             if (size <= i) break
             val index = look().toInt()
             advance()
-            val visitType = when(look()){
+            val visitType = when (look()) {
                 VisitorObject.VisitorType.ALREADY.i -> "already"
                 VisitorObject.VisitorType.PROTECTED.i -> "protected"
                 VisitorObject.VisitorType.PRIVATE.i -> "private"
                 else -> "public"
             }
             advance()
-            val obj = when(look()){
+            val obj = when (look()) {
                 VisitorObject.VisitObject.FUNCTION.i -> "function"
                 VisitorObject.VisitObject.VARIABLE.i -> "variable"
                 else -> "class"
             }
             advance()
             val vIndex = look().toInt()
-            val value = when(obj) {
+            val value = when (obj) {
                 "function" -> functions[vIndex] as ArrayList<*>
                 "variable" -> pool.pool[vIndex] as ArrayList<*>
                 else -> {
@@ -225,12 +235,11 @@ class Parser(private val code : ByteArray) {
             }
             advance()
             i += 4
-            visitorMap[index] = arrayListOf(visitType,obj,value)
+            visitorMap[index] = arrayListOf(visitType, obj, value)
         }
 
         visitorMap
     }
-
 
 
     fun getType(): ArrayList<Any> {
@@ -239,22 +248,26 @@ class Parser(private val code : ByteArray) {
             TypeObject.Type.NUMBER.id -> {
                 "Number"
             }
+
             TypeObject.Type.BOOLEAN.id -> {
                 "Boolean"
             }
+
             TypeObject.Type.IDENTIFIER.id -> {
                 "Identifier"
             }
+
             TypeObject.Type.STRING.id -> {
                 "String"
             }
+
             else -> {
                 "Void"
             }
         }
         advance()
-        if (look().toInt() != 0){
-            val value = when(type){
+        if (look().toInt() != 0) {
+            val value = when (type) {
                 "Identifier" -> getIdentifier()
                 "Number" -> getNumber()
                 "Boolean" -> getBoolean()
@@ -263,29 +276,31 @@ class Parser(private val code : ByteArray) {
                     "(void)"
                 }
             }
-            return arrayListOf(type,value)
+            return arrayListOf(type, value)
         }
 
         return arrayListOf(type)
     }
-    private fun getString() : String{
+
+    private fun getString(): String {
         val len = look()
         advance()
         return spiltCode(len.toInt()).toString(UTF_8)
     }
 
-    private fun getBoolean() : Boolean{
+    private fun getBoolean(): Boolean {
         val bool = look()
         advance()
         return bool == 0x01.toByte()
     }
-    private fun getNumber() : Number{
+
+    private fun getNumber(): Number {
         val len = look()
         advance()
         val value = spiltCode(len.toInt())
-        val number =  try {
+        val number = try {
             ByteBuffer.wrap(value).getDouble()
-        }catch (e : Exception){
+        } catch (e: Exception) {
             value[0].toInt()
         }
         return number
@@ -296,16 +311,17 @@ class Parser(private val code : ByteArray) {
         advance()
         return spiltCode(len).toString(UTF_8)
     }
+
     private fun look(): Byte {
         return code[index]
     }
 
-    private fun advance(value : Int = 1): Byte {
+    private fun advance(value: Int = 1): Byte {
         if (!isEnd()) index += value
         return code[index]
     }
 
-    private fun spiltCode(len: Int,jump : Boolean = true): ByteArray {
+    private fun spiltCode(len: Int, jump: Boolean = true): ByteArray {
         val bytes = code.sliceArray(index until index + len)
         if (jump) advance(len)
         return bytes

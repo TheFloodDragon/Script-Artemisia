@@ -16,20 +16,22 @@ class Visitor {
 
 
     private var values: MutableMap<String, Any?> = mutableMapOf()
-    private var consts : MutableMap<String,Any?> = mutableMapOf()
-    private var functions : MutableMap<String,Any?> = mutableMapOf()
+    private var consts: MutableMap<String, Any?> = mutableMapOf()
+    private var functions: MutableMap<String, Any?> = mutableMapOf()
 
     fun getValue(): MutableMap<String, Any?> {
         return values
     }
+
     fun getConst(): MutableMap<String, Any?> {
         return consts
     }
+
     fun getFunction(): MutableMap<String, Any?> {
         return functions
     }
 
-    fun addFunction(key: String, value: Any?){
+    fun addFunction(key: String, value: Any?) {
         functions[key] = value
     }
 
@@ -40,42 +42,45 @@ class Visitor {
         if (values.keys.contains(key)) {
             return values[key]
         }
-        if (consts.keys.contains(key)){
+        if (consts.keys.contains(key)) {
             return consts[key]
         }
-        if ( visitor != this) {
+        if (visitor != this) {
             return visitor.get(key)
         }
         return null
     }
-    fun defineAll(value : MutableMap<String, Any?>){
-        for (i in value.keys){
-            define(i,value[i])
+
+    fun defineAll(value: MutableMap<String, Any?>) {
+        for (i in value.keys) {
+            define(i, value[i])
         }
     }
-    fun set(key: String, value: Any?,isFunction: Boolean = false) {
-        if (isFunction || value is NativeFunction){
+
+    fun set(key: String, value: Any?, isFunction: Boolean = false) {
+        if (isFunction || value is NativeFunction) {
             functions[key] = value
             return
         }
-        if (values.keys.contains(key)){
+        if (values.keys.contains(key)) {
             values[key] = value
             return
         }
         if (consts.keys.contains(key)) thrower.SyntaxError("Cannot set const variable '$key'")
         if (visitor != this) {
-            visitor.set(key,value)
+            visitor.set(key, value)
             return
         }
         thrower.SyntaxError("Undefined variable '$key' to set.")
         return
     }
-    fun define(key: String, value: Any?, const : Boolean = false,isFunction : Boolean = false){
-        if (isFunction || value is NativeFunction){
+
+    fun define(key: String, value: Any?, const: Boolean = false, isFunction: Boolean = false) {
+        if (isFunction || value is NativeFunction) {
             functions[key] = value
-        }else if (const){
+        } else if (const) {
             consts[key] = value
-        }else{
+        } else {
             values[key] = value
         }
     }

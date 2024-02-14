@@ -6,7 +6,6 @@
 
 ## · 什么是Artemisia?
 
-
 > 项目于2023年11月8日开始编写
 >
 > 当前基于Kotlin
@@ -429,17 +428,16 @@
          ;
          ```
 
-
-
-
-
 # 构建
+
 **MacOS** / **Linux**
+
 ````
     ./gradlew build
 ````
 
 **Windows**
+
 ````
     gradlew.bat buid
 ````
