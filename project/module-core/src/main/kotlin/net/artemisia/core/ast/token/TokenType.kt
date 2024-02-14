@@ -6,6 +6,9 @@ package net.artemisia.core.ast.token
 enum class TokenType(val id: String) {
     // Keywords
     CLASS("class"),
+    IMPL("impl"),
+    EXT("ext"),
+    CONSTRUCTOR("constructor"),
     CONST("const"),
     SWITCH("switch"),
     CASE("case"),
@@ -49,6 +52,7 @@ enum class TokenType(val id: String) {
     OBJECT("object"),
 
     // Symbols
+    TO("->"),
     ARROW(">"),
     COLON(":"),
     AND("&&"),

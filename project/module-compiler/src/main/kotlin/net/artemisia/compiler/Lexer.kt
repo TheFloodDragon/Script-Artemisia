@@ -23,6 +23,9 @@ class Lexer(private var source: String) {
         "try" to TokenType.TRY,
         "catch" to TokenType.CATCH,
         "val" to TokenType.VAL,
+        "ext" to TokenType.EXT,
+        "impl" to TokenType.IMPL,
+        "constructor" to TokenType.CONSTRUCTOR,
         "this" to TokenType.THIS,
         "super" to TokenType.SUPER,
         "do" to TokenType.DO,
@@ -69,7 +72,7 @@ class Lexer(private var source: String) {
             start = current
             when(val c = advance()){
                 '(', ')', '.', ',','{',']','[','}',':',';' -> addToken(typeFinder())
-                '-' -> addToken(if (match('=')) typeFinder() else if(match('-')) typeFinder() else typeFinder())
+                '-' -> addToken(if (match('=')) typeFinder() else if(match('-')) typeFinder() else if(match('>')) typeFinder() else typeFinder())
                 '+' -> addToken(if (match('=')) typeFinder() else if(match('+')) typeFinder() else typeFinder())
                 '*' -> addToken(if (match('=')) typeFinder() else typeFinder())
                 '/' -> {

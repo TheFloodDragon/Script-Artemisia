@@ -147,6 +147,31 @@ sealed class Expression {
             )
         }
     }
+    data class Constructor(val params: List<Statement.VariableStatement>, val body: Statement.BlockStatement?,val location: BigLocation) : Expression(){
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "Constructor" to mutableMapOf(
+                    "type" to "Constructor",
+                    "params" to params.map { it.toMap() },
+                    "body" to body?.toMap(),
+                )
+            )
+        }
+    }
+    data class ToExpression(val left: Expression,val right: Expression) : Expression(){
+        override fun toMap(): MutableMap<Any?, Any?> {
+            return mutableMapOf(
+                "ToExpression" to mutableMapOf(
+                    "type" to "ToExpression",
+                    "left" to left.toMap(),
+                    "right" to right.toMap(),
+                )
+            )
+        }
+    }
+
+
+
 
     abstract fun toMap(): MutableMap<Any?, Any?>
 }

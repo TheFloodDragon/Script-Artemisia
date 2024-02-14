@@ -252,8 +252,8 @@ sealed class Statement {
     data class SwitchStatement(val init: Expression, val body: List<CaseDeclaration>, val location: BigLocation) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
             return mutableMapOf(
-                "SwichStatement" to mutableMapOf(
-                    "type" to "SwichStatement",
+                "SwitchStatement" to mutableMapOf(
+                    "type" to "SwitchStatement",
                     "location" to location.toMap(),
                     "init" to init.toMap(),
                     "cases" to body.map { it.toMap() }
@@ -263,10 +263,15 @@ sealed class Statement {
     }
 
 
+
+
     data class ClassDeclaration(
         val identifier: Expression.Identifier,
         val params: List<VariableStatement>?,
+        val ext : Expression.CallExpression?,
+        val impl : Expression.CallExpression?,
         val body: BlockStatement,
+        val isInterface: Boolean,
         val location: BigLocation
     ) : Statement() {
         override fun toMap(): MutableMap<Any?, Any?> {
@@ -275,8 +280,11 @@ sealed class Statement {
                     "type" to "ClassDeclaration",
                     "location" to location.toMap(),
                     "identifier" to identifier.toMap(),
+                    "ext" to ext?.toMap(),
+                    "impl" to impl?.toMap(),
                     "params" to params?.map { it.toMap() },
                     "body" to body.toMap(),
+                    "isInterface" to isInterface
                 )
             )
         }

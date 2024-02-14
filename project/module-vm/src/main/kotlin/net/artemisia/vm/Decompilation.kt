@@ -40,6 +40,9 @@ class Decompilation(val file : File) {
                         "${
                             if (parser.codes[i]!![0] == "CreateFunction") {
                                 parser.functions[parser.codes[i]!![1].toInt()]
+                            }else if (parser.codes[i]!![0] == "EventListener") {
+                                parser.listeners[parser.codes[i]!![1].toInt()]
+                            
                             } else if(parser.codes[i]!![0] == "InvokeType"){
                                 if(pool[parser.codes[i]!![1].toInt()] == null){
                                     when(parser.codes[i]!![1].toInt()){

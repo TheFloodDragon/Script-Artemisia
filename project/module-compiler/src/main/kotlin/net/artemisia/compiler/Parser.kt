@@ -33,12 +33,16 @@ class Parser(code: String, val file: File) {
         return Statement.Program(statementList, BigLocation(Location(1, 1), end))
     }
     fun parserJson(): String {
+        for (i in tokens){
+            println(i)
+        }
         return JsonUtils.toJson(parser().toMap())
     }
     private inner class statement {
         fun get(): Statement? {
             //根据当前token的类型，返回不同的语句
             return when (currentToken.type) {
+                TokenType.CONSTRUCTOR -> Statement.ExpressionStatement(constructorStatement(),constructorStatement().location)
                 TokenType.VAR -> varStatement()
                 TokenType.CONST, TokenType.VAL -> varStatement(true)
                 TokenType.LEFT_BRACE -> blockStatement()
@@ -89,7 +93,9 @@ class Parser(code: String, val file: File) {
                                 Statement.ExpressionStatement(expr.logical(expr.get()), BigLocation(start, end))
                             } else if (expr.binary.contains(peek().type)) {
                                 Statement.ExpressionStatement(expr.binary(expr.get()), BigLocation(start, end))
-                            } else {
+                            } else if (check(TokenType.TO)){
+                                Statement.ExpressionStatement(expr.toExpr(expr.get()), BigLocation(start, end))
+                            }else{
                                 Statement.ExpressionStatement(expr.assignment(), BigLocation(start, end))
                             }
                         }
@@ -400,19 +406,53 @@ class Parser(code: String, val file: File) {
             return Statement.DoWhileStatement(body, rule, BigLocation(start, end))
         }
 
-        fun classStatement(): Statement.ClassDeclaration {
+        fun constructorStatement(): Expression.Constructor {
+            val start = Location(line, column)
+            consume(TokenType.CONSTRUCTOR)
+            val params = paramGetter()
+            if (currentToken.type == TokenType.LEFT_BRACE){
+                val end = getEnd()
+                return Expression.Constructor(params,body = blockStatement(), BigLocation(start, end))
+            }
+            val end = getEnd()
+            return Expression.Constructor(params,null, BigLocation(start, end))
+        }
+
+        fun classStatement(isInterface : Boolean = false): Statement.ClassDeclaration {
+            var ext = false
+            fun getInherit(): Expression.CallExpression {
+                if (currentToken.type == TokenType.IMPL){
+                    consume(TokenType.IMPL)
+                    return expr.get() as Expression.CallExpression
+                }else{
+                    consume(TokenType.EXT)
+                    ext = true
+                    return expr.get() as Expression.CallExpression
+                }
+            }
             val start = Location(line, column)
             consume(TokenType.CLASS)
             val id = expr.identifier()
             if (currentToken.type == TokenType.LEFT_PAREN) {
                 val params = paramGetter()
+                val inherit = getInherit()
                 val body = blockStatement()
                 val end = getEnd()
-                return Statement.ClassDeclaration(id, params, body, BigLocation(start, end))
+                return if (ext){
+                    Statement.ClassDeclaration(id, params, inherit,null,body,isInterface,BigLocation(start, end))
+                }else{
+                    Statement.ClassDeclaration(id, params,null,inherit,body,isInterface,BigLocation(start, end))
+                }
+
             }
+            val inherit = getInherit()
             val body = blockStatement()
             val end = getEnd()
-            return Statement.ClassDeclaration(id, null, body, BigLocation(start, end))
+            return if (ext){
+                Statement.ClassDeclaration(id,null, inherit,null,body,isInterface,BigLocation(start, end))
+            }else{
+                Statement.ClassDeclaration(id, null,null,inherit,body,isInterface,BigLocation(start, end))
+            }
         }
 
         fun ifStatement(): Statement.IfStatement {
@@ -539,8 +579,8 @@ class Parser(code: String, val file: File) {
         fun get(): Expression {
             return when (currentToken.type) {
                 TokenType.MINUS, TokenType.BANG, TokenType.Incrementing, TokenType.Subtraction -> unary()!!
+                TokenType.CONSTRUCTOR -> state.constructorStatement()
                 TokenType.IDENTIFIER -> {
-
                     if (check(TokenType.LEFT_PAREN)) {
                         val left = callee()
                         if (binary.contains(currentToken.type)) {
@@ -561,6 +601,10 @@ class Parser(code: String, val file: File) {
                         }
                         return left
                     }
+                    if (check(TokenType.TO)){
+                        val left = primary()
+                        return toExpr(left)
+                    }
                     if (binary.contains(peek().type)) {
                         val left = primary()
                         return binary(left)
@@ -578,6 +622,9 @@ class Parser(code: String, val file: File) {
                         return member()
                     }
                     val left = primary()
+                    if (check(TokenType.TO)){
+                        return toExpr(left)
+                    }
                     if (binary.contains(currentToken.type)) {
                         return binary(left)
                     }
@@ -589,9 +636,13 @@ class Parser(code: String, val file: File) {
             }
         }
 
-        fun getLogical() {
+        fun toExpr(left: Expression): Expression.ToExpression {
+            consume(TokenType.TO)
+            val right = primary()
+            return Expression.ToExpression(left,right)
 
         }
+
 
         fun isAssignmentOperator(): Token {
             if (currentToken.type == TokenType.EQUAL) return consume(TokenType.EQUAL)
@@ -855,6 +906,9 @@ class Parser(code: String, val file: File) {
     }
     private fun consume(tokenType: TokenType): Token {
         val token = currentToken
+        if (currentToken.type == TokenType.EOF){
+            isEnd = true
+        }
         if (currentToken.type != tokenType) {
             thrower.send(
                 "Expect Token ['${tokenType.id}'] but is ['${token.type.id}']",

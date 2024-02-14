@@ -254,6 +254,8 @@ class Compiler(private val file : File) {
             }
             is Expression.UnaryExpression -> TODO()
             Expression.VoidLiteral -> TODO()
+            is Expression.Constructor -> TODO()
+            is Expression.ToExpression -> TODO()
         }
     }
 
