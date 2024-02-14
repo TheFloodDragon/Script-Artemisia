@@ -257,7 +257,7 @@
        声明 **Statement**
 
         ``` 
-        fn (名称) (参数) : [返回类型] { 
+        def (名称) (参数) : [返回类型] { 
             [表达式]
         }
         ```
@@ -265,10 +265,10 @@
        示例 **Example**
 
         ``` 
-        fn helloworld() {
+        def helloworld() {
             println("HelloWorld!")
         }
-        fn add(a : Number,b : Number){
+        def add(a : Number,b : Number){
             return a + b
         }
         ```
