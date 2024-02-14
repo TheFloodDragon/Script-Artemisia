@@ -1,1 +1,21 @@
-a -> b
+val a = constructor(val number : Number) -> String
+class awa ext Object{
+    val b : Number;
+
+    constructor(val number : Number){
+        b = number;
+
+    }
+    def c : String {
+        val a = ""
+        constructor(val number : Number){
+            a = number -> String
+        }
+        constructor(val str : String){
+             a = number -> str
+        }
+        return a
+    }
+
+
+}
