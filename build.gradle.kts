@@ -7,9 +7,7 @@ plugins {
 }
 
 subprojects {
-
     applyPlugins()
-
     repositories {
         mavenLocal()
         mavenCentral()

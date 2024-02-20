@@ -1,3 +1,0 @@
-dependencies {
-    compileModule("module-api")
-}
