@@ -277,6 +277,7 @@ class Compiler(private val file: File) {
             is Expr.ToExpr -> TODO()
             is Expr.Lambda -> TODO()
             is Expr.Parameter -> TODO()
+            is Expr.GenericExpr -> TODO()
         }
     }
 
