@@ -114,7 +114,7 @@ class Compiler(private val file: File) {
             }
 
             is State.ForState -> TODO()
-            is State.FunctionDeclaration -> {
+            is State.MethodDeclaration -> {
                 val args: ArrayList<ArgObject> = arrayListOf()
                 val array: ArrayList<CodeObject> = arrayListOf()
                 val id = TypeGetter(s.identifier)
@@ -151,7 +151,7 @@ class Compiler(private val file: File) {
                 TODO()
             }
 
-            is State.Program -> TODO()
+            is State.Module -> TODO()
             is State.ReturnState -> TODO()
             is State.SwitchState -> TODO()
             is State.TryState -> TODO()
@@ -162,7 +162,7 @@ class Compiler(private val file: File) {
 
 
                     val iIndex = pool.search(id.toList())
-                    array.addAll(statement(State.ExpressionState(s.init!!, s.location), pool))
+                    array.addAll(statement(s.init!!, pool))
                     typeInvoke(s.type, pool)?.let { toCode(it) }?.let { array.add(it) }
                     array.add(toCode(ByteCode.SaveConstant(iIndex!!.toByte())))
                     if (autoVisitor) {
@@ -189,7 +189,7 @@ class Compiler(private val file: File) {
                     return array
                 } else if (!s.const && s.init != null) {
                     val iIndex = pool.search(id.toList())
-                    array.addAll(statement(State.ExpressionState(s.init!!, s.location), pool))
+                    array.addAll(statement(s.init!!, pool))
                     typeInvoke(s.type, pool)?.let { toCode(it) }?.let { array.add(it) }
                     array.add(toCode(ByteCode.SaveVariable(iIndex!!.toByte())))
                     return array

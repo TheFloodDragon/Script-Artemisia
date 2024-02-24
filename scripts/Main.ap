@@ -1,1 +1,6 @@
-a().a().b()
+module console{
+    method a(){
+
+
+    }
+}

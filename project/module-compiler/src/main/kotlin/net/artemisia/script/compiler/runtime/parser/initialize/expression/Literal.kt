@@ -27,10 +27,6 @@ class Literal : Expression{
             return Expr.ObjectLiteral(parser.consume(parser.look().type)!!.value)
         }
 
-        fun VoidLiteral(): Expr.VoidLiteral {
-            parser.consume(TokenType.VOID)
-            return Expr.VoidLiteral
-        }
 
         fun NullLiteral(): Expr.NullLiteral {
             parser.consume(TokenType.NULL)
@@ -44,8 +40,6 @@ class Literal : Expression{
             TokenType.STRING -> StringLiteral()
             TokenType.FALSE, TokenType.TRUE -> BooleanLiteral()
             TokenType.NULL -> NullLiteral()
-            TokenType.OBJECT -> ObjectLiteral()
-            TokenType.VOID -> VoidLiteral()
             else -> {
                 thrower.send(
                     "Unexpected literal production ['${parser.look().type}']",

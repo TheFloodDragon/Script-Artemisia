@@ -3,15 +3,16 @@ package net.artemisia.script.common.token
 
 enum class TokenType(val id: String) {
     // Keywords
+    MODULE("module"),
     CLASS("class"),
     IMPL("impl"),
     EXT("ext"),
     CONSTRUCTOR("constructor"),
-    CONST("const"),
+    FINAL("final"),
     SWITCH("switch"),
     CASE("case"),
-    VAL("val"),
-    DEF("def"),
+    LET("let"),
+    METHOD("method"),
     TRY("try"),
     EVENT("event"),
     CATCH("catch"),
@@ -20,7 +21,6 @@ enum class TokenType(val id: String) {
     BREAK("break"),
     CONTINUE("continue"),
     ELSE("else"),
-    VAR("var"),
     FOR("for"),
     IF("if"),
     IMPORT("import"),
@@ -45,8 +45,6 @@ enum class TokenType(val id: String) {
     NUMBER("number"),
     STRING("string"),
     BOOLEAN("boolean"),
-    VOID("Void"),
-    OBJECT("object"),
 
     // Symbols
     TO("->"),

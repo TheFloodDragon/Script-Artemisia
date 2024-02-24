@@ -7,12 +7,9 @@ import net.artemisia.script.common.token.TokenType
 import net.artemisia.script.compiler.Parser
 import net.artemisia.script.compiler.runtime.parser.Expression
 
-class Call : Expression {
+class Call(val id : Expr) : Expression {
     override fun visit(parser: Parser): Expr {
         val start = parser.getLocation()
-
-        val id = Identifier().visit(parser)
-
         val states : ArrayList<State> = arrayListOf()
         parser.consume(TokenType.LEFT_PAREN)
         while (parser.look().type != TokenType.RIGHT_PAREN){
@@ -26,7 +23,7 @@ class Call : Expression {
         val member = Member(result)
         if (Member(result).isMember(parser)) return member.visit(parser)
 
-        parser.spilt()
+        //parser.spilt()
 
         return Expr.CallExpr(id,states, BigLocation(start,end))
     }

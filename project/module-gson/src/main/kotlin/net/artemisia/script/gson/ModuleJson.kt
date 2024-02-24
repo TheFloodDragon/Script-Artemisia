@@ -4,15 +4,15 @@ import com.google.gson.GsonBuilder
 import net.artemisia.script.common.ast.Expr
 import net.artemisia.script.common.ast.State
 import net.artemisia.script.common.location.BigLocation
-import java.lang.reflect.ParameterizedType
 import kotlin.reflect.full.primaryConstructor
 
 
-class JsonProgram {
-    fun parser(state: State.Program): String? {
+class ModuleJson {
+    fun parser(state: State.Module): String? {
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
         val map : MutableMap<Any?,Any?> = mutableMapOf()
-        map["name"] = "program"
+        map["name"] = "Module"
+        map["id"] = state.id.name
         map["location"] = state.location.toMap()
         val list : ArrayList<MutableMap<Any?,Any?>> = arrayListOf()
         for (i in state.body){

@@ -7,37 +7,60 @@ import net.artemisia.script.common.location.BigLocation
 import net.artemisia.script.common.location.Location
 import net.artemisia.script.common.token.Token
 import net.artemisia.script.common.token.TokenType
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.Call
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.Identifier
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.Literal
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.Member
+import net.artemisia.script.compiler.runtime.parser.initialize.expression.*
 import net.artemisia.script.compiler.runtime.parser.initialize.statement.EmptyStatement
+import net.artemisia.script.compiler.runtime.parser.initialize.statement.ImportStatement
+import net.artemisia.script.compiler.runtime.parser.initialize.statement.ModuleStatement
+import net.artemisia.script.compiler.runtime.parser.initialize.statement.VariableStatement
 import java.io.File
+import kotlin.system.exitProcess
 
 class Parser(val file: File) {
     private val tokens : List<Token> = Lexer(file.readText()).tokens
     private var index = 0
     private var currentToken : Token = tokens[index]
-    private val isEnd : Boolean = tokens.size <= index || currentToken.type == TokenType.EOF
-
-    private val program : ArrayList<State> = arrayListOf()
-    fun parser(): State.Program {
+    private var isModuleSet = false
+    val isEnd : Boolean = tokens.size <= index || currentToken.type == TokenType.EOF
+    var module : State.Module? = null
+    private val imports : ArrayList<State.ImportState> = arrayListOf()
+    fun parser(): State.Module {
         val start = getLocation()
         while (true){
-            if (isEnd || currentToken.type == TokenType.EOF) break
-            program.add(getState())
+            if (isEnd || currentToken.type == TokenType.EOF){
+                break
+            }else if (match(TokenType.MODULE) && !isModuleSet){
+                module = ModuleStatement().visit(this)
+                module!!.body.addAll(imports)
+                isModuleSet = true
+                break
+            }else if (match(TokenType.IMPORT)){
+                imports.add(ImportStatement().visit(this))
+            } else{
+                val end = getLocation()
+                thrower.send("Unknown Module!","Module Error",file, BigLocation(start,end),true)
+            }
         }
-        val end = getLocation()
-        return State.Program(program, BigLocation(start, end))
+        if (module!=null){
+            return module as State.Module
+        }else{
+            val end = getLocation()
+            if (file.readLines().isEmpty()){
+                exitProcess(0)
+            }
+            thrower.send("Unknown Module!","Module Error",file, BigLocation(start,end),true)
+            return module!!
+        }
     }
 
     fun getState(): State {
         return when(currentToken.type){
+            TokenType.FINAL -> VariableStatement(true).visit(this)
+            TokenType.LET -> VariableStatement().visit(this)
             TokenType.IDENTIFIER,TokenType.NUMBER,TokenType.STRING,TokenType.BOOLEAN -> {
                 val start = getLocation()
                 val expr = if (check(TokenType.DOT) || check(TokenType.LEFT_SQUARE)){
                     Member().visit(this)
-                }else {
+                } else {
                     getExpr()
                 }
                 val end = getLocation()
@@ -56,11 +79,21 @@ class Parser(val file: File) {
         return when(currentToken.type){
             TokenType.NUMBER,TokenType.STRING,TokenType.BOOLEAN -> {
                 Literal().visit(this)
+
             }
             TokenType.IDENTIFIER -> {
                 when (peek().type){
+                    TokenType.LESS -> {
+                        val result = Generic().visit(this)
+                        if (match(TokenType.LEFT_PAREN)) {
+                            Call(result).visit(this)
+                        }else{
+                            result
+                        }
+                    }
                     TokenType.LEFT_PAREN -> {
-                        Call().visit(this)
+                        Call(Identifier().visit(this)).visit(this)
+
                     }
                     else -> {
                         Identifier().visit(this)
