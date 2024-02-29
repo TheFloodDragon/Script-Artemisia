@@ -20,7 +20,7 @@ sealed class State {
     data class ForState(val init: Expr, val rule: Expr, val body: State, val location: BigLocation) : State()
     data class ReturnState(val argument: Expr?, val location: BigLocation) : State()
     data class EventState(val id: Expr.Identifier, val params: List<VariableDeclaration>, val body: BlockState, val location: BigLocation) : State()
-    data class MethodDeclaration(val identifier: Expr.Identifier, val params: List<VariableDeclaration>, val returnValue: Expr, val body: BlockState?, val location: BigLocation) : State()
+    data class MethodDeclaration(val identifier: Expr, val params: List<VariableDeclaration>, val body: BlockState?, val type: Expr?, val location: BigLocation) : State()
     data class CaseDeclaration(val case: Expr, val body: State?, val location: BigLocation) : State()
     data class SwitchState(val init: Expr, val body: List<CaseDeclaration>, val location: BigLocation) : State()
     data class ClassDeclaration(val identifier: Expr.Identifier, val params: List<VariableDeclaration>?, val ext: Expr.CallExpr?, val impl: Expr.CallExpr?, val body: BlockState, val isInterface: Boolean, val location: BigLocation) : State()

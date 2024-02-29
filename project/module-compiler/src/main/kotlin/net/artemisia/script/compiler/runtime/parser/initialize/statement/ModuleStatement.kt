@@ -1,5 +1,6 @@
 package net.artemisia.script.compiler.runtime.parser.initialize.statement
 
+import net.artemisia.script.common.ast.Expr
 import net.artemisia.script.common.ast.State
 import net.artemisia.script.common.location.BigLocation
 import net.artemisia.script.common.token.TokenType
@@ -7,11 +8,11 @@ import net.artemisia.script.compiler.Parser
 import net.artemisia.script.compiler.runtime.parser.Statement
 import net.artemisia.script.compiler.runtime.parser.initialize.expression.Identifier
 
-class ModuleStatement : Statement{
+class ModuleStatement(val identifier: Expr.Identifier? = null) : Statement{
     override fun visit(parser: Parser): State.Module {
-        parser.consume(TokenType.MODULE)
         val start = parser.getLocation()
-        val id = Identifier().visit(parser)
+        if (parser.match(TokenType.METHOD)) parser.consume(TokenType.MODULE)
+        val id = identifier ?: Identifier().visit(parser)
         if (parser.match(TokenType.LEFT_BRACE)){
 
             val body = BlockStatement().visit(parser).body as ArrayList

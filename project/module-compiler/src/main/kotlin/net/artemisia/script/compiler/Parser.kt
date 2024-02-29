@@ -8,12 +8,8 @@ import net.artemisia.script.common.location.Location
 import net.artemisia.script.common.token.Token
 import net.artemisia.script.common.token.TokenType
 import net.artemisia.script.compiler.runtime.parser.initialize.expression.*
-import net.artemisia.script.compiler.runtime.parser.initialize.statement.EmptyStatement
-import net.artemisia.script.compiler.runtime.parser.initialize.statement.ImportStatement
-import net.artemisia.script.compiler.runtime.parser.initialize.statement.ModuleStatement
-import net.artemisia.script.compiler.runtime.parser.initialize.statement.VariableStatement
+import net.artemisia.script.compiler.runtime.parser.initialize.statement.*
 import java.io.File
-import kotlin.system.exitProcess
 
 class Parser(val file: File) {
     private val tokens : List<Token> = Lexer(file.readText()).tokens
@@ -24,7 +20,6 @@ class Parser(val file: File) {
     var module : State.Module? = null
     private val imports : ArrayList<State.ImportState> = arrayListOf()
     fun parser(): State.Module {
-        val start = getLocation()
         while (true){
             if (isEnd || currentToken.type == TokenType.EOF){
                 break
@@ -35,25 +30,17 @@ class Parser(val file: File) {
                 break
             }else if (match(TokenType.IMPORT)){
                 imports.add(ImportStatement().visit(this))
-            } else{
-                val end = getLocation()
-                thrower.send("Unknown Module!","Module Error",file, BigLocation(start,end),true)
             }
         }
-        if (module!=null){
-            return module as State.Module
-        }else{
-            val end = getLocation()
-            if (file.readLines().isEmpty()){
-                exitProcess(0)
-            }
-            thrower.send("Unknown Module!","Module Error",file, BigLocation(start,end),true)
-            return module!!
+        if (module == null){
+            module = ModuleStatement(Expr.Identifier(file.nameWithoutExtension)).visit(this)
         }
+        return module!!
     }
 
     fun getState(): State {
         return when(currentToken.type){
+            TokenType.METHOD -> MethodStatement().visit(this)
             TokenType.FINAL -> VariableStatement(true).visit(this)
             TokenType.LET -> VariableStatement().visit(this)
             TokenType.IDENTIFIER,TokenType.NUMBER,TokenType.STRING,TokenType.BOOLEAN -> {

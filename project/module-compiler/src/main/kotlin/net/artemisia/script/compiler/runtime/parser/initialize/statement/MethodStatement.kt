@@ -1,12 +1,34 @@
 package net.artemisia.script.compiler.runtime.parser.initialize.statement
 
+import net.artemisia.script.common.ast.Expr
 import net.artemisia.script.common.ast.State
+import net.artemisia.script.common.location.BigLocation
+import net.artemisia.script.common.token.TokenType
 import net.artemisia.script.compiler.Parser
 import net.artemisia.script.compiler.runtime.parser.Statement
 
 class MethodStatement : Statement{
-    override fun visit(parser: Parser): State {
-        TODO("Not yet implemented")
+    override fun visit(parser: Parser): State.MethodDeclaration {
+        val start = parser.getLocation()
+        parser.consume(TokenType.METHOD)
+        val id = parser.getExpr()
+        parser.consume(TokenType.LEFT_PAREN)
+        val params : ArrayList<State.VariableDeclaration> = arrayListOf()
+        while (parser.look().type != TokenType.RIGHT_PAREN){
+            when (parser.look().type){
+                TokenType.FINAL -> params.add(VariableStatement(true).visit(parser))
+                else -> params.add(VariableStatement().visit(parser))
+            }
+        }
+        parser.consume(TokenType.RIGHT_PAREN)
+        val block = BlockStatement().visit(parser)
+        if (parser.match(TokenType.COLON)){
+            parser.consume(TokenType.COLON)
+            val type = parser.getExpr()
+            val end = parser.getLocation()
+            return State.MethodDeclaration(id,params,block,type, BigLocation(start, end))
+        }
+        val end = parser.getLocation()
+        return State.MethodDeclaration(id,params,block,Expr.VoidLiteral, BigLocation(start, end))
     }
-
 }
