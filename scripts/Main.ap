@@ -1,5 +1,6 @@
-import String
-method a(a : String){
-    println("awa")
+let a = add(1,2)
+
+method add(a : String,b : Int){
+    let a = i
 
 }

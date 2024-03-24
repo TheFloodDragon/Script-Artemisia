@@ -16,6 +16,7 @@ class MethodStatement : Statement{
         parser.consume(TokenType.LEFT_PAREN)
         val params : ArrayList<State.VariableDeclaration> = arrayListOf()
         while (parser.look().type != TokenType.RIGHT_PAREN){
+            if (parser.match(TokenType.COMMA)) parser.consume(TokenType.COMMA)
             when (parser.look().type){
                 TokenType.FINAL -> params.add(VariableStatement(true).visit(parser))
                 else -> params.add(VariableStatement().visit(parser))
