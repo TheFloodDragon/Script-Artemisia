@@ -11,7 +11,8 @@ import net.artemisia.script.compiler.runtime.parser.initialize.expression.Identi
 class ModuleStatement(val identifier: Expr.Identifier? = null) : Statement{
     override fun visit(parser: Parser): State.Module {
         val start = parser.getLocation()
-        if (parser.match(TokenType.METHOD)) parser.consume(TokenType.MODULE)
+
+        if (parser.match(TokenType.MODULE)) parser.consume(TokenType.MODULE)
         val id = identifier ?: Identifier().visit(parser)
         if (parser.match(TokenType.LEFT_BRACE)){
 

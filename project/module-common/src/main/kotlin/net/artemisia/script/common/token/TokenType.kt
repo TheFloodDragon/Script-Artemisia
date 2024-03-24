@@ -4,6 +4,7 @@ package net.artemisia.script.common.token
 enum class TokenType(val id: String) {
     // Keywords
     MODULE("module"),
+    MODIFIER("modifier"),
     CLASS("class"),
     IMPL("impl"),
     EXT("ext"),
@@ -72,6 +73,7 @@ enum class TokenType(val id: String) {
     SLASH("/"),
     STAR("*"),
     NEWLINE("\n"),
+    AT("@"),
 
     LEFT_SQUARE("["),
     RIGHT_SQUARE("]"),

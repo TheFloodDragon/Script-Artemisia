@@ -31,10 +31,9 @@ class VariableStatement(private val final : Boolean = false) : Statement {
         if (final) {
             return final(start,parser)
         }
-        if (parser.match(TokenType.EQUAL)){
+        if (parser.match(TokenType.EQUAL)) {
             parser.consume(TokenType.EQUAL)
-            val init = parser.getState()
-            return init
+            return parser.getState()
         }
         return null
     }

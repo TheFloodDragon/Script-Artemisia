@@ -25,21 +25,24 @@ class Parser(val file: File) {
                 break
             }else if (match(TokenType.MODULE) && !isModuleSet){
                 module = ModuleStatement().visit(this)
-                module!!.body.addAll(imports)
                 isModuleSet = true
                 break
             }else if (match(TokenType.IMPORT)){
                 imports.add(ImportStatement().visit(this))
-            }
+            }else if (match(TokenType.NEWLINE)) consume(TokenType.NEWLINE)
+            break
         }
         if (module == null){
             module = ModuleStatement(Expr.Identifier(file.nameWithoutExtension)).visit(this)
         }
+
+        module!!.body.addAll(imports)
         return module!!
     }
 
     fun getState(): State {
         return when(currentToken.type){
+            TokenType.RETURN -> ReturnStatement().visit(this)
             TokenType.METHOD -> MethodStatement().visit(this)
             TokenType.FINAL -> VariableStatement(true).visit(this)
             TokenType.LET -> VariableStatement().visit(this)
@@ -54,7 +57,11 @@ class Parser(val file: File) {
                 State.ExpressionState(expr, BigLocation(start,end))
             }
             else -> {
+                if (match(TokenType.DOT)){
+                    return State.ExpressionState(Member(Expr.NullLiteral).visit(this),BigLocation(getLocation(),getLocation()))
+                }
                 EmptyStatement().visit(this)
+
             }
         }
 
@@ -64,7 +71,11 @@ class Parser(val file: File) {
 
     fun getExpr() : Expr{
         return when(currentToken.type){
-            TokenType.NUMBER,TokenType.STRING,TokenType.BOOLEAN -> {
+            TokenType.NUMBER,TokenType.STRING-> {
+                Literal().visit(this)
+
+            }
+            TokenType.BOOLEAN -> {
                 Literal().visit(this)
 
             }
@@ -93,7 +104,9 @@ class Parser(val file: File) {
         }
     }
 
-
+    private fun isBinary(): Boolean {
+        return check(TokenType.PLUS,TokenType.MINUS,TokenType.SLASH,TokenType.STAR,TokenType.MODULUS)
+    }
 
     fun advance(): Token {
         if (!isEnd) {
@@ -124,6 +137,13 @@ class Parser(val file: File) {
     }
     fun check(token: TokenType) : Boolean {
         return peek().type == token
+    }
+    fun check(vararg token: TokenType) : Boolean {
+        var same = false
+        for (i in token){
+            same = peek().type == i
+        }
+        return same
     }
 
     fun match(token: TokenType) : Boolean{

@@ -1,6 +1,5 @@
-module console{
-    method a(){
+import String
+method a(a : String){
+    println("awa")
 
-
-    }
 }

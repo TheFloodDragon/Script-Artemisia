@@ -6,12 +6,13 @@ import net.artemisia.script.common.location.BigLocation
 import net.artemisia.script.common.token.TokenType
 import net.artemisia.script.compiler.Parser
 import net.artemisia.script.compiler.runtime.parser.Statement
+import net.artemisia.script.compiler.runtime.parser.initialize.expression.Identifier
 
 class MethodStatement : Statement{
     override fun visit(parser: Parser): State.MethodDeclaration {
         val start = parser.getLocation()
         parser.consume(TokenType.METHOD)
-        val id = parser.getExpr()
+        val id = Identifier().visit(parser)
         parser.consume(TokenType.LEFT_PAREN)
         val params : ArrayList<State.VariableDeclaration> = arrayListOf()
         while (parser.look().type != TokenType.RIGHT_PAREN){
@@ -29,6 +30,6 @@ class MethodStatement : Statement{
             return State.MethodDeclaration(id,params,block,type, BigLocation(start, end))
         }
         val end = parser.getLocation()
-        return State.MethodDeclaration(id,params,block,Expr.VoidLiteral, BigLocation(start, end))
+        return State.MethodDeclaration(id,params,block,null, BigLocation(start, end))
     }
 }

@@ -23,9 +23,6 @@ class Literal : Expression{
             return Expr.StringLiteral(parser.consume(TokenType.STRING)!!.value)
         }
 
-        fun ObjectLiteral(): Expr.ObjectLiteral {
-            return Expr.ObjectLiteral(parser.consume(parser.look().type)!!.value)
-        }
 
 
         fun NullLiteral(): Expr.NullLiteral {

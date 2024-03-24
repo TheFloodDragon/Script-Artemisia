@@ -6,6 +6,7 @@ import net.artemisia.script.common.location.BigLocation
 sealed class State {
 
     data class Module(val id : Expr.Identifier,val body: ArrayList<State>, val location: BigLocation) : State()
+
     data class EmptyState(val location: BigLocation) : State()
     data class BlockState(val body: List<State>, val location: BigLocation) : State()
     data class DoWhileState(val body: State, val rule: Expr, val location: BigLocation) : State()
@@ -18,7 +19,7 @@ sealed class State {
     data class EnumState(val id: Expr.Identifier, val enums: List<Expr>, val location: BigLocation) : State()
     data class WhileState(val rule: Expr, val body: State, val location: BigLocation) : State()
     data class ForState(val init: Expr, val rule: Expr, val body: State, val location: BigLocation) : State()
-    data class ReturnState(val argument: Expr?, val location: BigLocation) : State()
+    data class ReturnState(val argument: State?, val location: BigLocation) : State()
     data class EventState(val id: Expr.Identifier, val params: List<VariableDeclaration>, val body: BlockState, val location: BigLocation) : State()
     data class MethodDeclaration(val identifier: Expr, val params: List<VariableDeclaration>, val body: BlockState?, val type: Expr?, val location: BigLocation) : State()
     data class CaseDeclaration(val case: Expr, val body: State?, val location: BigLocation) : State()

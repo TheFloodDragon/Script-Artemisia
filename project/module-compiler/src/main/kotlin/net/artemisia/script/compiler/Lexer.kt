@@ -16,13 +16,14 @@ class Lexer(private var source: String) {
     private var column = 1
 
     private val keyWords: MutableMap<String, TokenType> = mutableMapOf(
+        "modifier" to TokenType.MODIFIER,
         "event" to TokenType.EVENT,
         "finally" to TokenType.FINALLY,
         "case" to TokenType.CASE,
         "switch" to TokenType.SWITCH,
         "try" to TokenType.TRY,
         "catch" to TokenType.CATCH,
-        "val" to TokenType.LET,
+        "let" to TokenType.LET,
         "ext" to TokenType.EXT,
         "impl" to TokenType.IMPL,
         "constructor" to TokenType.CONSTRUCTOR,
@@ -67,7 +68,7 @@ class Lexer(private var source: String) {
         while (!isEnd()) {
             start = current
             when (val c = advance()) {
-                '(', ')', '.', ',', '{', ']', '[', '}', ':', ';' -> addToken(typeFinder())
+                '(', ')', '.', ',', '{', ']', '[', '}', ':', ';','@' -> addToken(typeFinder())
                 '-' -> addToken(if (match('=')) typeFinder() else if (match('-')) typeFinder() else if (match('>')) typeFinder() else typeFinder())
                 '+' -> addToken(if (match('=')) typeFinder() else if (match('+')) typeFinder() else typeFinder())
                 '*' -> addToken(if (match('=')) typeFinder() else typeFinder())

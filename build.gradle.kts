@@ -25,6 +25,7 @@ subprojects {
     dependencies {
         // Kotlin标准库
         //compileOnly(kotlin("stdlib"))
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")
     }
 
     // Java 版本设置
