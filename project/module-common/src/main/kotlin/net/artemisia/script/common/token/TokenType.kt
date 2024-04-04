@@ -16,6 +16,7 @@ enum class TokenType(val id: String) {
     METHOD("method"),
     TRY("try"),
     EVENT("event"),
+
     CATCH("catch"),
     FINALLY("finally"),
     IN("in"),
@@ -30,10 +31,12 @@ enum class TokenType(val id: String) {
     PUBLIC("public"),
     PRIVATE("private"),
     PROTECTED("protected"),
-    ALREADY("already"),
+    OVERRIDE("override"),
     RETURN("return"),
     ENUM("enum"),
 
+
+    TO("to"),
     NULL("null"),
     FALSE("false"),
     TRUE("true"),
@@ -48,7 +51,8 @@ enum class TokenType(val id: String) {
     BOOLEAN("boolean"),
 
     // Symbols
-    TO("->"),
+
+    UNTIL("->"),
     ARROW(">"),
     COLON(":"),
     AND("&&"),
@@ -88,15 +92,48 @@ enum class TokenType(val id: String) {
     LESS("<"),
     LESS_EQUAL("<="),
 
+    ADDRESS("&"),
     DO("do"),
     SUPER("super"),
     THIS("this"),
-    LOGICAL_NOT("!"),
 
     // EOF
     EOF("eof");
 
+
+
+
+
     companion object {
+        val Binary = arrayListOf(
+            PLUS,
+            MINUS,
+            MODULUS,
+            SLASH,
+            STAR,
+            PLUS_EQUAL,
+            MINUS_EQUAL,
+            MODULUS_EQUAL,
+            SLASH_EQUAL,
+            STAR_EQUAL
+
+        )
+        val Unary = arrayListOf(
+            Incrementing,
+            BANG,
+            Subtraction
+        )
+
+        val logical = arrayListOf(
+            BANG_EQUAL,
+            EQUAL_EQUAL,
+            GREATER,
+            GREATER_EQUAL,
+            LESS,
+            LESS_EQUAL
+        )
+
+
         /**
          * 根据id获取对应的TokenType
          * @param id Token类型的标识符

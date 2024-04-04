@@ -32,6 +32,7 @@ class Lexer(private var source: String) {
         "do" to TokenType.DO,
         "method" to TokenType.METHOD,
         "in" to TokenType.IN,
+        "to" to TokenType.TO,
         "return" to TokenType.RETURN,
         "class" to TokenType.CLASS,
         "or" to TokenType.OR,
@@ -52,7 +53,7 @@ class Lexer(private var source: String) {
         "public" to TokenType.PUBLIC,
         "private" to TokenType.PRIVATE,
         "protected" to TokenType.PROTECTED,
-        "already" to TokenType.ALREADY,
+        "override" to TokenType.OVERRIDE,
 
         )
 
@@ -68,10 +69,11 @@ class Lexer(private var source: String) {
         while (!isEnd()) {
             start = current
             when (val c = advance()) {
-                '(', ')', '.', ',', '{', ']', '[', '}', ':', ';','@' -> addToken(typeFinder())
+                '(', ')', '.', ',', '{', ']', '[', '}', ':', ';','@','&' -> addToken(typeFinder())
                 '-' -> addToken(if (match('=')) typeFinder() else if (match('-')) typeFinder() else if (match('>')) typeFinder() else typeFinder())
                 '+' -> addToken(if (match('=')) typeFinder() else if (match('+')) typeFinder() else typeFinder())
                 '*' -> addToken(if (match('=')) typeFinder() else typeFinder())
+
                 '/' -> {
                     if (match('/')) {
                         // Single-line comment

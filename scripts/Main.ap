@@ -1,6 +1,0 @@
-let a = add(1,2)
-
-method add(a : String,b : Int){
-    let a = i
-
-}

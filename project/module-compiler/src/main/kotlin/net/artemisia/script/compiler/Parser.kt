@@ -10,6 +10,7 @@ import net.artemisia.script.common.token.TokenType
 import net.artemisia.script.compiler.runtime.parser.initialize.expression.*
 import net.artemisia.script.compiler.runtime.parser.initialize.statement.*
 import java.io.File
+import java.lang.RuntimeException
 
 class Parser(val file: File) {
     private val tokens : List<Token> = Lexer(file.readText()).tokens
@@ -42,10 +43,15 @@ class Parser(val file: File) {
 
     fun getState(): State {
         return when(currentToken.type){
+            TokenType.OVERRIDE,TokenType.PRIVATE,TokenType.PUBLIC,TokenType.PROTECTED -> VisitorStatement().visit(this)
+            TokenType.AT -> AnnotationStatement().visit(this)
+
+            TokenType.FOR -> ForStatement().visit(this)
             TokenType.RETURN -> ReturnStatement().visit(this)
             TokenType.METHOD -> MethodStatement().visit(this)
             TokenType.FINAL -> VariableStatement(true).visit(this)
             TokenType.LET -> VariableStatement().visit(this)
+            TokenType.LEFT_BRACE -> BlockStatement().visit(this)
             TokenType.IDENTIFIER,TokenType.NUMBER,TokenType.STRING,TokenType.BOOLEAN -> {
                 val start = getLocation()
                 val expr = if (check(TokenType.DOT) || check(TokenType.LEFT_SQUARE)){
@@ -56,9 +62,14 @@ class Parser(val file: File) {
                 val end = getLocation()
                 State.ExpressionState(expr, BigLocation(start,end))
             }
+            TokenType.IF -> IfStatement().visit(this)
+
             else -> {
                 if (match(TokenType.DOT)){
                     return State.ExpressionState(Member(Expr.NullLiteral).visit(this),BigLocation(getLocation(),getLocation()))
+                }
+                if (match(TokenType.ADDRESS)){
+                    return State.ExpressionState(getExpr(),BigLocation(getLocation(),getLocation()))
                 }
                 EmptyStatement().visit(this)
 
@@ -67,46 +78,120 @@ class Parser(val file: File) {
 
     }
 
-
-
-    fun getExpr() : Expr{
+    fun expr(): Expr {
         return when(currentToken.type){
             TokenType.NUMBER,TokenType.STRING-> {
-                Literal().visit(this)
+            Literal().visit(this)
 
-            }
+        }
             TokenType.BOOLEAN -> {
-                Literal().visit(this)
+            Literal().visit(this)
 
-            }
+        }
             TokenType.IDENTIFIER -> {
-                when (peek().type){
-                    TokenType.LESS -> {
+            when (peek().type){
+                TokenType.LESS -> {
+                    if (peek(2).type == TokenType.ARROW){
                         val result = Generic().visit(this)
+
                         if (match(TokenType.LEFT_PAREN)) {
                             Call(result).visit(this)
                         }else{
                             result
                         }
-                    }
-                    TokenType.LEFT_PAREN -> {
-                        Call(Identifier().visit(this)).visit(this)
-
-                    }
-                    else -> {
+                    }else{
                         Identifier().visit(this)
                     }
+
+                }
+                TokenType.LEFT_PAREN -> {
+                    Call(Identifier().visit(this)).visit(this)
+
+                }
+                TokenType.STAR -> {
+                    val id = Identifier().visit(this)
+                    consume(TokenType.STAR)
+                    if (match(TokenType.STAR)){
+                        Expr.PointerExpr(getExpr())
+                    }
+                    Expr.PointerExpr(id)
+                }
+                else -> {
+                    Identifier().visit(this)
                 }
             }
+        }
             else -> {
-                Expr.NullLiteral
-            }
+            Expr.NullLiteral
+        }
         }
     }
 
-    private fun isBinary(): Boolean {
-        return check(TokenType.PLUS,TokenType.MINUS,TokenType.SLASH,TokenType.STAR,TokenType.MODULUS)
+    fun getExpr() : Expr{
+        if (match(TokenType.ADDRESS)){
+            consume(TokenType.ADDRESS)
+            val id = expr()
+            return Expr.AddressableExpr(id)
+        }
+        if (match(TokenType.STAR)){
+            consume(TokenType.STAR)
+            val id = expr()
+            return Expr.AddressableExpr(id,true)
+        }
+        TokenType.Unary.forEach {
+            if (match(it)){
+                return Unary(true).visit(this)
+            }
+        }
+
+        val init = expr()
+
+
+        if (match(TokenType.TO)){
+            consume(TokenType.TO)
+            return Expr.ToExpr(init,getExpr())
+        }
+        if (match(TokenType.UNTIL)){
+            consume(TokenType.UNTIL)
+            return Expr.UntilExpr(init,getExpr())
+        }
+
+        if (match(TokenType.IN)){
+            consume(TokenType.IN)
+            return Expr.InExpr(init,getExpr())
+        }
+
+        TokenType.logical.forEach {
+            if (match(it)) {
+                val i = Logical(init).visit(this)
+                if (match(TokenType.AND)){
+                    consume(TokenType.AND)
+                    return Expr.LogicalExpr(TokenType.AND.id,i,getExpr())
+                }
+                if (match(TokenType.OR)){
+                    consume(TokenType.OR)
+                    return Expr.LogicalExpr(TokenType.OR.id,i,getExpr())
+                }
+                return i
+            }
+        }
+
+        TokenType.Binary.forEach {
+            if (match(it)) {
+                return Binary(init).visit(this)
+            }
+        }
+
+        TokenType.Unary.forEach {
+            if (match(it)){
+                return Unary(false).visit(this)
+            }
+        }
+
+
+        return init
     }
+
 
     fun advance(): Token {
         if (!isEnd) {
@@ -125,6 +210,7 @@ class Parser(val file: File) {
         else if (currentToken.type != TokenType.EOF && currentToken.type != TokenType.NEWLINE) consume(TokenType.SEMICOLON)
         else if (currentToken.type == TokenType.NEWLINE) consume(TokenType.NEWLINE)
         else if (currentToken.type == TokenType.SEMICOLON) consume(TokenType.SEMICOLON)
+
     }
     fun getLocation(): Location {
         return currentToken.location
@@ -132,8 +218,8 @@ class Parser(val file: File) {
     fun look(): Token {
         return currentToken
     }
-    fun peek(): Token{
-        return tokens[index + 1]
+    fun peek(range : Int = 1): Token{
+        return tokens[index + range]
     }
     fun check(token: TokenType) : Boolean {
         return peek().type == token

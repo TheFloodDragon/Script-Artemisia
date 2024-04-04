@@ -2,6 +2,7 @@ package net.artemisia.script.compiler.runtime.compiler.aura
 
 import net.artemisia.script.compiler.runtime.compiler.builder.ASMDataBuilder
 import net.artemisia.script.compiler.runtime.compiler.types.DataType
+import java.lang.StringBuilder
 
 class DataAura {
     private var index = 0
@@ -36,5 +37,14 @@ class DataAura {
         }
     }
 
+    override fun toString(): String {
+        val builder : StringBuilder = StringBuilder()
+        builder.appendLine(".data")
+        for (i in datas){
+            builder.appendLine("   $i")
+        }
+
+        return builder.toString()
+    }
 
 }

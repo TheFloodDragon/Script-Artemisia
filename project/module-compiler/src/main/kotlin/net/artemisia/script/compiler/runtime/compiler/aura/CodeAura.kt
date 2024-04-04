@@ -3,6 +3,7 @@ package net.artemisia.script.compiler.runtime.compiler.aura
 import net.artemisia.script.compiler.runtime.compiler.builder.ASMCodeBuilder
 import net.artemisia.script.compiler.runtime.compiler.helper.ASMCodeHelper
 import net.artemisia.script.compiler.runtime.compiler.types.ASMCode
+import java.lang.StringBuilder
 
 class CodeAura {
     private val datas : ArrayList<ASMCodeBuilder> = arrayListOf()
@@ -16,5 +17,13 @@ class CodeAura {
         for (i in datas){
             println("   $i")
         }
+    }
+
+    override fun toString(): String {
+        val builder : StringBuilder = StringBuilder()
+        for (i in datas){
+            builder.appendLine("   $i")
+        }
+        return builder.toString()
     }
 }

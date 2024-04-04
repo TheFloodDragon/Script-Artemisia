@@ -21,7 +21,11 @@ sealed class Expr {
     data class Lambda(val params : List<State.VariableDeclaration>,val body : State.BlockState): Expr()
     data class AssignmentExpr(val left: Expr, val operator: String, val right: Expr) : Expr()
     data class LogicalExpr(val operator: String, val left: Expr, val right: Expr) : Expr()
-    data class GenericExpr(val id : Identifier,val generic : List<Expr>) : Expr()
-
+    data class GenericExpr(val id : Identifier,val generic : Expr) : Expr()
+    data class AddressableExpr(val id : Expr,val indirect : Boolean = false) : Expr()
+    data class PointerExpr(val id : Expr) : Expr()
+    data class InExpr(val left: Expr, val right: Expr) : Expr()
     data class ToExpr(val left: Expr, val right: Expr) : Expr()
+    data class UntilExpr(val left: Expr, val right: Expr) : Expr()
+
 }
