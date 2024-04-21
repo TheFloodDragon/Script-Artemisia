@@ -1,3 +1,0 @@
-dependencies{
-    shadowModule("module-compiler")
-}

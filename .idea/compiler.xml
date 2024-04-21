@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="1.8">
+      <module name="Artemisia" target="17" />
+      <module name="Artemisia-Library" target="17" />
+      <module name="Artemisia.buildSrc" target="17" />
+      <module name="Artemisia.buildSrc.main" target="17" />
+      <module name="Artemisia.buildSrc.test" target="17" />
+      <module name="Artemisia.main" target="17" />
+      <module name="Artemisia.platform.platform-library" target="17" />
+      <module name="Artemisia.test" target="17" />
+      <module name="library" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
