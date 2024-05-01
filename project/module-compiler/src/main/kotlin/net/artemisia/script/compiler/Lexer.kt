@@ -1,9 +1,9 @@
-package net.artemisia.script.compiler
+package compiler
 
-import net.artemisia.script.common.expection.thrower
-import net.artemisia.script.common.location.Location
-import net.artemisia.script.common.token.Token
-import net.artemisia.script.common.token.TokenType
+import common.expection.thrower
+import common.location.Location
+import common.token.Token
+import common.token.TokenType
 
 
 class Lexer(private var source: String) {
@@ -54,7 +54,7 @@ class Lexer(private var source: String) {
         /*  Visitor  */
         "public" to TokenType.PUBLIC,
         "private" to TokenType.PRIVATE,
-        "protected" to TokenType.PROTECTED,
+        "abstract" to TokenType.ABSTRACT,
         "override" to TokenType.OVERRIDE,
 
         )

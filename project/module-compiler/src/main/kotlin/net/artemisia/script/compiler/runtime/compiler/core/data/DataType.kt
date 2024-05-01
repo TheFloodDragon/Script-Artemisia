@@ -1,4 +1,6 @@
-package net.artemisia.script.compiler.runtime.compiler.core.data
+package compiler.runtime.compiler.core.data
+
+import common.token.TokenType
 
 enum class DataType(val byte : Byte) {
 
@@ -7,7 +9,12 @@ enum class DataType(val byte : Byte) {
     DOUBLE(0x02),
     STRING(0x03),
     IDENTIFIER(0x04),
-    PATH(0x05)
+    PATH(0x05);
 
-
+    companion object{
+ 
+        fun fromByte(id: Byte): DataType? {
+            return DataType.entries.firstOrNull { it.byte == id }
+        }
+    }
 }

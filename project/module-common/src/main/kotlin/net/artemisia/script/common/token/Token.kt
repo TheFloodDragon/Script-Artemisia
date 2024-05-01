@@ -1,6 +1,6 @@
-package net.artemisia.script.common.token
+package common.token
 
-import net.artemisia.script.common.location.Location
+import common.location.Location
 
 
 class Token(var type: TokenType, var value: String, var location: Location) {

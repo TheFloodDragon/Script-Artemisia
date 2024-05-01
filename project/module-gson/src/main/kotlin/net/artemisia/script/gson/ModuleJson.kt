@@ -1,9 +1,9 @@
-package net.artemisia.script.gson
+package gson
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import net.artemisia.script.common.ast.Expr
-import net.artemisia.script.common.ast.State
-import net.artemisia.script.common.location.BigLocation
+import common.ast.Expr
+import common.ast.State
+import common.location.BigLocation
 import kotlin.reflect.full.primaryConstructor
 
 

@@ -1,6 +1,6 @@
-package net.artemisia.script.compiler.runtime.compiler.core.module
+package compiler.runtime.compiler.core.module
 
-import net.artemisia.script.compiler.runtime.compiler.core.data.DataPool
+import compiler.runtime.compiler.core.data.DataPool
 
 class Module {
     val data = DataPool()

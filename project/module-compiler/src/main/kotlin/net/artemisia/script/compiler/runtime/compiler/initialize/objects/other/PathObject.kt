@@ -1,4 +1,4 @@
-package net.artemisia.script.compiler.runtime.compiler.initialize.objects.other
+package compiler.runtime.compiler.initialize.objects.other
 
 class PathObject {
     // M(a/b/c,Object)
@@ -8,6 +8,8 @@ class PathObject {
     fun gen(value : String): List<Byte>{
          return value.toByteArray().toList()
     }
-
+    fun decode(value:ByteArray) : String{
+        return String(value, charset("UTF-8"))
+    }
 
 }

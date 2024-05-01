@@ -1,4 +1,4 @@
-package net.artemisia.script.common.expection
+package common.expection
 
 import kotlin.system.exitProcess
 

@@ -1,7 +1,7 @@
-package net.artemisia.script.common.expection
+package common.expection
 
 
-import net.artemisia.script.common.location.BigLocation
+import common.location.BigLocation
 import java.io.File
 import kotlin.system.exitProcess
 

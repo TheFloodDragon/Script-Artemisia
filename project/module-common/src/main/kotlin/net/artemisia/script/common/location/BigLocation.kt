@@ -1,4 +1,4 @@
-package net.artemisia.script.common.location
+package common.location
 
 class BigLocation(val start: Location, val end: Location) {
     fun toMap(): Map<String, Map<String, Int>> {

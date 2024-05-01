@@ -1,4 +1,4 @@
-package net.artemisia.script.compiler.runtime.compiler.initialize.objects.other
+package compiler.runtime.compiler.initialize.objects.other
 
 import java.nio.ByteBuffer
 
@@ -8,5 +8,8 @@ class FloatObject {
         val byte = ByteBuffer.allocate(8)
         byte.putFloat(value)
         return byte.array().toList()
+    }
+    fun decode(value : ByteArray): Float {
+        return ByteBuffer.wrap(value).getFloat()
     }
 }

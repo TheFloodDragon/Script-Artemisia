@@ -1,4 +1,4 @@
-package net.artemisia.script.common.token
+package common.token
 
 
 enum class TokenType(val id: String) {
@@ -33,7 +33,7 @@ enum class TokenType(val id: String) {
     WHILE("while"),
     PUBLIC("public"),
     PRIVATE("private"),
-    PROTECTED("protected"),
+    ABSTRACT("abstract"),
     OVERRIDE("override"),
     RETURN("return"),
     ENUM("enum"),
@@ -142,7 +142,7 @@ enum class TokenType(val id: String) {
          * @param id Token类型的标识符
          * @return 对应的TokenType，如果不存在则返回null
          */
-        @JvmStatic
+ 
         fun fromId(id: String?): TokenType? {
             return entries.firstOrNull { it.id == id }
         }

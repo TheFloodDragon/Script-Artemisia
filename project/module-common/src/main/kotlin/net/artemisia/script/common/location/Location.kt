@@ -1,4 +1,4 @@
-package net.artemisia.script.common.location
+package common.location
 
 class Location(
     var line: Int,

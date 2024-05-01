@@ -1,6 +1,6 @@
-package net.artemisia.script.common.ast
+package common.ast
 
-import net.artemisia.script.common.location.BigLocation
+import common.location.BigLocation
 
 
 sealed class State {
@@ -43,9 +43,10 @@ sealed class State {
     data class CaseDeclaration(val case: Expr, val body: State?, val location: BigLocation) : State()
     data class SwitchState(val init: Expr, val body: List<CaseDeclaration>, val location: BigLocation) : State()
 
-    /**/
+
     data class ClassDeclaration(val identifier: Expr.Identifier, val params: List<State>, val inherit: List<Expr>, val body: BlockState?, val location: BigLocation) : State()
-    data class AnnotationDeclaration(val identifier : Expr.Identifier,val params: List<VariableDeclaration>?, val body: BlockState, val location: BigLocation) : State()
-    data class InterfaceDeclaration(val  id: Expr.Identifier,val params: List<VariableDeclaration>?, val body: BlockState, val location: BigLocation)
+    data class AnnotationDeclaration(val identifier : Expr.Identifier,val params: List<State>?, val body: BlockState?, val location: BigLocation) : State()
+    data class StructDeclaration(val identifier: Expr.Identifier, val params: List<State>, val inherit: List<Expr>, val body: BlockState?, val location: BigLocation) : State()
+    data class InterfaceDeclaration(val  id: Expr.Identifier,val params: List<State>, val body: BlockState?, val location: BigLocation) : State()
 
 }

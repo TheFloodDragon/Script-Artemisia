@@ -1,9 +1,9 @@
-package net.artemisia.script.compiler.runtime.parser.initialize.statement
+package compiler.runtime.parser.initialize.statement
 
-import net.artemisia.script.common.ast.State
-import net.artemisia.script.common.location.BigLocation
-import net.artemisia.script.compiler.Parser
-import net.artemisia.script.compiler.runtime.parser.Statement
+import common.ast.State
+import common.location.BigLocation
+import compiler.Parser
+import compiler.runtime.parser.Statement
 
 class EmptyStatement : Statement {
     /**

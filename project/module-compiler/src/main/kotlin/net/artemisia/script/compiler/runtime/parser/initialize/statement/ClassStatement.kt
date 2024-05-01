@@ -1,14 +1,14 @@
-package net.artemisia.script.compiler.runtime.parser.initialize.statement
+package compiler.runtime.parser.initialize.statement
 
-import net.artemisia.script.common.ast.Expr
-import net.artemisia.script.common.ast.State
-import net.artemisia.script.common.location.BigLocation
-import net.artemisia.script.common.location.Location
-import net.artemisia.script.common.token.TokenType
-import net.artemisia.script.compiler.Parser
-import net.artemisia.script.compiler.runtime.parser.Statement
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.Call
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.Identifier
+import common.ast.Expr
+import common.ast.State
+import common.location.BigLocation
+import common.location.Location
+import common.token.TokenType
+import compiler.Parser
+import compiler.runtime.parser.Statement
+import compiler.runtime.parser.initialize.expression.Call
+import compiler.runtime.parser.initialize.expression.Identifier
 import kotlin.reflect.KClass
 
 class ClassStatement : Statement{

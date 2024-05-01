@@ -1,7 +1,7 @@
-package net.artemisia.script.compiler.runtime.parser
+package compiler.runtime.parser
 
-import net.artemisia.script.common.ast.Expr
-import net.artemisia.script.compiler.Parser
+import common.ast.Expr
+import compiler.Parser
 
 interface Expression{
     fun visit(parser: Parser) : Expr

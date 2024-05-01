@@ -1,13 +1,13 @@
-package net.artemisia.script.compiler.runtime.parser.initialize.statement
+package compiler.runtime.parser.initialize.statement
 
-import net.artemisia.script.common.ast.State
-import net.artemisia.script.common.expection.thrower
-import net.artemisia.script.common.location.BigLocation
-import net.artemisia.script.common.location.Location
-import net.artemisia.script.common.token.TokenType
-import net.artemisia.script.compiler.Parser
-import net.artemisia.script.compiler.runtime.parser.Statement
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.Identifier
+import common.ast.State
+import common.expection.thrower
+import common.location.BigLocation
+import common.location.Location
+import common.token.TokenType
+import compiler.Parser
+import compiler.runtime.parser.Statement
+import compiler.runtime.parser.initialize.expression.Identifier
 
 class VariableStatement(private val final : Boolean = false) : Statement {
     override fun visit(parser: Parser): State.VariableDeclaration {

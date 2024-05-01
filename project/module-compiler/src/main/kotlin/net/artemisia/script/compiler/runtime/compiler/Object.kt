@@ -1,6 +1,6 @@
-package net.artemisia.script.compiler.runtime.compiler
+package compiler.runtime.compiler
 
-import net.artemisia.script.compiler.Compiler
+import compiler.Compiler
 
 interface Object {
     fun visit(compiler: Compiler) : ArrayList<Byte>

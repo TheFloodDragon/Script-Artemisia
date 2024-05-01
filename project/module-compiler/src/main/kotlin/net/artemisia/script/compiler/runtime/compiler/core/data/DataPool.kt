@@ -1,4 +1,6 @@
-package net.artemisia.script.compiler.runtime.compiler.core.data
+package compiler.runtime.compiler.core.data
+
+import compiler.runtime.parser.initialize.statement.VariableStatement
 
 
 /*
@@ -24,9 +26,29 @@ class DataPool  {
         if (!datas.values.contains(data)) {
             datas[index] = data
             this.index += 1
+        }else{
+            return datas.values.indexOf(data)
         }
-
-
         return index - 1
     }
+
+    fun search(index : Int): Any {
+        return getDatas()[index]!!.values.first()
+    }
+
+    override fun toString(): String {
+        val string = StringBuilder()
+        datas.forEach{ (index, value) ->
+            string.append("\n   $index -> {")
+            val s = StringBuilder()
+            value.forEach{ (id, value) ->
+                s.appendLine("      id: $id")
+                s.appendLine("      value: $value")
+            }
+            string.append("\n$s")
+            string.append("     }")
+        }
+        return string.toString()
+    }
+
 }

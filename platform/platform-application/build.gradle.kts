@@ -6,6 +6,7 @@ dependencies {
     shadowModule("module-gson")
     shadowModule("module-common")
     shadowModule("module-compiler")
+    shadowModule("module-vm")
 }
 
 application {

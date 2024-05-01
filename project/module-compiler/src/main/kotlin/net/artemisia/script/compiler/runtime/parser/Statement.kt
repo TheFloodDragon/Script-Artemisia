@@ -1,7 +1,7 @@
-package net.artemisia.script.compiler.runtime.parser
+package compiler.runtime.parser
 
-import net.artemisia.script.common.ast.State
-import net.artemisia.script.compiler.Parser
+import common.ast.State
+import compiler.Parser
 
 interface Statement {
     fun visit(parser: Parser) : State

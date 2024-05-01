@@ -1,8 +1,8 @@
-package net.artemisia.script.compiler.runtime.parser.initialize.expression
+package compiler.runtime.parser.initialize.expression
 
-import net.artemisia.script.common.ast.Expr
-import net.artemisia.script.compiler.Parser
-import net.artemisia.script.compiler.runtime.parser.Expression
+import common.ast.Expr
+import compiler.Parser
+import compiler.runtime.parser.Expression
 
 class Unary(val head : Boolean) : Expression {
     override fun visit(parser: Parser): Expr {

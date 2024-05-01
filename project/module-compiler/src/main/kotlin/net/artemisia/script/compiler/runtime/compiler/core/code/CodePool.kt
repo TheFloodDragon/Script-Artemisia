@@ -1,4 +1,4 @@
-package net.artemisia.script.compiler.runtime.compiler.core.code
+package compiler.runtime.compiler.core.code
 
 
 class CodePool {
@@ -12,5 +12,8 @@ class CodePool {
     }
     fun indexOf(item : CodeItem): Int {
         return datas.indexOf(item)
+    }
+    fun get(index : Int): CodeItem {
+        return datas[index]
     }
 }

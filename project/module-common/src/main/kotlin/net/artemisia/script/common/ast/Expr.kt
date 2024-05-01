@@ -1,6 +1,6 @@
-package net.artemisia.script.common.ast
+package common.ast
 
-import net.artemisia.script.common.location.BigLocation
+import common.location.BigLocation
 
 
 sealed class Expr {

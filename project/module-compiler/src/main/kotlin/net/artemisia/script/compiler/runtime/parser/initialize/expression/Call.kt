@@ -1,11 +1,11 @@
-package net.artemisia.script.compiler.runtime.parser.initialize.expression
+package compiler.runtime.parser.initialize.expression
 
-import net.artemisia.script.common.ast.Expr
-import net.artemisia.script.common.ast.State
-import net.artemisia.script.common.location.BigLocation
-import net.artemisia.script.common.token.TokenType
-import net.artemisia.script.compiler.Parser
-import net.artemisia.script.compiler.runtime.parser.Expression
+import common.ast.Expr
+import common.ast.State
+import common.location.BigLocation
+import common.token.TokenType
+import compiler.Parser
+import compiler.runtime.parser.Expression
 
 class Call(val id : Expr) : Expression {
     override fun visit(parser: Parser): Expr {

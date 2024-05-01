@@ -1,4 +1,4 @@
-rootProject.name = "Artemisia-main"
+rootProject.name = "Artemisia-Main"
 
 applyAll("plugin")
 applyAll("platform")

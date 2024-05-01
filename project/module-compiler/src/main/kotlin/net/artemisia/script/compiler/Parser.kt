@@ -1,14 +1,14 @@
-package net.artemisia.script.compiler
+package compiler
 
-import net.artemisia.script.common.ast.Expr
-import net.artemisia.script.common.ast.State
-import net.artemisia.script.common.expection.thrower
-import net.artemisia.script.common.location.BigLocation
-import net.artemisia.script.common.location.Location
-import net.artemisia.script.common.token.Token
-import net.artemisia.script.common.token.TokenType
-import net.artemisia.script.compiler.runtime.parser.initialize.expression.*
-import net.artemisia.script.compiler.runtime.parser.initialize.statement.*
+import common.ast.Expr
+import common.ast.State
+import common.expection.thrower
+import common.location.BigLocation
+import common.location.Location
+import common.token.Token
+import common.token.TokenType
+import compiler.runtime.parser.initialize.expression.*
+import compiler.runtime.parser.initialize.statement.*
 import java.io.File
 
 class Parser(val file: File) {
@@ -53,7 +53,7 @@ class Parser(val file: File) {
                 val end = getLocation()
                 State.ExpressionState(expr, BigLocation(start, end))
             }
-            TokenType.OVERRIDE, TokenType.PRIVATE, TokenType.PUBLIC, TokenType.PROTECTED -> VisitorStatement().visit(
+            TokenType.OVERRIDE, TokenType.PRIVATE, TokenType.PUBLIC, TokenType.ABSTRACT -> VisitorStatement().visit(
                 this
             )
             TokenType.CLASS -> ClassStatement().visit(this)
@@ -64,13 +64,19 @@ class Parser(val file: File) {
             TokenType.METHOD -> MethodStatement().visit(this)
             TokenType.FINAL -> VariableStatement(true).visit(this)
             TokenType.LET -> VariableStatement().visit(this)
-
-
+            TokenType.INTERFACE -> InterfaceStatement().visit(this)
+            TokenType.STRUCT -> StructStatement().visit(this)
+            TokenType.ANNOTATION -> AnnotationDeclaration().visit(this)
 
             TokenType.IF -> IfStatement().visit(this)
 
             else -> {
-
+                if (match(TokenType.LEFT_PAREN)){
+                    return State.ExpressionState(
+                        Member(Expr.NullLiteral).visit(this),
+                        BigLocation(getLocation(), getLocation())
+                    )
+                }
                 if (match(TokenType.DOT)) {
                     return State.ExpressionState(
                         Member(Expr.NullLiteral).visit(this),
@@ -164,7 +170,13 @@ class Parser(val file: File) {
             }
         }
 
-        val init = expr()
+        val init = if (match(TokenType.LEFT_PAREN)){
+            consume(TokenType.LEFT_PAREN)
+            val i = getState()
+            consume(TokenType.RIGHT_PAREN)
+            Expr.GroupExpr(i)
+        } else expr()
+
 
         if (match(TokenType.TO)) {
             consume(TokenType.TO)
@@ -210,6 +222,7 @@ class Parser(val file: File) {
 
         return init
     }
+
 
 
     fun advance(): Token {
